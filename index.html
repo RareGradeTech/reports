@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -36,6 +37,20 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        
+        /* Auth Overlay Styles */
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
         #sidebar {
             width: 260px;
             background: var(--bg-card);
@@ -50,7 +65,8 @@
         #sidebar.collapsed .nav-text,
         #sidebar.collapsed .logo-text,
         #sidebar.collapsed .user-info,
-        #sidebar.collapsed .status-label { display: none; }
+        #sidebar.collapsed .status-label,
+        #sidebar.collapsed .logout-btn { display: none; }
         #sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
         #sidebar.collapsed .device-status-item { justify-content: center; gap: 6px; }
         .nav-item {
@@ -173,29 +189,6 @@
         .badge-green { background: #d1fae5; color: #065f46; }
         .badge-orange { background: #ffedd5; color: #9a3412; }
         .badge-gray { background: #f3f4f6; color: #374151; }
-
-        /* Modern Login & Logout Styles */
-        @keyframes loginGlow {
-            0% { box-shadow: 0 0 10px rgba(0, 48, 135, 0.1), 0 0 2px rgba(0, 48, 135, 0.05); }
-            50% { box-shadow: 0 0 30px rgba(0, 48, 135, 0.4), 0 0 10px rgba(0, 48, 135, 0.2); }
-            100% { box-shadow: 0 0 10px rgba(0, 48, 135, 0.1), 0 0 2px rgba(0, 48, 135, 0.05); }
-        }
-        .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: loginGlow 5s infinite ease-in-out;
-        }
-        .logout-card {
-            transform: scale(0.9);
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .modal-overlay.open .logout-card {
-            transform: scale(1);
-            opacity: 1;
-        }
-
         /* Toast */
         #toast {
             position: fixed;
@@ -209,7 +202,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            z-index: 1000;
+            z-index: 2000;
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.3s;
@@ -217,9 +210,9 @@
         #toast.show { transform: translateY(0); opacity: 1; }
         /* Modal */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            z-index: 100; display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(8px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 50; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
         }
         .modal-overlay.open { display: flex; }
         .modal-box {
@@ -365,6 +358,17 @@
     </style>
 </head>
 <body>
+    <div id="login-overlay">
+        <div class="card p-10 max-w-sm">
+            <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Logo" class="w-20 h-20 mx-auto mb-6">
+            <h2 class="text-2xl font-bold mb-2">Welcome Back</h2>
+            <p class="text-gray-500 mb-8">Please sign in to access the Enterprise Portal</p>
+            <button onclick="app.signIn()" class="btn btn-primary w-full justify-center py-3">
+                <i class="fa-brands fa-google"></i> Sign in with Google
+            </button>
+        </div>
+    </div>
+
     <aside id="sidebar">
         <div class="p-6 border-b border-gray-200 flex items-center gap-3">
             <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="w-10 h-10 rounded-lg shadow-lg object-contain">
@@ -412,15 +416,15 @@
         </nav>
         <div class="p-4 border-t border-gray-200">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">VL</div>
-                    <div class="user-info">
-                        <p class="text-sm font-semibold text-gray-900">Vynix Lingua</p>
-                        <p class="text-xs text-gray-500">System Admin</p>
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold flex-shrink-0">VL</div>
+                    <div class="user-info overflow-hidden">
+                        <p id="user-name" class="text-sm font-semibold text-gray-900 truncate">Vynix Lingua</p>
+                        <p id="user-email" class="text-xs text-gray-500 truncate">System Admin</p>
                     </div>
                 </div>
-                <button onclick="app.showLogout()" class="text-gray-400 hover:text-red-500 transition-colors p-2">
-                    <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                <button onclick="app.signOut()" class="logout-btn text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </div>
@@ -822,7 +826,6 @@
             </section>
         </div>
     </main>
-
     <div id="toast">
         <div id="toast-icon" class="text-green-500 text-xl"><i class="fa-solid fa-circle-check"></i></div>
         <div>
@@ -830,45 +833,6 @@
             <p id="toast-msg" class="text-xs text-gray-500">Operation completed successfully.</p>
         </div>
     </div>
-
-    <div id="login-modal" class="modal-overlay open">
-        <div class="login-card w-full max-w-md p-10 rounded-3xl flex flex-col items-center">
-            <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Logo" class="w-24 h-24 mb-6 drop-shadow-md">
-            <h2 class="text-2xl font-bold mb-2 font-display text-gray-900">Enterprise Access</h2>
-            <p class="text-gray-500 mb-8 text-center text-sm">Welcome back. Please authenticate to access the Rare Grade Tech portal.</p>
-            <div class="w-full space-y-4">
-                <div class="relative">
-                    <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="email" placeholder="Email Address" class="input pl-12 h-12">
-                </div>
-                <div class="relative">
-                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="password" placeholder="Password" class="input pl-12 h-12">
-                </div>
-                <button onclick="app.handleLogin()" class="btn btn-primary w-full py-4 justify-center text-lg mt-4 shadow-xl active:scale-95">
-                    Sign In to Portal
-                </button>
-            </div>
-            <p class="mt-8 text-xs text-gray-400">Authorized Personnel Only</p>
-        </div>
-    </div>
-
-    <div id="logout-modal" class="modal-overlay">
-        <div class="modal-box max-w-sm logout-card overflow-visible">
-            <div class="p-8 text-center">
-                <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner border border-red-100">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2 font-display">Confirm Logout</h3>
-                <p class="text-gray-500 text-sm mb-8 leading-relaxed">You are about to end your current session. Unsaved progress may be lost. Do you wish to continue?</p>
-                <div class="flex flex-col gap-3">
-                    <button onclick="app.confirmLogout()" class="btn bg-red-600 hover:bg-red-700 text-white w-full py-3 justify-center shadow-lg active:scale-95">Yes, Log Me Out</button>
-                    <button onclick="app.closeLogout()" class="btn btn-ghost w-full py-3 justify-center text-gray-500 hover:bg-gray-100">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="reports-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
@@ -880,30 +844,37 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div class="modal-body" id="reports-list-container"></div>
+            <div class="modal-body" id="reports-list-container">
+                </div>
         </div>
     </div>
-
     <script>
         class RareGradeApp {
             constructor() {
                 this.clients = [];
                 this.reports = [];
                 this.db = null;
+                this.auth = null;
+                this.user = null;
                 this.currentReportType = 'Hardware';
+                // Cloudinary Config
                 this.CLOUDINARY_CLOUD = 'dqkujefxj';
                 this.CLOUDINARY_PRESET = 'banter_box';
+                // Image State
                 this.currentImages = { before: null, after: null };
                 this.init();
             }
             init() {
                 this.initFirebase();
+                this.setupAuth();
                 this.setupListeners();
                 this.updateDate();
                 this.initChart();
                 this.generateReportID();
                 this.navigate('dashboard');
+                // Ensure sections are toggled correctly on start
                 this.toggleReportSections(this.currentReportType);
+                // Setup hover-based sidebar collapse/expand (desktop only)
                 this.setupSidebarHover();
             }
             setupSidebarHover() {
@@ -934,7 +905,44 @@
                 };
                 firebase.initializeApp(firebaseConfig);
                 this.db = firebase.database();
+                this.auth = firebase.auth();
             }
+
+            setupAuth() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                this.auth.onAuthStateChanged(user => {
+                    if (user) {
+                        this.user = user;
+                        document.getElementById('login-overlay').style.display = 'none';
+                        this.updateUserUI(user);
+                    } else {
+                        this.user = null;
+                        document.getElementById('login-overlay').style.display = 'flex';
+                    }
+                });
+            }
+
+            signIn() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                this.auth.signInWithPopup(provider)
+                    .then(() => this.showToast('Welcome', 'Signed in successfully'))
+                    .catch(err => this.showToast('Auth Error', err.message, 'error'));
+            }
+
+            signOut() {
+                if(confirm('Are you sure you want to sign out?')) {
+                    this.auth.signOut().then(() => this.showToast('Signed Out', 'See you next time'));
+                }
+            }
+
+            updateUserUI(user) {
+                document.getElementById('user-name').innerText = user.displayName;
+                document.getElementById('user-email').innerText = user.email;
+                if(user.photoURL) {
+                    document.getElementById('user-avatar').innerHTML = `<img src="${user.photoURL}" class="w-full h-full rounded-full object-cover">`;
+                }
+            }
+
             setupListeners() {
                 this.db.ref('clients').on('value', (snapshot) => {
                     this.clients = [];
@@ -963,27 +971,7 @@
                 });
             }
 
-            // Authentication & Logout Handlers
-            handleLogin() {
-                const modal = document.getElementById('login-modal');
-                this.showToast('Authentication', 'Access granted. Welcome back!');
-                modal.classList.remove('open');
-            }
-
-            showLogout() {
-                document.getElementById('logout-modal').classList.add('open');
-            }
-
-            closeLogout() {
-                document.getElementById('logout-modal').classList.remove('open');
-            }
-
-            confirmLogout() {
-                this.showToast('Signed Out', 'Your session has ended.', 'error');
-                this.closeLogout();
-                setTimeout(() => location.reload(), 1500);
-            }
-
+            // --- Cloudinary Integration ---
             async handleImageUpload(input, type) {
                 const file = input.files[0];
                 if (!file) return;
@@ -1065,7 +1053,8 @@
                     name, phone, email: email || '',
                     date: new Date().toLocaleDateString(),
                     timestamp: Date.now(),
-                    initialStatus: status
+                    initialStatus: status,
+                    createdBy: this.user ? this.user.email : 'system'
                 };
                 this.db.ref('clients').push(newClient)
                     .then(() => {
@@ -1079,14 +1068,13 @@
             renderClientTable() {
                 const tbody = document.getElementById('client-table-body');
                 const recentList = document.getElementById('recent-clients-list');
-                if(!tbody || !recentList) return;
                 tbody.innerHTML = '';
                 recentList.innerHTML = '';
                 if(this.clients.length === 0) {
-                    document.getElementById('empty-state').classList.remove('hidden');
+                    if(document.getElementById('empty-state')) document.getElementById('empty-state').classList.remove('hidden');
                     return;
                 }
-                document.getElementById('empty-state').classList.add('hidden');
+                if(document.getElementById('empty-state')) document.getElementById('empty-state').classList.add('hidden');
                 const sorted = [...this.clients].sort((a,b) => b.timestamp - a.timestamp);
                 sorted.forEach(client => {
                     const clientReports = this.reports.filter(r => r.clientKey === client._key);
@@ -1243,7 +1231,8 @@
                     status: document.getElementById('device-status').value,
                     timestamp: Date.now(),
                     checkboxes: this.captureCheckboxStates(),
-                    visuals: this.currentImages 
+                    visuals: this.currentImages,
+                    savedBy: this.user ? this.user.email : 'system'
                 };
                 if (this.currentReportType === 'Hardware') {
                     reportData.deviceInfo = {
@@ -1295,6 +1284,7 @@
                 document.getElementById('report-client-select').value = '';
                 document.getElementById('device-status').value = 'Received';
                 document.getElementById('current-report-id').value = '';
+                // Reset Images
                 this.currentImages = { before: null, after: null };
                 document.getElementById('img-display-before').src = "https://via.placeholder.com/150?text=No+Image";
                 document.getElementById('img-display-after').src = "https://via.placeholder.com/150?text=No+Image";
@@ -1351,6 +1341,7 @@
                     document.getElementById('display-client-email').value = report.clientInfo.email || '';
                 }
                 
+                // Load Visuals
                 if(report.visuals) {
                     this.currentImages = report.visuals;
                     document.getElementById('img-display-before').src = report.visuals.before || "https://via.placeholder.com/150?text=No+Image";
@@ -1451,6 +1442,7 @@
             }
             showToast(title, message, type = 'success') {
                 const toast = document.getElementById('toast');
+                if(!toast) return;
                 document.getElementById('toast-title').innerText = title;
                 document.getElementById('toast-msg').innerText = message;
                 const icon = document.getElementById('toast-icon');
