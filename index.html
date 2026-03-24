@@ -50,7 +50,8 @@
         #sidebar.collapsed .nav-text,
         #sidebar.collapsed .logo-text,
         #sidebar.collapsed .user-info,
-        #sidebar.collapsed .status-label { display: none; }
+        #sidebar.collapsed .status-label,
+        #sidebar.collapsed .logout-text { display: none; }
         #sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
         #sidebar.collapsed .device-status-item { justify-content: center; gap: 6px; }
         .nav-item {
@@ -395,6 +396,10 @@
                     <p class="text-xs text-gray-500">System Admin</p>
                 </div>
             </div>
+            <button onclick="app.showLogoutModal()" class="w-full mt-4 flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
+                <i class="fa-solid fa-right-from-bracket w-5 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="logout-text">Sign Out</span>
+            </button>
         </div>
     </aside>
     <div class="overlay" onclick="app.toggleSidebar()"></div>
@@ -816,6 +821,23 @@
                 </div>
         </div>
     </div>
+
+    <div id="logout-modal" class="modal-overlay">
+        <div class="modal-box max-w-sm">
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-right-from-bracket text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 font-display">Confirm Logout</h3>
+                <p class="text-gray-500 mb-6">Are you sure you want to end your current session? You will need to sign in again to access the portal.</p>
+                <div class="flex gap-3">
+                    <button onclick="app.closeLogoutModal()" class="btn btn-ghost flex-1 justify-center">Cancel</button>
+                    <button onclick="app.handleLogout()" class="btn btn-primary bg-red-600 hover:bg-red-700 border-none flex-1 justify-center">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         class RareGradeApp {
             constructor() {
@@ -841,6 +863,11 @@
                 this.toggleReportSections(this.currentReportType);
                 // Setup hover-based sidebar collapse/expand (desktop only)
                 this.setupSidebarHover();
+                
+                // Simulated Login Success Popup
+                setTimeout(() => {
+                    this.showToast('Login Successful', 'Welcome back, Vynix Lingua!', 'success');
+                }, 800);
             }
             setupSidebarHover() {
                 const sidebar = document.getElementById('sidebar');
@@ -955,6 +982,22 @@
                     sidebar.classList.toggle('collapsed');
                 }
             }
+
+            // --- Logout Methods ---
+            showLogoutModal() {
+                document.getElementById('logout-modal').classList.add('open');
+            }
+            closeLogoutModal() {
+                document.getElementById('logout-modal').classList.remove('open');
+            }
+            handleLogout() {
+                this.showToast('Signing Out', 'Logging you out of the system...');
+                setTimeout(() => {
+                    // Logic for logout: In this case, reloading the page simulates session end
+                    window.location.reload();
+                }, 1000);
+            }
+
             updateIdPreview() {
                 const name = document.getElementById('newClientName').value.trim();
                 const preview = document.getElementById('preview-client-id');
