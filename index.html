@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rare Grade Tech | Enterprise Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #003087;
+            --accent-light: #e0e7ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+        h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        #sidebar {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 30;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        #sidebar.collapsed { width: 80px; }
+        #sidebar.collapsed .nav-text,
+        #sidebar.collapsed .logo-text,
+        #sidebar.collapsed .user-info,
+        #sidebar.collapsed .status-label { display: none; }
+        #sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
+        #sidebar.collapsed .device-status-item { justify-content: center; gap: 6px; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            margin: 4px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .nav-item:hover { 
+            background: #f1f5f9; 
+            color: var(--accent); 
+            transform: translateX(8px); 
+        }
+        .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        header {
+            height: 64px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .content-area { flex: 1; overflow-y: auto; padding: 24px; }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .stat-card { padding: 20px; position: relative; transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
+        .stat-card:hover { transform: translateY(-6px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+    
+        .stat-icon-bg {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            opacity: 0.1;
+            color: var(--accent);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+        }
+        tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        tbody tr:hover { background: #f8fafc; }
+        tbody tr:last-child td { border-bottom: none; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+        .btn:hover {
+            transform: translateY(-1px) scale(1.02);
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #002060; }
+        .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
+        .btn-ghost:hover { background: #f1f5f9; color: var(--text-main); }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        .input {
+            width: 100%;
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.1); }
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #d1fae5; color: #065f46; }
+        .badge-orange { background: #ffedd5; color: #9a3412; }
+        .badge-gray { background: #f3f4f6; color: #374151; }
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        #toast.show { transform: translateY(0); opacity: 1; }
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 50; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: white; border-radius: 12px; width: 90%; max-width: 600px;
+            max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .report-list-item {
+            border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+            margin-bottom: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .report-list-item:hover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+            transform: translateY(-2px);
+        }
+        /*
+           OPTIMIZED PDF STYLES
+        */
+        #report-paper {
+            font-family: 'Times New Roman', serif;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: #000;
+            background: white;
+            padding: 15mm;
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        #report-paper .rpt-header {
+            background: #003087;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: -15mm -15mm 15px -15mm;
+            width: calc(100% + 30mm);
+            box-sizing: border-box;
+        }
+        #report-paper .form-line {
+            border: none;
+            border-bottom: 1px solid #999;
+            background: transparent;
+            width: 100%;
+            font-size: 10pt;
+            font-family: 'Times New Roman', serif;
+            padding: 1px 0;
+            height: 16px;
+        }
+    
+        #report-paper .form-line:focus { outline: none; border-bottom-color: #003087; }
+    
+        #report-paper h3, #report-paper h4 {
+            font-size: 11pt;
+            margin-bottom: 6px;
+            margin-top: 10px;
+        }
+        #report-paper table {
+            margin-bottom: 8px;
+        }
+        #report-paper td {
+            padding: 2px 0;
+            vertical-align: bottom;
+        }
+        #report-paper .checkbox-grid label {
+            font-size: 9.5pt;
+            display: block;
+            margin-bottom: 2px;
+        }
+        /* Report type sections toggle */
+        .hardware-section, .software-section {
+            transition: opacity 0.2s;
+        }
+        .hardware-section.hidden, .software-section.hidden {
+            display: none;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #report-paper, #report-paper * { visibility: visible; }
+            #report-paper {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                box-shadow: none;
+                padding: 15mm;
+            }
+        }
+        @media (max-width: 768px) {
+            #sidebar { position: fixed; left: -260px; height: 100vh; box-shadow: 5px 0 20px rgba(0,0,0,0.1); }
+            #sidebar.open { left: 0; }
+            .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 20; }
+            .overlay.open { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside id="sidebar">
+        <div class="p-6 border-b border-gray-200 flex items-center gap-3">
+            <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="w-10 h-10 rounded-lg shadow-lg object-contain">
+            <div class="logo-text">
+                <h1 class="font-display font-bold text-gray-900 leading-tight">Rare Grade</h1>
+                <p class="text-xs text-gray-500 font-medium">Enterprise Portal</p>
+            </div>
+        </div>
+        <nav class="flex-1 py-6 overflow-y-auto">
+            <div class="px-6 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Menu</div>
+        
+            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-item active w-full text-left">
+                <i class="fa-solid fa-chart-pie w-5"></i>
+                <span class="nav-text">Dashboard</span>
+            </button>
+        
+            <button onclick="app.navigate('add-client')" id="nav-add-client" class="nav-item w-full text-left">
+                <i class="fa-solid fa-user-plus w-5"></i>
+                <span class="nav-text">New Client</span>
+            </button>
+        
+            <button onclick="app.navigate('manage-clients')" id="nav-manage-clients" class="nav-item w-full text-left">
+                <i class="fa-solid fa-users w-5"></i>
+                <span class="nav-text">Client Registry</span>
+            </button>
+        
+            <button onclick="app.navigate('service-form')" id="nav-service-form" class="nav-item w-full text-left">
+                <i class="fa-solid fa-file-signature w-5"></i>
+                <span class="nav-text">Service Reports</span>
+            </button>
+            <div class="px-6 mt-6 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Device Status</div>
+        
+            <div class="px-6 py-2 flex items-center justify-between text-sm text-gray-600 device-status-item">
+                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div><span class="status-label">Received</span></span>
+                <span class="font-bold text-gray-900" id="side-received">0</span>
+            </div>
+            <div class="px-6 py-2 flex items-center justify-between text-sm text-gray-600 device-status-item">
+                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-orange-500"></div><span class="status-label">In Repair</span></span>
+                <span class="font-bold text-gray-900" id="side-in-repair">0</span>
+            </div>
+            <div class="px-6 py-2 flex items-center justify-between text-sm text-gray-600 device-status-item">
+                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div><span class="status-label">Completed</span></span>
+                <span class="font-bold text-gray-900" id="side-completed">0</span>
+            </div>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">VL</div>
+                <div class="user-info">
+                    <p class="text-sm font-semibold text-gray-900">Vynix Lingua</p>
+                    <p class="text-xs text-gray-500">System Admin</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <div class="overlay" onclick="app.toggleSidebar()"></div>
+    <!-- Main Content -->
+    <main>
+        <header>
+            <div class="flex items-center gap-4">
+                <button onclick="app.toggleSidebar()" class="lg:hidden text-gray-500 hover:text-gray-900">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <h2 id="page-title" class="text-xl font-bold text-gray-900 font-display">Dashboard</h2>
+            </div>
+        
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-2 text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">
+                    <i class="fa-regular fa-calendar"></i>
+                    <span id="current-date">Loading...</span>
+                </div>
+                <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+            </div>
+        </header>
+        <div class="content-area">
+        
+            <!-- DASHBOARD -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card stat-card">
+                        <i class="fa-solid fa-users stat-icon-bg"></i>
+                        <p class="text-sm text-gray-500 font-medium mb-1">Total Clients</p>
+                        <h3 class="text-3xl font-bold text-gray-900" id="stat-clients">0</h3>
+                    </div>
+                    <div class="card stat-card">
+                        <i class="fa-solid fa-clipboard-check stat-icon-bg text-orange-500"></i>
+                        <p class="text-sm text-gray-500 font-medium mb-1">Active Reports</p>
+                        <h3 class="text-3xl font-bold text-gray-900" id="stat-reports">0</h3>
+                    </div>
+                    <div class="card stat-card">
+                        <i class="fa-solid fa-screwdriver-wrench stat-icon-bg text-orange-500"></i>
+                        <p class="text-sm text-gray-500 font-medium mb-1">In Repair</p>
+                        <h3 class="text-3xl font-bold text-gray-900" id="stat-in-repair">0</h3>
+                    </div>
+                    <div class="card stat-card">
+                        <i class="fa-solid fa-check-circle stat-icon-bg text-green-500"></i>
+                        <p class="text-sm text-gray-500 font-medium mb-1">Completed</p>
+                        <h3 class="text-3xl font-bold text-gray-900" id="stat-completed">0</h3>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="card lg:col-span-1 p-6">
+                        <h3 class="font-bold text-gray-900 mb-4">Activity Overview</h3>
+                        <canvas id="activityChart" height="200"></canvas>
+                    </div>
+                
+                    <div class="card lg:col-span-2">
+                        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                            <h3 class="font-bold text-gray-900">Recent Registrations</h3>
+                            <button onclick="app.navigate('manage-clients')" class="text-sm text-blue-700 font-medium hover:underline">View All</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Client Name</th>
+                                        <th>ID</th>
+                                        <th>Date Added</th>
+                                        <th>Device Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-clients-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- ADD CLIENT -->
+            <section id="view-add-client" class="view-section">
+                <div class="max-w-2xl mx-auto">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 font-display">Onboard New Client</h2>
+                        <p class="text-gray-500">Create a new profile in the enterprise registry.</p>
+                    </div>
+                    <div class="card p-8">
+                        <form id="add-client-form" onsubmit="app.handleAddClient(event)">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                    <input type="text" id="newClientName" required class="input" placeholder="e.g. John Doe" oninput="app.updateIdPreview()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                    <input type="tel" id="newClientPhone" required class="input" placeholder="+27 61 527 0749">
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" id="newClientEmail" class="input" placeholder="john@example.com">
+                            </div>
+                            <!-- Initial Device Status Selection -->
+                            <div class="mb-8">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Initial Device Status</label>
+                                <select id="newClientStatus" class="input">
+                                    <option value="Received">Received</option>
+                                    <option value="In Repair">In Repair</option>
+                                    <option value="Waiting for Parts">Waiting for Parts</option>
+                                    <option value="Ready for Pickup">Ready for Pickup</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-8 flex justify-between items-center">
+                                <span class="text-sm text-blue-800 font-medium">Generated Client ID</span>
+                                <span id="preview-client-id" class="font-display font-bold text-blue-900 text-lg">—</span>
+                            </div>
+                            <div class="flex justify-end gap-3">
+                                <button type="button" onclick="app.navigate('dashboard')" class="btn btn-ghost">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-save"></i> Register Client
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+            <!-- MANAGE CLIENTS -->
+            <section id="view-manage-clients" class="view-section">
+                <div class="card">
+                    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="relative w-full sm:w-96">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="client-search" onkeyup="app.filterClients()" placeholder="Search by name, ID, or email..." class="input pl-10">
+                        </div>
+                        <button onclick="app.navigate('add-client')" class="btn btn-primary">
+                            <i class="fa-solid fa-plus"></i> New Client
+                        </button>
+                    </div>
+                
+                    <div class="overflow-x-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Client ID</th>
+                                    <th>Contact</th>
+                                    <th>Current Status</th>
+                                    <th>Date Added</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="client-table-body"></tbody>
+                        </table>
+                        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-gray-400">
+                            <i class="fa-regular fa-folder-open text-4xl mb-3"></i>
+                            <p>No clients found in registry.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- SERVICE REPORT FORM -->
+            <section id="view-service-form" class="view-section">
+                <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                    <!-- Controls -->
+                    <div class="xl:col-span-1 space-y-6 no-print">
+                        <div class="card p-6">
+                            <h3 class="font-bold text-gray-900 mb-4">Configuration</h3>
+                        
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Client</label>
+                                    <select id="report-client-select" onchange="app.loadClientToForm(this.value)" class="input">
+                                        <option value="">-- Choose Client --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                                    <div class="flex bg-gray-100 p-1 rounded-lg">
+                                        <button onclick="app.setReportType('Hardware')" id="btn-type-hardware" class="flex-1 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-blue-900">Hardware</button>
+                                        <button onclick="app.setReportType('Software')" id="btn-type-software" class="flex-1 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900">Software</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Update Device Status</label>
+                                    <select id="device-status" class="input" onchange="app.updateStatusColor(this)">
+                                        <option value="Received">Received</option>
+                                        <option value="In Repair">In Repair</option>
+                                        <option value="Waiting for Parts">Waiting for Parts</option>
+                                        <option value="Ready for Pickup">Ready for Pickup</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                    <!-- Hidden input to store the report ID if editing -->
+                                    <input type="hidden" id="current-report-id">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="font-bold text-gray-900 mb-4">Actions</h3>
+                            <div class="space-y-3">
+                                <button onclick="app.saveReport()" class="btn btn-primary w-full justify-center">
+                                    <i class="fa-solid fa-database"></i> Save Report
+                                </button>
+                                <button onclick="app.downloadPDF()" class="btn btn-ghost w-full justify-center border-gray-300">
+                                    <i class="fa-solid fa-file-pdf text-red-500"></i> Export PDF
+                                </button>
+                                <button onclick="app.clearReportForm()" class="btn btn-ghost w-full justify-center border-gray-300 text-gray-500">
+                                    <i class="fa-solid fa-eraser"></i> Clear Form
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Paper -->
+                    <div class="xl:col-span-3 overflow-auto bg-gray-200 p-4 rounded-xl flex justify-center">
+                        <div id="report-paper">
+                            <div class="rpt-header">
+                                <div class="flex items-center gap-4">
+                                    <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="h-10 w-auto bg-white p-1 rounded object-contain">
+                                    <div>
+                                        <div class="font-bold text-lg tracking-wide">RARE GRADE TECH</div>
+                                        <div class="text-xs opacity-80">Enterprise Service Solutions</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div id="report-type-title" class="text-xl font-bold tracking-widest">HARDWARE</div>
+                                    <div class="text-xs opacity-80">SERVICE REPORT</div>
+                                </div>
+                            </div>
+                            <p class="text-center text-xs text-gray-600 mb-4 italic">Thank you for trusting us with your device. Below is the detailed report on the services performed.</p>
+                            <!-- Client Info (common) -->
+                            <div class="mb-4">
+                                <h3 class="font-bold text-sm border-b-2 border-black pb-1 mb-2 uppercase">Client Information</h3>
+                                <table class="w-full text-sm">
+                                    <tr><td class="py-1 w-1/3 font-semibold">Client Name:</td><td class="py-1"><input id="display-client-name" class="form-line"></td></tr>
+                                    <tr><td class="py-1 font-semibold">Contact Number:</td><td class="py-1"><input id="display-client-phone" class="form-line"></td></tr>
+                                    <tr><td class="py-1 font-semibold">Email Address:</td><td class="py-1"><input id="display-client-email" class="form-line"></td></tr>
+                                </table>
+                            </div>
+                          
+                            <!-- Hardware Section (default visible) -->
+                            <div id="hardware-section" class="hardware-section">
+                                <!-- Device Info -->
+                                <div class="mb-4">
+                                    <h3 class="font-bold text-sm border-b-2 border-black pb-1 mb-2 uppercase">Device Information (Hardware)</h3>
+                                    <table class="w-full text-sm">
+                                        <tr><td class="py-1 w-1/3 font-semibold">Device Model:</td><td class="py-1"><input id="display-device-model" class="form-line"></td></tr>
+                                        <tr><td class="py-1 font-semibold">Serial Number:</td><td class="py-1"><input id="display-serial" class="form-line"></td></tr>
+                                        <tr><td class="py-1 font-semibold">Issue Reported:</td><td class="py-1"><input id="display-issue" class="form-line"></td></tr>
+                                        <tr><td class="py-1 font-semibold">Diagnosis:</td><td class="py-1"><input id="display-diagnosis" class="form-line"></td></tr>
+                                        <tr><td class="py-1 font-semibold">Action Taken:</td><td class="py-1"><input id="display-resolution" class="form-line"></td></tr>
+                                    </table>
+                                </div>
+                                <!-- Status -->
+                                <div class="mb-4 text-sm flex items-center gap-4">
+                                    <span class="font-bold">Status After Service:</span>
+                                    <label class="mr-4"><input type="checkbox" id="cb-functional" class="mr-1"> Functional</label>
+                                    <label><input type="checkbox" id="cb-non-functional" class="mr-1"> Non-Functional</label>
+                                </div>
+                                <!-- Service Summary -->
+                                <div class="mb-4 text-sm">
+                                    <h4 class="font-bold mb-2">Service Summary:</h4>
+                                    <div class="grid grid-cols-2 gap-y-1 checkbox-grid">
+                                        <label><input type="checkbox" id="cb-device-repair" class="mr-2"> Device Repair</label>
+                                        <label><input type="checkbox" id="cb-software-install" class="mr-2"> Software Installation</label>
+                                        <label><input type="checkbox" id="cb-software-update" class="mr-2"> Software Update</label>
+                                        <label><input type="checkbox" id="cb-programming" class="mr-2"> Programming</label>
+                                        <div class="col-span-2 flex items-center">
+                                            <label class="mr-2"><input type="checkbox" id="cb-other" class="mr-1"> Other:</label>
+                                            <input id="display-other-service" class="form-line flex-1">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 flex items-center">
+                                        <span class="font-bold mr-2">Date of Completion:</span>
+                                        <input id="display-date" class="form-line w-40">
+                                    </div>
+                                </div>
+                                <!-- Condition -->
+                                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                                    <div>
+                                        <h4 class="font-bold mb-2">Condition Before Service:</h4>
+                                        <div class="space-y-1 checkbox-grid">
+                                            <div class="flex gap-4 mb-1">
+                                                <label><input type="checkbox" id="cb-before-new" class="mr-1"> NEW</label>
+                                                <label><input type="checkbox" id="cb-before-used" class="mr-1"> USED</label>
+                                                <label><input type="checkbox" id="cb-before-damaged" class="mr-1"> DMG</label>
+                                            </div>
+                                            <label class="block"><input type="checkbox" id="cb-before-fully-functional" class="mr-1"> Fully Functional</label>
+                                            <label class="block"><input type="checkbox" id="cb-before-non-functional" class="mr-1"> Non-Functional</label>
+                                            <div class="flex items-center">
+                                                <label class="mr-2"><input type="checkbox" id="cb-before-partial" class="mr-1"> Partial:</label>
+                                                <input id="display-before-partial" class="form-line flex-1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold mb-2">After Service:</h4>
+                                        <div class="space-y-1 checkbox-grid">
+                                            <label class="block"><input type="checkbox" id="cb-after-fully-functional" class="mr-1"> Fully Functional</label>
+                                            <div class="flex items-center">
+                                                <label class="mr-2"><input type="checkbox" id="cb-after-partial" class="mr-1"> Partial:</label>
+                                                <input id="display-after-partial" class="form-line flex-1">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <label class="mr-2"><input type="checkbox" id="cb-after-issues" class="mr-1"> Issues:</label>
+                                                <input id="display-issues-persisting" class="form-line flex-1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Software Section (hidden by default) -->
+                            <div id="software-section" class="software-section hidden">
+                                <div class="mb-4">
+                                    <h3 class="font-bold text-sm border-b-2 border-black pb-1 mb-2 uppercase">Project Information (Software)</h3>
+                                    <table class="w-full text-sm">
+                                        <tr><td class="py-1 w-1/3 font-semibold">Project Name:</td><td class="py-1"><input id="sw-project-name" class="form-line"></td></tr>
+                                        <tr><td class="py-1 font-semibold">Programming Language:</td><td class="py-1"><input id="sw-language" class="form-line" placeholder="e.g., Python, JavaScript"></td></tr>
+                                        <tr><td class="py-1 font-semibold">Work Performed:</td><td class="py-1"><input id="sw-work" class="form-line" placeholder="Description of development work"></td></tr>
+                                    </table>
+                                </div>
+                                <!-- Status After Service (Software) -->
+                                <div class="mb-4 text-sm flex items-center gap-4">
+                                    <span class="font-bold">Project Status:</span>
+                                    <label class="mr-4"><input type="checkbox" id="sw-cb-deployed" class="mr-1"> Deployed / Delivered</label>
+                                    <label><input type="checkbox" id="sw-cb-testing" class="mr-1"> In Testing / QA</label>
+                                    <label><input type="checkbox" id="sw-cb-maintenance" class="mr-1"> Maintenance Mode</label>
+                                </div>
+                                <!-- Service Summary (Software) -->
+                                <div class="mb-4 text-sm">
+                                    <h4 class="font-bold mb-2">Service Summary:</h4>
+                                    <div class="grid grid-cols-2 gap-y-1 checkbox-grid">
+                                        <label><input type="checkbox" id="sw-cb-web-dev" class="mr-2"> Website Development</label>
+                                        <label><input type="checkbox" id="sw-cb-mobile-app" class="mr-2"> Mobile App Development</label>
+                                        <label><input type="checkbox" id="sw-cb-desktop-app" class="mr-2"> Desktop Application</label>
+                                        <label><input type="checkbox" id="sw-cb-database-design" class="mr-2"> Database Design</label>
+                                        <label><input type="checkbox" id="sw-cb-api-integration" class="mr-2"> API Integration</label>
+                                        <label><input type="checkbox" id="sw-cb-bug-fix" class="mr-2"> Bug Fixing / Debugging</label>
+                                        <label><input type="checkbox" id="sw-cb-code-optimization" class="mr-2"> Code Optimization</label>
+                                        <label><input type="checkbox" id="sw-cb-ui-ux" class="mr-2"> UI/UX Design</label>
+                                        <div class="col-span-2 flex items-center">
+                                            <label class="mr-2"><input type="checkbox" id="sw-cb-other" class="mr-1"> Other:</label>
+                                            <input id="sw-other-service" class="form-line flex-1">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 flex items-center">
+                                        <span class="font-bold mr-2">Date of Completion:</span>
+                                        <input id="sw-date" class="form-line w-40">
+                                    </div>
+                                </div>
+                                <!-- Developer Name (moved from removed notes block) -->
+                                <div class="mb-4 text-sm">
+                                    <div class="flex items-center mb-2">
+                                        <span class="font-semibold w-32">Developer Name:</span>
+                                        <input id="sw-developer-name" class="form-line flex-1">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Signature (common) -->
+                            <div class="border-t-2 border-black pt-4 text-sm mt-auto">
+                                <h4 class="font-bold mb-2">Client Acknowledgment</h4>
+                                <p class="text-xs text-gray-600 mb-4">By signing below, the client confirms receipt of the device/project and agreement with the service details provided.</p>
+                                <div class="flex justify-between items-end">
+                                    <div class="w-1/2 pr-4">
+                                        <div class="font-semibold mb-1">Client Signature:</div>
+                                        <input id="display-client-signature" class="form-line">
+                                    </div>
+                                    <div class="w-1/2 pl-4">
+                                        <div class="font-semibold mb-1">Date:</div>
+                                        <input id="display-date-full" class="form-line">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-2 border-t border-gray-300 text-center text-xs text-gray-500">
+                                <p class="font-semibold text-gray-700">Thank you for your business!</p>
+                                <p>015 065 0979 • 061 527 0749 • info@raregradetech.co.za • raregradetech.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <!-- Toast -->
+    <div id="toast">
+        <div id="toast-icon" class="text-green-500 text-xl"><i class="fa-solid fa-circle-check"></i></div>
+        <div>
+            <h4 id="toast-title" class="font-bold text-gray-900 text-sm">Success</h4>
+            <p id="toast-msg" class="text-xs text-gray-500">Operation completed successfully.</p>
+        </div>
+    </div>
+    <!-- Reports Modal -->
+    <div id="reports-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3 class="font-bold text-lg text-gray-900">Service History</h3>
+                    <p class="text-sm text-gray-500" id="reports-modal-subtitle">Client Reports</p>
+                </div>
+                <button onclick="app.closeReportsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="reports-list-container">
+                <!-- Reports injected here -->
+            </div>
+        </div>
+    </div>
+    <script>
+        class RareGradeApp {
+            constructor() {
+                this.clients = [];
+                this.reports = [];
+                this.db = null;
+                this.currentReportType = 'Hardware';
+                this.init();
+            }
+            init() {
+                this.initFirebase();
+                this.setupListeners();
+                this.updateDate();
+                this.initChart();
+                this.generateReportID();
+                this.navigate('dashboard');
+                // Ensure sections are toggled correctly on start
+                this.toggleReportSections(this.currentReportType);
+                // Setup hover-based sidebar collapse/expand (desktop only)
+                this.setupSidebarHover();
+            }
+            setupSidebarHover() {
+                const sidebar = document.getElementById('sidebar');
+                // Hover expand
+                sidebar.addEventListener('mouseenter', () => {
+                    if (window.innerWidth > 1024) {
+                        sidebar.classList.remove('collapsed');
+                    }
+                });
+                // Hover collapse
+                sidebar.addEventListener('mouseleave', () => {
+                    if (window.innerWidth > 1024) {
+                        sidebar.classList.add('collapsed');
+                    }
+                });
+                // Initial state: collapsed on desktop
+                if (window.innerWidth > 1024) {
+                    sidebar.classList.add('collapsed');
+                }
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth <= 1024) {
+                        sidebar.classList.remove('collapsed');
+                    } else {
+                        sidebar.classList.add('collapsed');
+                    }
+                });
+            }
+            initFirebase() {
+               const firebaseConfig = {
+  apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
+  authDomain: "test-17881.firebaseapp.com",
+  projectId: "test-17881",
+  storageBucket: "test-17881.firebasestorage.app",
+  messagingSenderId: "1057428047643",
+  appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
+};
+                firebase.initializeApp(firebaseConfig);
+                this.db = firebase.database();
+            }
+            setupListeners() {
+                // Listen for Clients
+                this.db.ref('clients').on('value', (snapshot) => {
+                    this.clients = [];
+                    if(snapshot.exists()) {
+                        snapshot.forEach(child => {
+                            const client = child.val();
+                            client._key = child.key;
+                            this.clients.push(client);
+                        });
+                    }
+                    this.renderClientTable();
+                    this.renderClientDropdown();
+                    this.updateStats();
+                });
+                // Listen for Reports
+                this.db.ref('reports').on('value', (snapshot) => {
+                    this.reports = [];
+                    if(snapshot.exists()) {
+                        snapshot.forEach(child => {
+                            const report = child.val();
+                            report._key = child.key;
+                            this.reports.push(report);
+                        });
+                    }
+                    this.updateStats();
+                    this.renderClientTable(); // Re-render to update status badges
+                });
+            }
+            navigate(viewId) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                document.getElementById(`view-${viewId}`).classList.add('active');
+            
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const activeBtn = document.getElementById(`nav-${viewId}`);
+                if(activeBtn) activeBtn.classList.add('active');
+                const titles = {
+                    'dashboard': 'Dashboard',
+                    'add-client': 'New Client',
+                    'manage-clients': 'Client Registry',
+                    'service-form': 'Service Reports'
+                };
+                document.getElementById('page-title').innerText = titles[viewId];
+                document.getElementById('sidebar').classList.remove('open');
+                document.querySelector('.overlay').classList.remove('open');
+            }
+            toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.querySelector('.overlay');
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('open');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                }
+            }
+            // --- Client Management ---
+            updateIdPreview() {
+                const name = document.getElementById('newClientName').value.trim();
+                const preview = document.getElementById('preview-client-id');
+                if(name.length > 2) {
+                    const id = 'RGT-' + name.substring(0,3).toUpperCase() + Math.floor(1000 + Math.random() * 9000);
+                    preview.innerText = id;
+                } else {
+                    preview.innerText = '—';
+                }
+            }
+            handleAddClient(e) {
+                e.preventDefault();
+                const name = document.getElementById('newClientName').value.trim();
+                const phone = document.getElementById('newClientPhone').value.trim();
+                const email = document.getElementById('newClientEmail').value.trim();
+                const status = document.getElementById('newClientStatus').value;
+                if(!name || !phone) {
+                    this.showToast('Error', 'Name and Phone are required', 'error');
+                    return;
+                }
+                const displayId = document.getElementById('preview-client-id').innerText;
+            
+                const newClient = {
+                    displayId: displayId === '—' ? 'RGT-' + Date.now() : displayId,
+                    name, phone, email: email || '',
+                    date: new Date().toLocaleDateString(),
+                    timestamp: Date.now(),
+                    initialStatus: status // Save initial status if needed
+                };
+                this.db.ref('clients').push(newClient)
+                    .then(() => {
+                        this.showToast('Success', 'Client registered successfully');
+                        e.target.reset();
+                        document.getElementById('preview-client-id').innerText = '—';
+                        setTimeout(() => this.navigate('manage-clients'), 1000);
+                    })
+                    .catch(err => this.showToast('Error', err.message, 'error'));
+            }
+            renderClientTable() {
+                const tbody = document.getElementById('client-table-body');
+                const recentList = document.getElementById('recent-clients-list');
+            
+                tbody.innerHTML = '';
+                recentList.innerHTML = '';
+                if(this.clients.length === 0) {
+                    document.getElementById('empty-state').classList.remove('hidden');
+                    return;
+                }
+                document.getElementById('empty-state').classList.add('hidden');
+                const sorted = [...this.clients].sort((a,b) => b.timestamp - a.timestamp);
+                sorted.forEach(client => {
+                    // Find latest report for this client to show status
+                    const clientReports = this.reports.filter(r => r.clientKey === client._key);
+                    const latestReport = clientReports.sort((a,b) => b.timestamp - a.timestamp)[0];
+                    const currentStatus = latestReport ? latestReport.status : (client.initialStatus || 'Received');
+                
+                    let statusBadgeClass = 'badge-gray';
+                    if(currentStatus === 'Received') statusBadgeClass = 'badge-blue';
+                    if(currentStatus === 'In Repair' || currentStatus === 'Waiting for Parts') statusBadgeClass = 'badge-orange';
+                    if(currentStatus === 'Completed' || currentStatus === 'Ready for Pickup') statusBadgeClass = 'badge-green';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="font-medium text-gray-900">${client.name}</td>
+                        <td><span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">${client.displayId}</span></td>
+                        <td>${client.phone}</td>
+                        <td><span class="badge ${statusBadgeClass}">${currentStatus}</span></td>
+                        <td class="text-gray-500 text-sm">${client.date}</td>
+                        <td class="text-right">
+                            <button onclick="app.prepReport('${client._key}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium mr-3">New Report</button>
+                            ${clientReports.length > 0 ? `<button onclick="app.viewReports('${client._key}')" class="text-gray-500 hover:text-gray-800 text-sm font-medium mr-3">History (${clientReports.length})</button>` : ''}
+                            <button onclick="app.deleteClient('${client._key}')" class="text-red-400 hover:text-red-600 text-sm"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                // Dashboard Recent List
+                sorted.slice(0, 5).forEach(client => {
+                    const clientReports = this.reports.filter(r => r.clientKey === client._key);
+                    const latestReport = clientReports.sort((a,b) => b.timestamp - a.timestamp)[0];
+                    const currentStatus = latestReport ? latestReport.status : 'Registered';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="font-medium text-gray-900">${client.name}</td>
+                        <td><span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">${client.displayId}</span></td>
+                        <td class="text-gray-500 text-sm">${client.date}</td>
+                        <td><span class="badge ${currentStatus === 'Completed' ? 'badge-green' : 'badge-blue'}">${currentStatus}</span></td>
+                    `;
+                    recentList.appendChild(tr);
+                });
+            }
+            renderClientDropdown() {
+                const select = document.getElementById('report-client-select');
+                if(!select) return;
+                const firstOpt = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(firstOpt);
+                this.clients.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c._key;
+                    opt.text = `${c.name} (${c.displayId})`;
+                    select.appendChild(opt);
+                });
+            }
+            filterClients() {
+                const term = document.getElementById('client-search').value.toLowerCase();
+                const rows = document.querySelectorAll('#client-table-body tr');
+                rows.forEach(row => {
+                    row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
+                });
+            }
+            deleteClient(key) {
+                if(confirm('Delete this client and all their reports?')) {
+                    const clientReports = this.reports.filter(r => r.clientKey === key);
+                
+                    this.db.ref('clients/' + key).remove()
+                        .then(() => {
+                            const deletePromises = clientReports.map(r =>
+                                this.db.ref('reports/' + r._key).remove()
+                            );
+                            return Promise.all(deletePromises);
+                        })
+                        .then(() => {
+                            this.showToast('Deleted', 'Client and history removed');
+                        })
+                        .catch(err => {
+                            console.error('Delete error:', err);
+                            this.showToast('Error', 'Failed to delete: ' + err.message, 'error');
+                        });
+                }
+            }
+            // --- Service Reports ---
+            prepReport(clientKey) {
+                this.navigate('service-form');
+                this.clearReportForm();
+                const select = document.getElementById('report-client-select');
+                if(select) {
+                    select.value = clientKey;
+                    this.loadClientToForm(clientKey);
+                }
+            }
+            loadClientToForm(clientKey) {
+                const client = this.clients.find(c => c._key === clientKey);
+                if(client) {
+                    document.getElementById('display-client-name').value = client.name;
+                    document.getElementById('display-client-phone').value = client.phone;
+                    document.getElementById('display-client-email').value = client.email;
+                }
+            }
+            toggleReportSections(type) {
+                const hwSection = document.getElementById('hardware-section');
+                const swSection = document.getElementById('software-section');
+                if (type === 'Hardware') {
+                    hwSection.classList.remove('hidden');
+                    swSection.classList.add('hidden');
+                } else {
+                    hwSection.classList.add('hidden');
+                    swSection.classList.remove('hidden');
+                }
+            }
+            setReportType(type) {
+                this.currentReportType = type;
+                document.getElementById('report-type-title').innerText = type.toUpperCase();
+                const hwBtn = document.getElementById('btn-type-hardware');
+                const swBtn = document.getElementById('btn-type-software');
+                if(type === 'Hardware') {
+                    hwBtn.className = "flex-1 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-blue-900";
+                    swBtn.className = "flex-1 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900";
+                } else {
+                    swBtn.className = "flex-1 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-blue-900";
+                    hwBtn.className = "flex-1 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900";
+                }
+                this.toggleReportSections(type);
+            }
+            updateStatusColor(select) {
+                // Visual feedback for status selection if needed
+            }
+            generateReportID() {
+                const today = new Date().toLocaleDateString('en-GB');
+                document.getElementById('display-date').value = today;
+                document.getElementById('sw-date').value = today;
+                document.getElementById('display-date-full').value = today;
+            }
+            captureCheckboxStates() {
+                const ids = [
+                    // Hardware
+                    'cb-functional', 'cb-non-functional', 'cb-device-repair', 'cb-software-install',
+                    'cb-software-update', 'cb-programming', 'cb-other', 'cb-before-new', 'cb-before-used',
+                    'cb-before-damaged', 'cb-before-fully-functional', 'cb-before-non-functional', 'cb-before-partial',
+                    'cb-after-fully-functional', 'cb-after-partial', 'cb-after-issues',
+                    // Software
+                    'sw-cb-deployed', 'sw-cb-testing', 'sw-cb-maintenance', 'sw-cb-web-dev', 'sw-cb-mobile-app',
+                    'sw-cb-desktop-app', 'sw-cb-database-design', 'sw-cb-api-integration', 'sw-cb-bug-fix',
+                    'sw-cb-code-optimization', 'sw-cb-ui-ux', 'sw-cb-other', 'sw-cb-local', 'sw-cb-cloud', 'sw-cb-hybrid'
+                ];
+                const states = {};
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) states[id] = el.checked;
+                });
+                return states;
+            }
+            saveReport() {
+                const clientKey = document.getElementById('report-client-select').value;
+                if(!clientKey) {
+                    this.showToast('Error', 'Please select a client first', 'error');
+                    return;
+                }
+                const reportId = document.getElementById('current-report-id').value;
+                const isUpdate = !!reportId;
+              
+                // Common fields
+                const reportData = {
+                    type: this.currentReportType,
+                    clientKey: clientKey,
+                    clientInfo: {
+                        name: document.getElementById('display-client-name').value,
+                        phone: document.getElementById('display-client-phone').value,
+                        email: document.getElementById('display-client-email').value
+                    },
+                    status: document.getElementById('device-status').value,
+                    timestamp: Date.now(),
+                    checkboxes: this.captureCheckboxStates()
+                };
+                // Hardware specific fields
+                if (this.currentReportType === 'Hardware') {
+                    reportData.deviceInfo = {
+                        model: document.getElementById('display-device-model').value,
+                        serial: document.getElementById('display-serial').value,
+                        issue: document.getElementById('display-issue').value
+                    };
+                    reportData.serviceDetails = {
+                        diagnosis: document.getElementById('display-diagnosis').value,
+                        resolution: document.getElementById('display-resolution').value,
+                        serviceDate: document.getElementById('display-date').value,
+                        technicianName: document.getElementById('display-technician-name').value,
+                        notes: document.getElementById('display-notes').value,
+                        clientSignature: document.getElementById('display-client-signature').value,
+                        completionDate: document.getElementById('display-date-full').value,
+                        otherService: document.getElementById('display-other-service').value,
+                        beforePartialDetails: document.getElementById('display-before-partial').value,
+                        afterPartialDetails: document.getElementById('display-after-partial').value,
+                        issuesPersisting: document.getElementById('display-issues-persisting').value
+                    };
+                } else { // Software
+                    reportData.projectInfo = {
+                        projectName: document.getElementById('sw-project-name').value,
+                        language: document.getElementById('sw-language').value,
+                        workPerformed: document.getElementById('sw-work').value
+                    };
+                    reportData.softwareDetails = {
+                        developerName: document.getElementById('sw-developer-name').value,
+                        completionDate: document.getElementById('sw-date').value,
+                        otherService: document.getElementById('sw-other-service').value,
+                        clientSignature: document.getElementById('display-client-signature').value,
+                        signatureDate: document.getElementById('display-date-full').value
+                    };
+                }
+                if(isUpdate) {
+                    this.db.ref('reports/' + reportId).update(reportData)
+                        .then(() => this.showToast('Updated', 'Report updated successfully'))
+                        .catch(err => this.showToast('Error', err.message, 'error'));
+                } else {
+                    this.db.ref('reports').push(reportData)
+                        .then(() => {
+                            this.showToast('Saved', 'New report saved to database');
+                            this.clearReportForm();
+                        })
+                        .catch(err => this.showToast('Error', err.message, 'error'));
+                }
+            }
+            clearReportForm() {
+                // Clear all inputs and checkboxes in both sections
+                document.querySelectorAll('#report-paper input[type="text"], #report-paper textarea').forEach(el => el.value = '');
+                document.querySelectorAll('#report-paper input[type="checkbox"]').forEach(el => el.checked = false);
+                document.getElementById('report-client-select').value = '';
+                document.getElementById('device-status').value = 'Received';
+                document.getElementById('current-report-id').value = '';
+                this.generateReportID();
+                this.showToast('Cleared', 'Form reset to default');
+            }
+            // --- View / Load Existing Reports ---
+            viewReports(clientKey) {
+                const client = this.clients.find(c => c._key === clientKey);
+                const clientReports = this.reports.filter(r => r.clientKey === clientKey).sort((a,b) => b.timestamp - a.timestamp);
+            
+                document.getElementById('reports-modal-subtitle').innerText = `${client.name} — ${clientReports.length} report(s)`;
+                const container = document.getElementById('reports-list-container');
+                container.innerHTML = '';
+                if(clientReports.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-8">No reports found.</p>';
+                } else {
+                    clientReports.forEach(report => {
+                        const div = document.createElement('div');
+                        div.className = 'report-list-item';
+                        div.innerHTML = `
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">${report.type} Report</span>
+                                    <div class="font-bold text-gray-900">${new Date(report.timestamp).toLocaleDateString()}</div>
+                                </div>
+                                <span class="badge ${report.status === 'Completed' ? 'badge-green' : 'badge-orange'} text-xs">${report.status}</span>
+                            </div>
+                            <div class="text-sm text-gray-600 mb-3">
+                                ${report.type === 'Hardware'
+                                    ? `<div><strong>Device:</strong> ${report.deviceInfo?.model || 'N/A'}</div>
+                                       <div><strong>Issue:</strong> ${report.deviceInfo?.issue || 'N/A'}</div>`
+                                    : `<div><strong>Project:</strong> ${report.projectInfo?.projectName || 'N/A'}</div>
+                                       <div><strong>Language:</strong> ${report.projectInfo?.language || 'N/A'}</div>`
+                                }
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="app.loadReport('${report._key}')" class="btn btn-primary btn-sm flex-1 justify-center">Open</button>
+                                <button onclick="app.deleteReport('${report._key}')" class="btn btn-ghost btn-sm text-red-500 border-red-200 hover:bg-red-50">Delete</button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+            
+                document.getElementById('reports-modal').classList.add('open');
+            }
+            closeReportsModal() {
+                document.getElementById('reports-modal').classList.remove('open');
+            }
+            loadReport(reportKey) {
+                const report = this.reports.find(r => r._key === reportKey);
+                if(!report) return;
+                this.closeReportsModal();
+                this.navigate('service-form');
+                // Set Edit Mode ID
+                document.getElementById('current-report-id').value = reportKey;
+                // Set report type first to show correct section
+                this.setReportType(report.type || 'Hardware');
+                // Load Client
+                const sel = document.getElementById('report-client-select');
+                sel.value = report.clientKey;
+                this.loadClientToForm(report.clientKey);
+                // Load Status
+                document.getElementById('device-status').value = report.status || 'Received';
+              
+                // Load common fields
+                if (report.clientInfo) {
+                    document.getElementById('display-client-name').value = report.clientInfo.name || '';
+                    document.getElementById('display-client-phone').value = report.clientInfo.phone || '';
+                    document.getElementById('display-client-email').value = report.clientInfo.email || '';
+                }
+                document.getElementById('display-client-signature').value = report.softwareDetails?.clientSignature || report.serviceDetails?.clientSignature || '';
+                document.getElementById('display-date-full').value = report.softwareDetails?.signatureDate || report.serviceDetails?.completionDate || '';
+                // Load hardware-specific fields
+                if (report.type === 'Hardware' && report.deviceInfo) {
+                    document.getElementById('display-device-model').value = report.deviceInfo.model || '';
+                    document.getElementById('display-serial').value = report.deviceInfo.serial || '';
+                    document.getElementById('display-issue').value = report.deviceInfo.issue || '';
+                }
+                if (report.type === 'Hardware' && report.serviceDetails) {
+                    const sd = report.serviceDetails;
+                    document.getElementById('display-diagnosis').value = sd.diagnosis || '';
+                    document.getElementById('display-resolution').value = sd.resolution || '';
+                    document.getElementById('display-date').value = sd.serviceDate || '';
+                    document.getElementById('display-technician-name').value = sd.technicianName || '';
+                    document.getElementById('display-notes').value = sd.notes || '';
+                    document.getElementById('display-other-service').value = sd.otherService || '';
+                    document.getElementById('display-before-partial').value = sd.beforePartialDetails || '';
+                    document.getElementById('display-after-partial').value = sd.afterPartialDetails || '';
+                    document.getElementById('display-issues-persisting').value = sd.issuesPersisting || '';
+                }
+                // Load software-specific fields
+                if (report.type === 'Software' && report.projectInfo) {
+                    const pi = report.projectInfo;
+                    document.getElementById('sw-project-name').value = pi.projectName || '';
+                    document.getElementById('sw-language').value = pi.language || '';
+                    document.getElementById('sw-work').value = pi.workPerformed || '';
+                }
+                if (report.type === 'Software' && report.softwareDetails) {
+                    const sd = report.softwareDetails;
+                    document.getElementById('sw-developer-name').value = sd.developerName || '';
+                    document.getElementById('sw-date').value = sd.completionDate || '';
+                    document.getElementById('sw-other-service').value = sd.otherService || '';
+                }
+                // Load Checkboxes (for both sections; inactive section is hidden, but we still set values)
+                if(report.checkboxes) {
+                    for(const [id, checked] of Object.entries(report.checkboxes)) {
+                        const el = document.getElementById(id);
+                        if(el) el.checked = checked;
+                    }
+                }
+                this.showToast('Report Loaded', 'Data retrieved successfully');
+            }
+            deleteReport(reportKey) {
+                if(confirm('Are you sure you want to delete this report?')) {
+                    const report = this.reports.find(r => r._key === reportKey);
+                    const clientKey = report ? report.clientKey : null;
+                
+                    this.db.ref('reports/' + reportKey).remove()
+                        .then(() => {
+                            this.showToast('Deleted', 'Report removed');
+                            if(clientKey) {
+                                this.viewReports(clientKey);
+                            } else {
+                                this.closeReportsModal();
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Delete report error:', err);
+                            this.showToast('Error', 'Failed to delete report: ' + err.message, 'error');
+                        });
+                }
+            }
+            downloadPDF() {
+                const element = document.getElementById('report-paper');
+                this.showToast('Generating PDF', 'Please wait...');
+            
+                html2pdf().set({
+                    margin: 0,
+                    filename: `RGT_Service_Report_${Date.now()}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: 'avoid-all' }
+                }).from(element).save().then(() => {
+                    this.showToast('Success', 'PDF Downloaded');
+                });
+            }
+            // --- Utilities ---
+            updateStats() {
+                this.animateValue('stat-clients', this.clients.length);
+                this.animateValue('stat-reports', this.reports.length);
+            
+                const inRepair = this.reports.filter(r => r.status === 'In Repair').length;
+                const completed = this.reports.filter(r => r.status === 'Completed').length;
+                const received = this.reports.filter(r => r.status === 'Received').length;
+                this.animateValue('stat-in-repair', inRepair);
+                this.animateValue('stat-completed', completed);
+            
+                document.getElementById('side-received').innerText = received;
+                document.getElementById('side-in-repair').innerText = inRepair;
+                document.getElementById('side-completed').innerText = completed;
+            }
+            animateValue(id, end) {
+                const el = document.getElementById(id);
+                if(!el) return;
+                const start = parseInt(el.innerText) || 0;
+                if(start === end) return;
+                const duration = 1000;
+                const startTime = performance.now();
+                const step = (currentTime) => {
+                    const progress = Math.min((currentTime - startTime) / duration, 1);
+                    el.innerText = Math.floor(progress * (end - start) + start);
+                    if(progress < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            }
+            updateDate() {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-ZA', options);
+            }
+            showToast(title, message, type = 'success') {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast-title').innerText = title;
+                document.getElementById('toast-msg').innerText = message;
+                const icon = document.getElementById('toast-icon');
+                if(type === 'error') {
+                    icon.innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-500"></i>';
+                } else {
+                    icon.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>';
+                }
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+            initChart() {
+                const ctx = document.getElementById('activityChart');
+                if(!ctx) return;
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Activity',
+                            data: [12, 19, 15, 25, 22, 30, 28],
+                            borderColor: '#003087',
+                            backgroundColor: 'rgba(0, 48, 135, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { display: false } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new RareGradeApp();
+        });
+    </script>
+</body>
+</html>
