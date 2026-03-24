@@ -8,9 +8,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -51,7 +53,8 @@
         #sidebar.collapsed .nav-text,
         #sidebar.collapsed .logo-text,
         #sidebar.collapsed .user-info,
-        #sidebar.collapsed .status-label { display: none; }
+        #sidebar.collapsed .status-label,
+        #sidebar.collapsed #logout-btn { display: none; }
         #sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
         #sidebar.collapsed .device-status-item { justify-content: center; gap: 6px; }
         .nav-item {
@@ -67,10 +70,10 @@
             font-size: 14px;
             font-weight: 500;
         }
-        .nav-item:hover {
-            background: #f1f5f9;
-            color: var(--accent);
-            transform: translateX(8px);
+        .nav-item:hover { 
+            background: #f1f5f9; 
+            color: var(--accent); 
+            transform: translateX(8px); 
         }
         .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
         main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -99,7 +102,7 @@
         }
         .stat-card { padding: 20px; position: relative; transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
         .stat-card:hover { transform: translateY(-6px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
-   
+    
         .stat-icon-bg {
             position: absolute;
             right: 20px;
@@ -257,9 +260,9 @@
             padding: 1px 0;
             height: 16px;
         }
-   
+    
         #report-paper .form-line:focus { outline: none; border-bottom-color: #003087; }
-   
+    
         #report-paper h3, #report-paper h4 {
             font-size: 11pt;
             margin-bottom: 6px;
@@ -306,37 +309,32 @@
     </style>
 </head>
 <body>
-    <!-- Authentication Login Screen - Added for user authentication requirement -->
-    <div id="login-screen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-[9999]">
-        <div class="card max-w-md w-full mx-4 p-10">
+
+    <div id="auth-modal" class="modal-overlay open" style="z-index: 9999; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);">
+        <div class="modal-box p-8 max-w-md w-full shadow-2xl" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
             <div class="text-center mb-8">
-                <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="mx-auto w-16 h-16 rounded-lg shadow-lg object-contain">
-                <h1 class="font-display font-bold text-3xl text-gray-900 mt-6">Rare Grade</h1>
-                <p class="text-gray-500 mt-1">Enterprise Portal</p>
-                <div class="mt-8 text-sm font-medium text-gray-400">Sign in to access the system</div>
+                <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg object-contain bg-gray-50 p-2">
+                <h2 class="text-2xl font-bold text-gray-900 font-display">System Access</h2>
+                <p class="text-sm text-gray-500 mt-2">Sign in to manage the Enterprise Portal</p>
             </div>
-            <form id="login-form" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                    <input type="email" id="login-email" value="admin@raregradetech.co.za" class="input" placeholder="admin@raregradetech.co.za" required>
+            <form id="auth-form" onsubmit="app.login(event)">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                        <input type="email" id="auth-email" required class="input py-2.5" placeholder="admin@raregradetech.co.za">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                        <input type="password" id="auth-pass" required class="input py-2.5" placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="auth-btn" class="btn btn-primary w-full justify-center mt-6 py-3 text-base shadow-md">
+                        <i class="fa-solid fa-lock mr-2"></i> Authenticate
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input type="password" id="login-password" value="admin123" class="input" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-full py-4 text-base font-semibold">
-                    <i class="fa-solid fa-right-to-bracket mr-2"></i>
-                    Sign In Securely
-                </button>
             </form>
-            <div class="text-center mt-6 text-xs text-gray-400">
-                Demo credentials (create this user in Firebase Console → Authentication if needed):<br>
-                <span class="font-mono">admin@raregradetech.co.za</span> / <span class="font-mono">admin123</span>
-            </div>
         </div>
     </div>
 
-    <!-- Sidebar -->
     <aside id="sidebar">
         <div class="p-6 border-b border-gray-200 flex items-center gap-3">
             <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="w-10 h-10 rounded-lg shadow-lg object-contain">
@@ -347,28 +345,28 @@
         </div>
         <nav class="flex-1 py-6 overflow-y-auto">
             <div class="px-6 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Menu</div>
-       
+        
             <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-item active w-full text-left">
                 <i class="fa-solid fa-chart-pie w-5"></i>
                 <span class="nav-text">Dashboard</span>
             </button>
-       
+        
             <button onclick="app.navigate('add-client')" id="nav-add-client" class="nav-item w-full text-left">
                 <i class="fa-solid fa-user-plus w-5"></i>
                 <span class="nav-text">New Client</span>
             </button>
-       
+        
             <button onclick="app.navigate('manage-clients')" id="nav-manage-clients" class="nav-item w-full text-left">
                 <i class="fa-solid fa-users w-5"></i>
                 <span class="nav-text">Client Registry</span>
             </button>
-       
+        
             <button onclick="app.navigate('service-form')" id="nav-service-form" class="nav-item w-full text-left">
                 <i class="fa-solid fa-file-signature w-5"></i>
                 <span class="nav-text">Service Reports</span>
             </button>
             <div class="px-6 mt-6 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Device Status</div>
-       
+        
             <div class="px-6 py-2 flex items-center justify-between text-sm text-gray-600 device-status-item">
                 <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div><span class="status-label">Received</span></span>
                 <span class="font-bold text-gray-900" id="side-received">0</span>
@@ -382,18 +380,20 @@
                 <span class="font-bold text-gray-900" id="side-completed">0</span>
             </div>
         </nav>
-        <div class="p-4 border-t border-gray-200">
+        <div class="p-4 border-t border-gray-200 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">VL</div>
+                <div id="sidebar-user-initial" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">--</div>
                 <div class="user-info">
-                    <p class="text-sm font-semibold text-gray-900">Vynix Lingua</p>
+                    <p id="sidebar-user-name" class="text-sm font-semibold text-gray-900">User</p>
                     <p class="text-xs text-gray-500">System Admin</p>
                 </div>
             </div>
+            <button id="logout-btn" onclick="app.logout()" class="text-gray-400 hover:text-red-500 transition-colors px-2" title="Sign Out">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
         </div>
     </aside>
     <div class="overlay" onclick="app.toggleSidebar()"></div>
-    <!-- Main Content -->
     <main>
         <header>
             <div class="flex items-center gap-4">
@@ -402,7 +402,7 @@
                 </button>
                 <h2 id="page-title" class="text-xl font-bold text-gray-900 font-display">Dashboard</h2>
             </div>
-       
+        
             <div class="flex items-center gap-4">
                 <div class="hidden md:flex items-center gap-2 text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">
                     <i class="fa-regular fa-calendar"></i>
@@ -414,8 +414,7 @@
             </div>
         </header>
         <div class="content-area">
-       
-            <!-- DASHBOARD -->
+        
             <section id="view-dashboard" class="view-section active">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="card stat-card">
@@ -444,7 +443,7 @@
                         <h3 class="font-bold text-gray-900 mb-4">Activity Overview</h3>
                         <canvas id="activityChart" height="200"></canvas>
                     </div>
-               
+                
                     <div class="card lg:col-span-2">
                         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                             <h3 class="font-bold text-gray-900">Recent Registrations</h3>
@@ -466,7 +465,6 @@
                     </div>
                 </div>
             </section>
-            <!-- ADD CLIENT -->
             <section id="view-add-client" class="view-section">
                 <div class="max-w-2xl mx-auto">
                     <div class="mb-6">
@@ -489,7 +487,6 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                                 <input type="email" id="newClientEmail" class="input" placeholder="john@example.com">
                             </div>
-                            <!-- Initial Device Status Selection -->
                             <div class="mb-8">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Initial Device Status</label>
                                 <select id="newClientStatus" class="input">
@@ -514,7 +511,6 @@
                     </div>
                 </div>
             </section>
-            <!-- MANAGE CLIENTS -->
             <section id="view-manage-clients" class="view-section">
                 <div class="card">
                     <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -526,7 +522,7 @@
                             <i class="fa-solid fa-plus"></i> New Client
                         </button>
                     </div>
-               
+                
                     <div class="overflow-x-auto">
                         <table>
                             <thead>
@@ -548,14 +544,12 @@
                     </div>
                 </div>
             </section>
-            <!-- SERVICE REPORT FORM -->
             <section id="view-service-form" class="view-section">
                 <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                    <!-- Controls -->
                     <div class="xl:col-span-1 space-y-6 no-print">
                         <div class="card p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Configuration</h3>
-                       
+                        
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Select Client</label>
@@ -579,7 +573,6 @@
                                         <option value="Ready for Pickup">Ready for Pickup</option>
                                         <option value="Completed">Completed</option>
                                     </select>
-                                    <!-- Hidden input to store the report ID if editing -->
                                     <input type="hidden" id="current-report-id">
                                 </div>
                             </div>
@@ -599,7 +592,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Paper -->
                     <div class="xl:col-span-3 overflow-auto bg-gray-200 p-4 rounded-xl flex justify-center">
                         <div id="report-paper">
                             <div class="rpt-header">
@@ -616,7 +608,6 @@
                                 </div>
                             </div>
                             <p class="text-center text-xs text-gray-600 mb-4 italic">Thank you for trusting us with your device. Below is the detailed report on the services performed.</p>
-                            <!-- Client Info (common) -->
                             <div class="mb-4">
                                 <h3 class="font-bold text-sm border-b-2 border-black pb-1 mb-2 uppercase">Client Information</h3>
                                 <table class="w-full text-sm">
@@ -625,10 +616,8 @@
                                     <tr><td class="py-1 font-semibold">Email Address:</td><td class="py-1"><input id="display-client-email" class="form-line"></td></tr>
                                 </table>
                             </div>
-                         
-                            <!-- Hardware Section (default visible) -->
+                          
                             <div id="hardware-section" class="hardware-section">
-                                <!-- Device Info -->
                                 <div class="mb-4">
                                     <h3 class="font-bold text-sm border-b-2 border-black pb-1 mb-2 uppercase">Device Information (Hardware)</h3>
                                     <table class="w-full text-sm">
@@ -639,13 +628,11 @@
                                         <tr><td class="py-1 font-semibold">Action Taken:</td><td class="py-1"><input id="display-resolution" class="form-line"></td></tr>
                                     </table>
                                 </div>
-                                <!-- Status -->
                                 <div class="mb-4 text-sm flex items-center gap-4">
                                     <span class="font-bold">Status After Service:</span>
                                     <label class="mr-4"><input type="checkbox" id="cb-functional" class="mr-1"> Functional</label>
                                     <label><input type="checkbox" id="cb-non-functional" class="mr-1"> Non-Functional</label>
                                 </div>
-                                <!-- Service Summary -->
                                 <div class="mb-4 text-sm">
                                     <h4 class="font-bold mb-2">Service Summary:</h4>
                                     <div class="grid grid-cols-2 gap-y-1 checkbox-grid">
@@ -663,7 +650,6 @@
                                         <input id="display-date" class="form-line w-40">
                                     </div>
                                 </div>
-                                <!-- Condition -->
                                 <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
                                     <div>
                                         <h4 class="font-bold mb-2">Condition Before Service:</h4>
@@ -697,7 +683,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Software Section (hidden by default) -->
                             <div id="software-section" class="software-section hidden">
                                 <div class="mb-4">
                                     <h3 class="font-bold text-sm border-b-2 border-black pb-1 mb-2 uppercase">Project Information (Software)</h3>
@@ -707,14 +692,12 @@
                                         <tr><td class="py-1 font-semibold">Work Performed:</td><td class="py-1"><input id="sw-work" class="form-line" placeholder="Description of development work"></td></tr>
                                     </table>
                                 </div>
-                                <!-- Status After Service (Software) -->
                                 <div class="mb-4 text-sm flex items-center gap-4">
                                     <span class="font-bold">Project Status:</span>
                                     <label class="mr-4"><input type="checkbox" id="sw-cb-deployed" class="mr-1"> Deployed / Delivered</label>
                                     <label><input type="checkbox" id="sw-cb-testing" class="mr-1"> In Testing / QA</label>
                                     <label><input type="checkbox" id="sw-cb-maintenance" class="mr-1"> Maintenance Mode</label>
                                 </div>
-                                <!-- Service Summary (Software) -->
                                 <div class="mb-4 text-sm">
                                     <h4 class="font-bold mb-2">Service Summary:</h4>
                                     <div class="grid grid-cols-2 gap-y-1 checkbox-grid">
@@ -736,7 +719,6 @@
                                         <input id="sw-date" class="form-line w-40">
                                     </div>
                                 </div>
-                                <!-- Developer Name (moved from removed notes block) -->
                                 <div class="mb-4 text-sm">
                                     <div class="flex items-center mb-2">
                                         <span class="font-semibold w-32">Developer Name:</span>
@@ -744,7 +726,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Signature (common) -->
                             <div class="border-t-2 border-black pt-4 text-sm mt-auto">
                                 <h4 class="font-bold mb-2">Client Acknowledgment</h4>
                                 <p class="text-xs text-gray-600 mb-4">By signing below, the client confirms receipt of the device/project and agreement with the service details provided.</p>
@@ -769,7 +750,6 @@
             </section>
         </div>
     </main>
-    <!-- Toast -->
     <div id="toast">
         <div id="toast-icon" class="text-green-500 text-xl"><i class="fa-solid fa-circle-check"></i></div>
         <div>
@@ -777,7 +757,6 @@
             <p id="toast-msg" class="text-xs text-gray-500">Operation completed successfully.</p>
         </div>
     </div>
-    <!-- Reports Modal -->
     <div id="reports-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
@@ -790,8 +769,7 @@
                 </button>
             </div>
             <div class="modal-body" id="reports-list-container">
-                <!-- Reports injected here -->
-            </div>
+                </div>
         </div>
     </div>
     <script>
@@ -800,12 +778,13 @@
                 this.clients = [];
                 this.reports = [];
                 this.db = null;
+                this.auth = null;
                 this.currentReportType = 'Hardware';
                 this.init();
             }
             init() {
                 this.initFirebase();
-                this.setupListeners();
+                this.setupAuth(); // Handles auth logic before allowing data fetch
                 this.updateDate();
                 this.initChart();
                 this.generateReportID();
@@ -814,15 +793,6 @@
                 this.toggleReportSections(this.currentReportType);
                 // Setup hover-based sidebar collapse/expand (desktop only)
                 this.setupSidebarHover();
-                // Auth state listener for persistent login (after auth it shows all data)
-                this.auth.onAuthStateChanged((user) => {
-                    const loginScreen = document.getElementById('login-screen');
-                    if (user && loginScreen) {
-                        loginScreen.classList.add('hidden');
-                    } else if (loginScreen) {
-                        loginScreen.classList.remove('hidden');
-                    }
-                });
             }
             setupSidebarHover() {
                 const sidebar = document.getElementById('sidebar');
@@ -853,17 +823,81 @@
             }
             initFirebase() {
                const firebaseConfig = {
-  apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
-  authDomain: "test-17881.firebaseapp.com",
-  projectId: "test-17881",
-  storageBucket: "test-17881.firebasestorage.app",
-  messagingSenderId: "1057428047643",
-  appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
-};
+                  apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
+                  authDomain: "test-17881.firebaseapp.com",
+                  projectId: "test-17881",
+                  storageBucket: "test-17881.firebasestorage.app",
+                  messagingSenderId: "1057428047643",
+                  appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
+                };
                 firebase.initializeApp(firebaseConfig);
                 this.db = firebase.database();
                 this.auth = firebase.auth();
             }
+            
+            // --- Authentication ---
+            setupAuth() {
+                this.auth.onAuthStateChanged(user => {
+                    if (user) {
+                        // User is signed in
+                        document.getElementById('auth-modal').classList.remove('open');
+                        
+                        // Update UI with user info
+                        const emailParts = user.email.split('@')[0];
+                        document.getElementById('sidebar-user-name').innerText = emailParts;
+                        document.getElementById('sidebar-user-initial').innerText = emailParts.substring(0, 2).toUpperCase();
+                        
+                        this.setupListeners(); // Now it's safe to load data based on rules
+                    } else {
+                        // User is signed out
+                        document.getElementById('auth-modal').classList.add('open');
+                        
+                        // Clear out data safely
+                        this.clients = [];
+                        this.reports = [];
+                        this.renderClientTable();
+                        this.renderClientDropdown();
+                        this.updateStats();
+                        
+                        // Turn off any existing listeners
+                        if(this.db) {
+                            this.db.ref('clients').off();
+                            this.db.ref('reports').off();
+                        }
+                    }
+                });
+            }
+            login(e) {
+                e.preventDefault();
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-pass').value;
+                const btn = document.getElementById('auth-btn');
+                
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Authenticating...';
+                btn.disabled = true;
+
+                this.auth.signInWithEmailAndPassword(email, pass)
+                    .then(() => {
+                        this.showToast('Welcome', 'Successfully logged into the portal.');
+                        document.getElementById('auth-form').reset();
+                    })
+                    .catch(err => {
+                        console.error("Auth Error:", err);
+                        this.showToast('Authentication Failed', err.message, 'error');
+                    })
+                    .finally(() => {
+                        btn.innerHTML = '<i class="fa-solid fa-lock mr-2"></i> Authenticate';
+                        btn.disabled = false;
+                    });
+            }
+            logout() {
+                this.auth.signOut().then(() => {
+                    this.showToast('Logged Out', 'You have been securely signed out.');
+                }).catch(err => {
+                    this.showToast('Logout Error', err.message, 'error');
+                });
+            }
+
             setupListeners() {
                 // Listen for Clients
                 this.db.ref('clients').on('value', (snapshot) => {
@@ -896,7 +930,7 @@
             navigate(viewId) {
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
                 document.getElementById(`view-${viewId}`).classList.add('active');
-           
+            
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 const activeBtn = document.getElementById(`nav-${viewId}`);
                 if(activeBtn) activeBtn.classList.add('active');
@@ -942,7 +976,7 @@
                     return;
                 }
                 const displayId = document.getElementById('preview-client-id').innerText;
-           
+            
                 const newClient = {
                     displayId: displayId === '—' ? 'RGT-' + Date.now() : displayId,
                     name, phone, email: email || '',
@@ -962,7 +996,7 @@
             renderClientTable() {
                 const tbody = document.getElementById('client-table-body');
                 const recentList = document.getElementById('recent-clients-list');
-           
+            
                 tbody.innerHTML = '';
                 recentList.innerHTML = '';
                 if(this.clients.length === 0) {
@@ -976,7 +1010,7 @@
                     const clientReports = this.reports.filter(r => r.clientKey === client._key);
                     const latestReport = clientReports.sort((a,b) => b.timestamp - a.timestamp)[0];
                     const currentStatus = latestReport ? latestReport.status : (client.initialStatus || 'Received');
-               
+                
                     let statusBadgeClass = 'badge-gray';
                     if(currentStatus === 'Received') statusBadgeClass = 'badge-blue';
                     if(currentStatus === 'In Repair' || currentStatus === 'Waiting for Parts') statusBadgeClass = 'badge-orange';
@@ -1034,7 +1068,7 @@
             deleteClient(key) {
                 if(confirm('Delete this client and all their reports?')) {
                     const clientReports = this.reports.filter(r => r.clientKey === key);
-               
+                
                     this.db.ref('clients/' + key).remove()
                         .then(() => {
                             const deletePromises = clientReports.map(r =>
@@ -1130,7 +1164,7 @@
                 }
                 const reportId = document.getElementById('current-report-id').value;
                 const isUpdate = !!reportId;
-             
+              
                 // Common fields
                 const reportData = {
                     type: this.currentReportType,
@@ -1205,7 +1239,7 @@
             viewReports(clientKey) {
                 const client = this.clients.find(c => c._key === clientKey);
                 const clientReports = this.reports.filter(r => r.clientKey === clientKey).sort((a,b) => b.timestamp - a.timestamp);
-           
+            
                 document.getElementById('reports-modal-subtitle').innerText = `${client.name} — ${clientReports.length} report(s)`;
                 const container = document.getElementById('reports-list-container');
                 container.innerHTML = '';
@@ -1239,7 +1273,7 @@
                         container.appendChild(div);
                     });
                 }
-           
+            
                 document.getElementById('reports-modal').classList.add('open');
             }
             closeReportsModal() {
@@ -1260,7 +1294,7 @@
                 this.loadClientToForm(report.clientKey);
                 // Load Status
                 document.getElementById('device-status').value = report.status || 'Received';
-             
+              
                 // Load common fields
                 if (report.clientInfo) {
                     document.getElementById('display-client-name').value = report.clientInfo.name || '';
@@ -1313,7 +1347,7 @@
                 if(confirm('Are you sure you want to delete this report?')) {
                     const report = this.reports.find(r => r._key === reportKey);
                     const clientKey = report ? report.clientKey : null;
-               
+                
                     this.db.ref('reports/' + reportKey).remove()
                         .then(() => {
                             this.showToast('Deleted', 'Report removed');
@@ -1332,7 +1366,7 @@
             downloadPDF() {
                 const element = document.getElementById('report-paper');
                 this.showToast('Generating PDF', 'Please wait...');
-           
+            
                 html2pdf().set({
                     margin: 0,
                     filename: `RGT_Service_Report_${Date.now()}.pdf`,
@@ -1348,13 +1382,13 @@
             updateStats() {
                 this.animateValue('stat-clients', this.clients.length);
                 this.animateValue('stat-reports', this.reports.length);
-           
+            
                 const inRepair = this.reports.filter(r => r.status === 'In Repair').length;
                 const completed = this.reports.filter(r => r.status === 'Completed').length;
                 const received = this.reports.filter(r => r.status === 'Received').length;
                 this.animateValue('stat-in-repair', inRepair);
                 this.animateValue('stat-completed', completed);
-           
+            
                 document.getElementById('side-received').innerText = received;
                 document.getElementById('side-in-repair').innerText = inRepair;
                 document.getElementById('side-completed').innerText = completed;
@@ -1418,40 +1452,9 @@
                     }
                 });
             }
-            // Authentication method - Added only for the requested authentication feature
-            login(email, password) {
-                if (!this.auth) {
-                    this.showToast('Error', 'Auth not initialized', 'error');
-                    return;
-                }
-                this.auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        this.showToast('Success', 'Authentication successful. Welcome to the system!');
-                        const loginScreen = document.getElementById('login-screen');
-                        if (loginScreen) {
-                            loginScreen.classList.add('hidden');
-                        }
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        this.showToast('Login Failed', error.message || 'Invalid credentials. Please check Firebase Auth console.', 'error');
-                    });
-            }
         }
         document.addEventListener('DOMContentLoaded', () => {
             window.app = new RareGradeApp();
-            // Login form handler - Added only for the requested authentication feature
-            const loginForm = document.getElementById('login-form');
-            if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const email = document.getElementById('login-email').value.trim();
-                    const password = document.getElementById('login-password').value.trim();
-                    if (window.app && email && password) {
-                        window.app.login(email, password);
-                    }
-                });
-            }
         });
     </script>
 </body>
