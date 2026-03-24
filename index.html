@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -36,6 +37,20 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        
+        /* Auth Overlay Styles */
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
         #sidebar {
             width: 260px;
             background: var(--bg-card);
@@ -51,7 +66,7 @@
         #sidebar.collapsed .logo-text,
         #sidebar.collapsed .user-info,
         #sidebar.collapsed .status-label,
-        #sidebar.collapsed .logout-text { display: none; }
+        #sidebar.collapsed .logout-btn { display: none; }
         #sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
         #sidebar.collapsed .device-status-item { justify-content: center; gap: 6px; }
         .nav-item {
@@ -187,7 +202,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            z-index: 1000;
+            z-index: 2000;
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.3s;
@@ -343,6 +358,17 @@
     </style>
 </head>
 <body>
+    <div id="login-overlay">
+        <div class="card p-10 max-w-sm">
+            <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Logo" class="w-20 h-20 mx-auto mb-6">
+            <h2 class="text-2xl font-bold mb-2">Welcome Back</h2>
+            <p class="text-gray-500 mb-8">Please sign in to access the Enterprise Portal</p>
+            <button onclick="app.signIn()" class="btn btn-primary w-full justify-center py-3">
+                <i class="fa-brands fa-google"></i> Sign in with Google
+            </button>
+        </div>
+    </div>
+
     <aside id="sidebar">
         <div class="p-6 border-b border-gray-200 flex items-center gap-3">
             <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="w-10 h-10 rounded-lg shadow-lg object-contain">
@@ -389,17 +415,18 @@
             </div>
         </nav>
         <div class="p-4 border-t border-gray-200">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">VL</div>
-                <div class="user-info">
-                    <p class="text-sm font-semibold text-gray-900">Vynix Lingua</p>
-                    <p class="text-xs text-gray-500">System Admin</p>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold flex-shrink-0">VL</div>
+                    <div class="user-info overflow-hidden">
+                        <p id="user-name" class="text-sm font-semibold text-gray-900 truncate">Vynix Lingua</p>
+                        <p id="user-email" class="text-xs text-gray-500 truncate">System Admin</p>
+                    </div>
                 </div>
+                <button onclick="app.signOut()" class="logout-btn text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
-            <button onclick="app.showLogoutModal()" class="w-full mt-4 flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
-                <i class="fa-solid fa-right-from-bracket w-5 text-center group-hover:scale-110 transition-transform"></i>
-                <span class="logout-text">Sign Out</span>
-            </button>
         </div>
     </aside>
     <div class="overlay" onclick="app.toggleSidebar()"></div>
@@ -821,29 +848,14 @@
                 </div>
         </div>
     </div>
-
-    <div id="logout-modal" class="modal-overlay">
-        <div class="modal-box max-w-sm">
-            <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-right-from-bracket text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 font-display">Confirm Logout</h3>
-                <p class="text-gray-500 mb-6">Are you sure you want to end your current session? You will need to sign in again to access the portal.</p>
-                <div class="flex gap-3">
-                    <button onclick="app.closeLogoutModal()" class="btn btn-ghost flex-1 justify-center">Cancel</button>
-                    <button onclick="app.handleLogout()" class="btn btn-primary bg-red-600 hover:bg-red-700 border-none flex-1 justify-center">Sign Out</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         class RareGradeApp {
             constructor() {
                 this.clients = [];
                 this.reports = [];
                 this.db = null;
+                this.auth = null;
+                this.user = null;
                 this.currentReportType = 'Hardware';
                 // Cloudinary Config
                 this.CLOUDINARY_CLOUD = 'dqkujefxj';
@@ -854,6 +866,7 @@
             }
             init() {
                 this.initFirebase();
+                this.setupAuth();
                 this.setupListeners();
                 this.updateDate();
                 this.initChart();
@@ -863,11 +876,6 @@
                 this.toggleReportSections(this.currentReportType);
                 // Setup hover-based sidebar collapse/expand (desktop only)
                 this.setupSidebarHover();
-                
-                // Simulated Login Success Popup
-                setTimeout(() => {
-                    this.showToast('Login Successful', 'Welcome back, Vynix Lingua!', 'success');
-                }, 800);
             }
             setupSidebarHover() {
                 const sidebar = document.getElementById('sidebar');
@@ -897,7 +905,44 @@
                 };
                 firebase.initializeApp(firebaseConfig);
                 this.db = firebase.database();
+                this.auth = firebase.auth();
             }
+
+            setupAuth() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                this.auth.onAuthStateChanged(user => {
+                    if (user) {
+                        this.user = user;
+                        document.getElementById('login-overlay').style.display = 'none';
+                        this.updateUserUI(user);
+                    } else {
+                        this.user = null;
+                        document.getElementById('login-overlay').style.display = 'flex';
+                    }
+                });
+            }
+
+            signIn() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                this.auth.signInWithPopup(provider)
+                    .then(() => this.showToast('Welcome', 'Signed in successfully'))
+                    .catch(err => this.showToast('Auth Error', err.message, 'error'));
+            }
+
+            signOut() {
+                if(confirm('Are you sure you want to sign out?')) {
+                    this.auth.signOut().then(() => this.showToast('Signed Out', 'See you next time'));
+                }
+            }
+
+            updateUserUI(user) {
+                document.getElementById('user-name').innerText = user.displayName;
+                document.getElementById('user-email').innerText = user.email;
+                if(user.photoURL) {
+                    document.getElementById('user-avatar').innerHTML = `<img src="${user.photoURL}" class="w-full h-full rounded-full object-cover">`;
+                }
+            }
+
             setupListeners() {
                 this.db.ref('clients').on('value', (snapshot) => {
                     this.clients = [];
@@ -982,22 +1027,6 @@
                     sidebar.classList.toggle('collapsed');
                 }
             }
-
-            // --- Logout Methods ---
-            showLogoutModal() {
-                document.getElementById('logout-modal').classList.add('open');
-            }
-            closeLogoutModal() {
-                document.getElementById('logout-modal').classList.remove('open');
-            }
-            handleLogout() {
-                this.showToast('Signing Out', 'Logging you out of the system...');
-                setTimeout(() => {
-                    // Logic for logout: In this case, reloading the page simulates session end
-                    window.location.reload();
-                }, 1000);
-            }
-
             updateIdPreview() {
                 const name = document.getElementById('newClientName').value.trim();
                 const preview = document.getElementById('preview-client-id');
@@ -1024,7 +1053,8 @@
                     name, phone, email: email || '',
                     date: new Date().toLocaleDateString(),
                     timestamp: Date.now(),
-                    initialStatus: status
+                    initialStatus: status,
+                    createdBy: this.user ? this.user.email : 'system'
                 };
                 this.db.ref('clients').push(newClient)
                     .then(() => {
@@ -1041,10 +1071,10 @@
                 tbody.innerHTML = '';
                 recentList.innerHTML = '';
                 if(this.clients.length === 0) {
-                    document.getElementById('empty-state').classList.remove('hidden');
+                    if(document.getElementById('empty-state')) document.getElementById('empty-state').classList.remove('hidden');
                     return;
                 }
-                document.getElementById('empty-state').classList.add('hidden');
+                if(document.getElementById('empty-state')) document.getElementById('empty-state').classList.add('hidden');
                 const sorted = [...this.clients].sort((a,b) => b.timestamp - a.timestamp);
                 sorted.forEach(client => {
                     const clientReports = this.reports.filter(r => r.clientKey === client._key);
@@ -1161,9 +1191,9 @@
             updateStatusColor(select) {}
             generateReportID() {
                 const today = new Date().toLocaleDateString('en-GB');
-                document.getElementById('display-date').value = today;
-                document.getElementById('sw-date').value = today;
-                document.getElementById('display-date-full').value = today;
+                if(document.getElementById('display-date')) document.getElementById('display-date').value = today;
+                if(document.getElementById('sw-date')) document.getElementById('sw-date').value = today;
+                if(document.getElementById('display-date-full')) document.getElementById('display-date-full').value = today;
             }
             captureCheckboxStates() {
                 const ids = [
@@ -1201,7 +1231,8 @@
                     status: document.getElementById('device-status').value,
                     timestamp: Date.now(),
                     checkboxes: this.captureCheckboxStates(),
-                    visuals: this.currentImages // SAVE IMAGES
+                    visuals: this.currentImages,
+                    savedBy: this.user ? this.user.email : 'system'
                 };
                 if (this.currentReportType === 'Hardware') {
                     reportData.deviceInfo = {
@@ -1387,9 +1418,9 @@
                 const received = this.reports.filter(r => r.status === 'Received').length;
                 this.animateValue('stat-in-repair', inRepair);
                 this.animateValue('stat-completed', completed);
-                document.getElementById('side-received').innerText = received;
-                document.getElementById('side-in-repair').innerText = inRepair;
-                document.getElementById('side-completed').innerText = completed;
+                if(document.getElementById('side-received')) document.getElementById('side-received').innerText = received;
+                if(document.getElementById('side-in-repair')) document.getElementById('side-in-repair').innerText = inRepair;
+                if(document.getElementById('side-completed')) document.getElementById('side-completed').innerText = completed;
             }
             animateValue(id, end) {
                 const el = document.getElementById(id);
@@ -1407,10 +1438,11 @@
             }
             updateDate() {
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-ZA', options);
+                if(document.getElementById('current-date')) document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-ZA', options);
             }
             showToast(title, message, type = 'success') {
                 const toast = document.getElementById('toast');
+                if(!toast) return;
                 document.getElementById('toast-title').innerText = title;
                 document.getElementById('toast-msg').innerText = message;
                 const icon = document.getElementById('toast-icon');
