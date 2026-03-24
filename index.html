@@ -8,11 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -53,8 +50,7 @@
         #sidebar.collapsed .nav-text,
         #sidebar.collapsed .logo-text,
         #sidebar.collapsed .user-info,
-        #sidebar.collapsed .status-label,
-        #sidebar.collapsed #logout-btn { display: none; }
+        #sidebar.collapsed .status-label { display: none; }
         #sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
         #sidebar.collapsed .device-status-item { justify-content: center; gap: 6px; }
         .nav-item {
@@ -230,14 +226,13 @@
             background: white;
             padding: 15mm;
             width: 210mm;
-            height: 297mm;
+            min-height: 297mm;
             margin: 0 auto;
             border-radius: 4px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
         }
         #report-paper .rpt-header {
             background: #003087;
@@ -280,6 +275,43 @@
             display: block;
             margin-bottom: 2px;
         }
+
+        /* Image Preview Styles */
+        .image-preview-container {
+            display: grid;
+            grid-template-cols: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .img-box {
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f9f9f9;
+            position: relative;
+        }
+        .img-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .upload-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .img-box:hover .upload-overlay { display: flex; }
+
         /* Report type sections toggle */
         .hardware-section, .software-section {
             transition: opacity 0.2s;
@@ -299,6 +331,7 @@
                 box-shadow: none;
                 padding: 15mm;
             }
+            .no-print { display: none !important; }
         }
         @media (max-width: 768px) {
             #sidebar { position: fixed; left: -260px; height: 100vh; box-shadow: 5px 0 20px rgba(0,0,0,0.1); }
@@ -309,24 +342,6 @@
     </style>
 </head>
 <body>
-
-    <div id="auth-modal" class="modal-overlay open" style="z-index: 9999; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);">
-        <div class="modal-box p-8 max-w-md w-full shadow-2xl" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-            <div class="text-center mb-8">
-                <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg object-contain bg-gray-50 p-2">
-                <h2 class="text-2xl font-bold text-gray-900 font-display">System Access</h2>
-                <p class="text-sm text-gray-500 mt-2">Sign in to manage the Enterprise Portal</p>
-            </div>
-            <form id="auth-form" onsubmit="app.login(event)">
-                <div class="space-y-5">
-                    <button type="submit" id="auth-btn" class="btn btn-primary w-full justify-center mt-6 py-3 text-base shadow-md">
-                        <i class="fa-brands fa-google mr-2"></i> Sign in with Google
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <aside id="sidebar">
         <div class="p-6 border-b border-gray-200 flex items-center gap-3">
             <img src="https://i.postimg.cc/QMT6Ns0J/Gemini-Generated-Image-3tzsqu3tzsqu3tzs-removebg-preview.png" alt="Rare Grade Tech Logo" class="w-10 h-10 rounded-lg shadow-lg object-contain">
@@ -372,17 +387,14 @@
                 <span class="font-bold text-gray-900" id="side-completed">0</span>
             </div>
         </nav>
-        <div class="p-4 border-t border-gray-200 flex justify-between items-center">
+        <div class="p-4 border-t border-gray-200">
             <div class="flex items-center gap-3">
-                <div id="sidebar-user-initial" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">--</div>
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">VL</div>
                 <div class="user-info">
-                    <p id="sidebar-user-name" class="text-sm font-semibold text-gray-900">User</p>
+                    <p class="text-sm font-semibold text-gray-900">Vynix Lingua</p>
                     <p class="text-xs text-gray-500">System Admin</p>
                 </div>
             </div>
-            <button id="logout-btn" onclick="app.logout()" class="text-gray-400 hover:text-red-500 transition-colors px-2" title="Sign Out">
-                <i class="fa-solid fa-power-off"></i>
-            </button>
         </div>
     </aside>
     <div class="overlay" onclick="app.toggleSidebar()"></div>
@@ -569,6 +581,27 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="card p-6">
+                            <h3 class="font-bold text-gray-900 mb-4">Visual Documentation</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Before Image</label>
+                                    <input type="file" id="upload-before" class="hidden" accept="image/*" onchange="app.handleImageUpload(this, 'before')">
+                                    <button onclick="document.getElementById('upload-before').click()" class="btn btn-ghost w-full justify-center text-xs">
+                                        <i class="fa-solid fa-camera"></i> Upload Before
+                                    </button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">After Image</label>
+                                    <input type="file" id="upload-after" class="hidden" accept="image/*" onchange="app.handleImageUpload(this, 'after')">
+                                    <button onclick="document.getElementById('upload-after').click()" class="btn btn-ghost w-full justify-center text-xs">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Upload After
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="card p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Actions</h3>
                             <div class="space-y-3">
@@ -718,6 +751,25 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="mb-4">
+                                <h3 class="font-bold text-sm border-b-2 border-black pb-1 mb-2 uppercase">Visual Documentation</h3>
+                                <div class="image-preview-container">
+                                    <div class="text-center">
+                                        <p class="text-[9px] font-bold text-gray-500 mb-1 uppercase">Before Service</p>
+                                        <div class="img-box" id="preview-box-before">
+                                            <img id="img-display-before" src="https://via.placeholder.com/150?text=No+Image" alt="Before Image">
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-[9px] font-bold text-gray-500 mb-1 uppercase">After Service</p>
+                                        <div class="img-box" id="preview-box-after">
+                                            <img id="img-display-after" src="https://via.placeholder.com/150?text=No+Image" alt="After Image">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="border-t-2 border-black pt-4 text-sm mt-auto">
                                 <h4 class="font-bold mb-2">Client Acknowledgment</h4>
                                 <p class="text-xs text-gray-600 mb-4">By signing below, the client confirms receipt of the device/project and agreement with the service details provided.</p>
@@ -770,13 +822,17 @@
                 this.clients = [];
                 this.reports = [];
                 this.db = null;
-                this.auth = null;
                 this.currentReportType = 'Hardware';
+                // Cloudinary Config
+                this.CLOUDINARY_CLOUD = 'dqkujefxj';
+                this.CLOUDINARY_PRESET = 'banter_box';
+                // Image State
+                this.currentImages = { before: null, after: null };
                 this.init();
             }
             init() {
                 this.initFirebase();
-                this.setupAuth(); // Handles auth logic before allowing data fetch
+                this.setupListeners();
                 this.updateDate();
                 this.initChart();
                 this.generateReportID();
@@ -788,23 +844,13 @@
             }
             setupSidebarHover() {
                 const sidebar = document.getElementById('sidebar');
-                // Hover expand
                 sidebar.addEventListener('mouseenter', () => {
-                    if (window.innerWidth > 1024) {
-                        sidebar.classList.remove('collapsed');
-                    }
+                    if (window.innerWidth > 1024) sidebar.classList.remove('collapsed');
                 });
-                // Hover collapse
                 sidebar.addEventListener('mouseleave', () => {
-                    if (window.innerWidth > 1024) {
-                        sidebar.classList.add('collapsed');
-                    }
+                    if (window.innerWidth > 1024) sidebar.classList.add('collapsed');
                 });
-                // Initial state: collapsed on desktop
-                if (window.innerWidth > 1024) {
-                    sidebar.classList.add('collapsed');
-                }
-                // Handle window resize
+                if (window.innerWidth > 1024) sidebar.classList.add('collapsed');
                 window.addEventListener('resize', () => {
                     if (window.innerWidth <= 1024) {
                         sidebar.classList.remove('collapsed');
@@ -824,73 +870,8 @@
                 };
                 firebase.initializeApp(firebaseConfig);
                 this.db = firebase.database();
-                this.auth = firebase.auth();
             }
-            
-            // --- Authentication ---
-            setupAuth() {
-                this.auth.onAuthStateChanged(user => {
-                    if (user) {
-                        // User is signed in
-                        document.getElementById('auth-modal').classList.remove('open');
-                        
-                        // Update UI with user info
-                        const userName = user.displayName || user.email.split('@')[0];
-                        document.getElementById('sidebar-user-name').innerText = userName;
-                        document.getElementById('sidebar-user-initial').innerText = userName.substring(0, 2).toUpperCase();
-                        
-                        this.setupListeners(); // Now it's safe to load data based on rules
-                    } else {
-                        // User is signed out
-                        document.getElementById('auth-modal').classList.add('open');
-                        
-                        // Clear out data safely
-                        this.clients = [];
-                        this.reports = [];
-                        this.renderClientTable();
-                        this.renderClientDropdown();
-                        this.updateStats();
-                        
-                        // Turn off any existing listeners
-                        if(this.db) {
-                            this.db.ref('clients').off();
-                            this.db.ref('reports').off();
-                        }
-                    }
-                });
-            }
-            login(e) {
-                e.preventDefault();
-                const btn = document.getElementById('auth-btn');
-                
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Authenticating...';
-                btn.disabled = true;
-
-                const provider = new firebase.auth.GoogleAuthProvider();
-
-                this.auth.signInWithPopup(provider)
-                    .then((result) => {
-                        this.showToast('Welcome', 'Successfully logged into the portal.');
-                    })
-                    .catch(err => {
-                        console.error("Auth Error:", err);
-                        this.showToast('Authentication Failed', err.message, 'error');
-                    })
-                    .finally(() => {
-                        btn.innerHTML = '<i class="fa-brands fa-google mr-2"></i> Sign in with Google';
-                        btn.disabled = false;
-                    });
-            }
-            logout() {
-                this.auth.signOut().then(() => {
-                    this.showToast('Logged Out', 'You have been securely signed out.');
-                }).catch(err => {
-                    this.showToast('Logout Error', err.message, 'error');
-                });
-            }
-
             setupListeners() {
-                // Listen for Clients
                 this.db.ref('clients').on('value', (snapshot) => {
                     this.clients = [];
                     if(snapshot.exists()) {
@@ -904,7 +885,6 @@
                     this.renderClientDropdown();
                     this.updateStats();
                 });
-                // Listen for Reports
                 this.db.ref('reports').on('value', (snapshot) => {
                     this.reports = [];
                     if(snapshot.exists()) {
@@ -915,9 +895,39 @@
                         });
                     }
                     this.updateStats();
-                    this.renderClientTable(); // Re-render to update status badges
+                    this.renderClientTable();
                 });
             }
+
+            // --- Cloudinary Integration ---
+            async handleImageUpload(input, type) {
+                const file = input.files[0];
+                if (!file) return;
+
+                this.showToast('Uploading', `Processing ${type} image...`);
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', this.CLOUDINARY_PRESET);
+
+                try {
+                    const response = await fetch(`https://api.cloudinary.com/v1_1/${this.CLOUDINARY_CLOUD}/image/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    
+                    if (data.secure_url) {
+                        this.currentImages[type] = data.secure_url;
+                        document.getElementById(`img-display-${type}`).src = data.secure_url;
+                        this.showToast('Uploaded', `${type} image ready.`);
+                    }
+                } catch (error) {
+                    console.error('Cloudinary Error:', error);
+                    this.showToast('Upload Failed', 'Error uploading image', 'error');
+                }
+            }
+
             navigate(viewId) {
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
                 document.getElementById(`view-${viewId}`).classList.add('active');
@@ -945,7 +955,6 @@
                     sidebar.classList.toggle('collapsed');
                 }
             }
-            // --- Client Management ---
             updateIdPreview() {
                 const name = document.getElementById('newClientName').value.trim();
                 const preview = document.getElementById('preview-client-id');
@@ -967,13 +976,12 @@
                     return;
                 }
                 const displayId = document.getElementById('preview-client-id').innerText;
-            
                 const newClient = {
                     displayId: displayId === '—' ? 'RGT-' + Date.now() : displayId,
                     name, phone, email: email || '',
                     date: new Date().toLocaleDateString(),
                     timestamp: Date.now(),
-                    initialStatus: status // Save initial status if needed
+                    initialStatus: status
                 };
                 this.db.ref('clients').push(newClient)
                     .then(() => {
@@ -987,7 +995,6 @@
             renderClientTable() {
                 const tbody = document.getElementById('client-table-body');
                 const recentList = document.getElementById('recent-clients-list');
-            
                 tbody.innerHTML = '';
                 recentList.innerHTML = '';
                 if(this.clients.length === 0) {
@@ -997,7 +1004,6 @@
                 document.getElementById('empty-state').classList.add('hidden');
                 const sorted = [...this.clients].sort((a,b) => b.timestamp - a.timestamp);
                 sorted.forEach(client => {
-                    // Find latest report for this client to show status
                     const clientReports = this.reports.filter(r => r.clientKey === client._key);
                     const latestReport = clientReports.sort((a,b) => b.timestamp - a.timestamp)[0];
                     const currentStatus = latestReport ? latestReport.status : (client.initialStatus || 'Received');
@@ -1021,7 +1027,6 @@
                     `;
                     tbody.appendChild(tr);
                 });
-                // Dashboard Recent List
                 sorted.slice(0, 5).forEach(client => {
                     const clientReports = this.reports.filter(r => r.clientKey === client._key);
                     const latestReport = clientReports.sort((a,b) => b.timestamp - a.timestamp)[0];
@@ -1059,24 +1064,15 @@
             deleteClient(key) {
                 if(confirm('Delete this client and all their reports?')) {
                     const clientReports = this.reports.filter(r => r.clientKey === key);
-                
                     this.db.ref('clients/' + key).remove()
                         .then(() => {
-                            const deletePromises = clientReports.map(r =>
-                                this.db.ref('reports/' + r._key).remove()
-                            );
+                            const deletePromises = clientReports.map(r => this.db.ref('reports/' + r._key).remove());
                             return Promise.all(deletePromises);
                         })
-                        .then(() => {
-                            this.showToast('Deleted', 'Client and history removed');
-                        })
-                        .catch(err => {
-                            console.error('Delete error:', err);
-                            this.showToast('Error', 'Failed to delete: ' + err.message, 'error');
-                        });
+                        .then(() => this.showToast('Deleted', 'Client and history removed'))
+                        .catch(err => this.showToast('Error', 'Failed to delete: ' + err.message, 'error'));
                 }
             }
-            // --- Service Reports ---
             prepReport(clientKey) {
                 this.navigate('service-form');
                 this.clearReportForm();
@@ -1119,9 +1115,7 @@
                 }
                 this.toggleReportSections(type);
             }
-            updateStatusColor(select) {
-                // Visual feedback for status selection if needed
-            }
+            updateStatusColor(select) {}
             generateReportID() {
                 const today = new Date().toLocaleDateString('en-GB');
                 document.getElementById('display-date').value = today;
@@ -1130,15 +1124,13 @@
             }
             captureCheckboxStates() {
                 const ids = [
-                    // Hardware
                     'cb-functional', 'cb-non-functional', 'cb-device-repair', 'cb-software-install',
                     'cb-software-update', 'cb-programming', 'cb-other', 'cb-before-new', 'cb-before-used',
                     'cb-before-damaged', 'cb-before-fully-functional', 'cb-before-non-functional', 'cb-before-partial',
                     'cb-after-fully-functional', 'cb-after-partial', 'cb-after-issues',
-                    // Software
                     'sw-cb-deployed', 'sw-cb-testing', 'sw-cb-maintenance', 'sw-cb-web-dev', 'sw-cb-mobile-app',
                     'sw-cb-desktop-app', 'sw-cb-database-design', 'sw-cb-api-integration', 'sw-cb-bug-fix',
-                    'sw-cb-code-optimization', 'sw-cb-ui-ux', 'sw-cb-other', 'sw-cb-local', 'sw-cb-cloud', 'sw-cb-hybrid'
+                    'sw-cb-code-optimization', 'sw-cb-ui-ux', 'sw-cb-other'
                 ];
                 const states = {};
                 ids.forEach(id => {
@@ -1155,8 +1147,6 @@
                 }
                 const reportId = document.getElementById('current-report-id').value;
                 const isUpdate = !!reportId;
-              
-                // Common fields
                 const reportData = {
                     type: this.currentReportType,
                     clientKey: clientKey,
@@ -1167,9 +1157,9 @@
                     },
                     status: document.getElementById('device-status').value,
                     timestamp: Date.now(),
-                    checkboxes: this.captureCheckboxStates()
+                    checkboxes: this.captureCheckboxStates(),
+                    visuals: this.currentImages // SAVE IMAGES
                 };
-                // Hardware specific fields
                 if (this.currentReportType === 'Hardware') {
                     reportData.deviceInfo = {
                         model: document.getElementById('display-device-model').value,
@@ -1180,16 +1170,14 @@
                         diagnosis: document.getElementById('display-diagnosis').value,
                         resolution: document.getElementById('display-resolution').value,
                         serviceDate: document.getElementById('display-date').value,
-                        technicianName: document.getElementById('display-technician-name').value,
-                        notes: document.getElementById('display-notes').value,
-                        clientSignature: document.getElementById('display-client-signature').value,
                         completionDate: document.getElementById('display-date-full').value,
                         otherService: document.getElementById('display-other-service').value,
                         beforePartialDetails: document.getElementById('display-before-partial').value,
                         afterPartialDetails: document.getElementById('display-after-partial').value,
-                        issuesPersisting: document.getElementById('display-issues-persisting').value
+                        issuesPersisting: document.getElementById('display-issues-persisting').value,
+                        clientSignature: document.getElementById('display-client-signature').value
                     };
-                } else { // Software
+                } else {
                     reportData.projectInfo = {
                         projectName: document.getElementById('sw-project-name').value,
                         language: document.getElementById('sw-language').value,
@@ -1217,20 +1205,21 @@
                 }
             }
             clearReportForm() {
-                // Clear all inputs and checkboxes in both sections
                 document.querySelectorAll('#report-paper input[type="text"], #report-paper textarea').forEach(el => el.value = '');
                 document.querySelectorAll('#report-paper input[type="checkbox"]').forEach(el => el.checked = false);
                 document.getElementById('report-client-select').value = '';
                 document.getElementById('device-status').value = 'Received';
                 document.getElementById('current-report-id').value = '';
+                // Reset Images
+                this.currentImages = { before: null, after: null };
+                document.getElementById('img-display-before').src = "https://via.placeholder.com/150?text=No+Image";
+                document.getElementById('img-display-after').src = "https://via.placeholder.com/150?text=No+Image";
                 this.generateReportID();
                 this.showToast('Cleared', 'Form reset to default');
             }
-            // --- View / Load Existing Reports ---
             viewReports(clientKey) {
                 const client = this.clients.find(c => c._key === clientKey);
                 const clientReports = this.reports.filter(r => r.clientKey === clientKey).sort((a,b) => b.timestamp - a.timestamp);
-            
                 document.getElementById('reports-modal-subtitle').innerText = `${client.name} — ${clientReports.length} report(s)`;
                 const container = document.getElementById('reports-list-container');
                 container.innerHTML = '';
@@ -1248,14 +1237,6 @@
                                 </div>
                                 <span class="badge ${report.status === 'Completed' ? 'badge-green' : 'badge-orange'} text-xs">${report.status}</span>
                             </div>
-                            <div class="text-sm text-gray-600 mb-3">
-                                ${report.type === 'Hardware'
-                                    ? `<div><strong>Device:</strong> ${report.deviceInfo?.model || 'N/A'}</div>
-                                       <div><strong>Issue:</strong> ${report.deviceInfo?.issue || 'N/A'}</div>`
-                                    : `<div><strong>Project:</strong> ${report.projectInfo?.projectName || 'N/A'}</div>
-                                       <div><strong>Language:</strong> ${report.projectInfo?.language || 'N/A'}</div>`
-                                }
-                            </div>
                             <div class="flex gap-2">
                                 <button onclick="app.loadReport('${report._key}')" class="btn btn-primary btn-sm flex-1 justify-center">Open</button>
                                 <button onclick="app.deleteReport('${report._key}')" class="btn btn-ghost btn-sm text-red-500 border-red-200 hover:bg-red-50">Delete</button>
@@ -1264,7 +1245,6 @@
                         container.appendChild(div);
                     });
                 }
-            
                 document.getElementById('reports-modal').classList.add('open');
             }
             closeReportsModal() {
@@ -1275,26 +1255,25 @@
                 if(!report) return;
                 this.closeReportsModal();
                 this.navigate('service-form');
-                // Set Edit Mode ID
                 document.getElementById('current-report-id').value = reportKey;
-                // Set report type first to show correct section
                 this.setReportType(report.type || 'Hardware');
-                // Load Client
                 const sel = document.getElementById('report-client-select');
                 sel.value = report.clientKey;
                 this.loadClientToForm(report.clientKey);
-                // Load Status
                 document.getElementById('device-status').value = report.status || 'Received';
-              
-                // Load common fields
                 if (report.clientInfo) {
                     document.getElementById('display-client-name').value = report.clientInfo.name || '';
                     document.getElementById('display-client-phone').value = report.clientInfo.phone || '';
                     document.getElementById('display-client-email').value = report.clientInfo.email || '';
                 }
-                document.getElementById('display-client-signature').value = report.softwareDetails?.clientSignature || report.serviceDetails?.clientSignature || '';
-                document.getElementById('display-date-full').value = report.softwareDetails?.signatureDate || report.serviceDetails?.completionDate || '';
-                // Load hardware-specific fields
+                
+                // Load Visuals
+                if(report.visuals) {
+                    this.currentImages = report.visuals;
+                    document.getElementById('img-display-before').src = report.visuals.before || "https://via.placeholder.com/150?text=No+Image";
+                    document.getElementById('img-display-after').src = report.visuals.after || "https://via.placeholder.com/150?text=No+Image";
+                }
+
                 if (report.type === 'Hardware' && report.deviceInfo) {
                     document.getElementById('display-device-model').value = report.deviceInfo.model || '';
                     document.getElementById('display-serial').value = report.deviceInfo.serial || '';
@@ -1305,27 +1284,26 @@
                     document.getElementById('display-diagnosis').value = sd.diagnosis || '';
                     document.getElementById('display-resolution').value = sd.resolution || '';
                     document.getElementById('display-date').value = sd.serviceDate || '';
-                    document.getElementById('display-technician-name').value = sd.technicianName || '';
-                    document.getElementById('display-notes').value = sd.notes || '';
                     document.getElementById('display-other-service').value = sd.otherService || '';
                     document.getElementById('display-before-partial').value = sd.beforePartialDetails || '';
                     document.getElementById('display-after-partial').value = sd.afterPartialDetails || '';
                     document.getElementById('display-issues-persisting').value = sd.issuesPersisting || '';
+                    document.getElementById('display-client-signature').value = sd.clientSignature || '';
+                    document.getElementById('display-date-full').value = sd.completionDate || '';
                 }
-                // Load software-specific fields
                 if (report.type === 'Software' && report.projectInfo) {
-                    const pi = report.projectInfo;
-                    document.getElementById('sw-project-name').value = pi.projectName || '';
-                    document.getElementById('sw-language').value = pi.language || '';
-                    document.getElementById('sw-work').value = pi.workPerformed || '';
+                    document.getElementById('sw-project-name').value = report.projectInfo.projectName || '';
+                    document.getElementById('sw-language').value = report.projectInfo.language || '';
+                    document.getElementById('sw-work').value = report.projectInfo.workPerformed || '';
                 }
                 if (report.type === 'Software' && report.softwareDetails) {
                     const sd = report.softwareDetails;
                     document.getElementById('sw-developer-name').value = sd.developerName || '';
                     document.getElementById('sw-date').value = sd.completionDate || '';
                     document.getElementById('sw-other-service').value = sd.otherService || '';
+                    document.getElementById('display-client-signature').value = sd.clientSignature || '';
+                    document.getElementById('display-date-full').value = sd.signatureDate || '';
                 }
-                // Load Checkboxes (for both sections; inactive section is hidden, but we still set values)
                 if(report.checkboxes) {
                     for(const [id, checked] of Object.entries(report.checkboxes)) {
                         const el = document.getElementById(id);
@@ -1338,48 +1316,34 @@
                 if(confirm('Are you sure you want to delete this report?')) {
                     const report = this.reports.find(r => r._key === reportKey);
                     const clientKey = report ? report.clientKey : null;
-                
                     this.db.ref('reports/' + reportKey).remove()
                         .then(() => {
                             this.showToast('Deleted', 'Report removed');
-                            if(clientKey) {
-                                this.viewReports(clientKey);
-                            } else {
-                                this.closeReportsModal();
-                            }
+                            if(clientKey) this.viewReports(clientKey); else this.closeReportsModal();
                         })
-                        .catch(err => {
-                            console.error('Delete report error:', err);
-                            this.showToast('Error', 'Failed to delete report: ' + err.message, 'error');
-                        });
+                        .catch(err => this.showToast('Error', 'Failed to delete report: ' + err.message, 'error'));
                 }
             }
             downloadPDF() {
                 const element = document.getElementById('report-paper');
                 this.showToast('Generating PDF', 'Please wait...');
-            
                 html2pdf().set({
                     margin: 0,
-                    filename: `RGT_Service_Report_${Date.now()}.pdf`,
+                    filename: `RGT_Report_${Date.now()}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                     pagebreak: { mode: 'avoid-all' }
-                }).from(element).save().then(() => {
-                    this.showToast('Success', 'PDF Downloaded');
-                });
+                }).from(element).save().then(() => this.showToast('Success', 'PDF Downloaded'));
             }
-            // --- Utilities ---
             updateStats() {
                 this.animateValue('stat-clients', this.clients.length);
                 this.animateValue('stat-reports', this.reports.length);
-            
                 const inRepair = this.reports.filter(r => r.status === 'In Repair').length;
                 const completed = this.reports.filter(r => r.status === 'Completed').length;
                 const received = this.reports.filter(r => r.status === 'Received').length;
                 this.animateValue('stat-in-repair', inRepair);
                 this.animateValue('stat-completed', completed);
-            
                 document.getElementById('side-received').innerText = received;
                 document.getElementById('side-in-repair').innerText = inRepair;
                 document.getElementById('side-completed').innerText = completed;
@@ -1436,17 +1400,12 @@
                     options: {
                         responsive: true,
                         plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { display: false } },
-                            x: { grid: { display: false } }
-                        }
+                        scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
                     }
                 });
             }
         }
-        document.addEventListener('DOMContentLoaded', () => {
-            window.app = new RareGradeApp();
-        });
+        document.addEventListener('DOMContentLoaded', () => { window.app = new RareGradeApp(); });
     </script>
 </body>
 </html>
