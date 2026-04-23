@@ -98,7 +98,7 @@
         .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.3s; }
         #update-modal.active .modal-content { transform: translateY(0); }
 
-        /* --- A4 PRINT/PDF CANVAS --- */
+        /* --- A4 PREVIEW CANVAS --- */
         .a4-wrapper { background: #e2e8f0; padding: 40px; display: flex; justify-content: center; overflow-y: auto; height: 100%; }
         .a4-paper {
             width: 210mm; min-height: 297mm; background: white; padding: 20mm;
@@ -116,7 +116,8 @@
     <div id="global-spinner">
         <div class="spinner-ring"></div>
         <p id="spinner-text" class="text-slate-800 mt-4 font-bold tracking-wide">Processing...</p>
-        <p id="spinner-subtext" class="text-slate-500 text-sm mt-1"></p> </div>
+        <p id="spinner-subtext" class="text-slate-500 text-sm mt-1"></p> 
+    </div>
 
     <div id="lock-screen">
         <div class="bg-blue-50 p-4 rounded-2xl mb-6 shadow-sm border border-blue-100">
@@ -312,7 +313,7 @@
                         </div>
 
                         <button onclick="app.submitIntake()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Save Intake & Export PDF
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Save Intake
                         </button>
                     </div>
                 </div>
@@ -368,12 +369,6 @@
                                 <div class="flex items-center gap-2"><i class="fa-regular fa-square" id="sq-cracks"></i> Pre-existing physical damage</div>
                                 <div class="flex items-center gap-2 col-span-2 text-blue-700 font-medium"><i class="fa-regular fa-square" id="sq-data"></i> Client accepts data loss liability</div>
                             </div>
-                        </div>
-
-                        <div id="a4-photos-section" class="mt-6 hidden">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Visual Evidence Appendix</h3>
-                            <div id="a4-photos-grid" class="flex gap-4">
-                                </div>
                         </div>
 
                         <div class="mt-auto pt-6">
@@ -457,8 +452,8 @@
         };
         
         // Cloudinary
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqkujefxj/image/upload";
-        const CLOUDINARY_PRESET = "banter_box"; 
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload";
+        const CLOUDINARY_PRESET = "YOUR_UNSIGNED_PRESET"; 
 
         class EnterpriseSystem {
             constructor() {
@@ -482,7 +477,6 @@
                 document.getElementById('a4-date').innerText = "Date Received: " + this.formatDate(Date.now());
             }
 
-            // Format date helper
             formatDate(timestamp) {
                 if(!timestamp) return "---";
                 const date = new Date(timestamp);
@@ -558,7 +552,6 @@
                     const tr = document.createElement('tr');
                     tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
                     
-                    // Email notify button logic
                     let notifyBtn = "";
                     if(report.clientEmail) {
                         notifyBtn = `<button onclick="app.notifyClient('${report.clientEmail}', '${report.refId}', '${report.clientName}')" class="ml-2 text-slate-400 hover:text-blue-500" title="Send Email Receipt"><i class="fa-regular fa-envelope"></i></button>`;
@@ -596,9 +589,6 @@
                 return '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Collected</span>';
             }
 
-            // ==========================================
-            // EMAIL NOTIFICATION (mailto:)
-            // ==========================================
             notifyClient(email, refId, name) {
                 const subject = encodeURIComponent(`Repair Intake Confirmation: ${refId}`);
                 const body = encodeURIComponent(`Hello ${name},\n\nYour device has been securely logged at Rare Grade Tech.\n\nYour Reference ID is: ${refId}\n\nWe will notify you via email or phone when your repair is ready for collection.\n\nRegards,\nThe Rare Grade Tech Team`);
@@ -644,7 +634,6 @@
                         lastUpdated: Date.now()
                     };
 
-                    // Automatically mark collected date if status is completed
                     if(status === 'Completed & Collected') {
                         updateData.dateCollected = Date.now();
                     }
@@ -661,7 +650,7 @@
             }
 
             // ==========================================
-            // INTAKE: Cloudinary -> Firebase -> PDF
+            // INTAKE: Cloudinary -> Firebase
             // ==========================================
             handleFiles(input) {
                 if (input.files) {
@@ -685,7 +674,6 @@
             }
 
             async uploadToCloudinary(file) {
-                // Return null immediately if not configured so the app doesn't crash
                 if(!CLOUDINARY_PRESET || CLOUDINARY_PRESET === "YOUR_UNSIGNED_PRESET") {
                     return null; 
                 }
@@ -705,17 +693,14 @@
                 }
             }
 
-            // SHOW ERROR UI Helper
             showErrorMsg(msg) {
                 document.getElementById('spinner-ring').style.display = 'none';
                 document.getElementById('spinner-text').innerText = "An error occurred";
                 document.getElementById('spinner-text').classList.add('text-red-600');
                 document.getElementById('spinner-subtext').innerText = msg;
                 
-                // Hide after 5 seconds
                 setTimeout(() => {
                     this.hideLoading();
-                    // reset spinner styles for next time
                     document.getElementById('spinner-ring').style.display = 'block';
                     document.getElementById('spinner-text').classList.remove('text-red-600');
                     document.getElementById('spinner-subtext').innerText = "";
@@ -762,61 +747,22 @@
                         photos: uploadedUrls,
                         signatureBase64: this.canvas.toDataURL(),
                         timestamp: Date.now(),
-                        dateCollected: null, // Null until technician marks completed
+                        dateCollected: null,
                         status: 'Pending' 
                     };
 
                     // 3. Save to Firebase 
-                    // This is where it usually fails if rules are strict
                     await this.db.ref('reports').push(reportData);
-
-                    // 4. Inject Images into A4 Appendix for PDF safely
-                    const appendix = document.getElementById('a4-photos-section');
-                    const grid = document.getElementById('a4-photos-grid');
                     
-                    if (uploadedUrls.length > 0) {
-                        appendix.classList.remove('hidden');
-                        grid.innerHTML = '';
-                        uploadedUrls.forEach(url => {
-                            const img = new Image();
-                            img.crossOrigin = "Anonymous"; // MUST BE ANONYMOUS
-                            img.src = url; 
-                            img.style.height = "120px"; 
-                            img.style.objectFit = "cover"; 
-                            img.style.borderRadius = "4px";
-                            grid.appendChild(img);
-                        });
-                        
-                        await new Promise(r => setTimeout(r, 500)); 
-                    } else {
-                        appendix.classList.add('hidden');
-                        grid.innerHTML = '';
-                    }
-
-                    // 5. Generate PDF
-                    this.showLoading("Generating PDF Report...", 0);
-                    const element = document.getElementById('a4-document');
-                    window.scrollTo(0,0); 
-
-                    const opt = {
-                        margin: 0, 
-                        filename: `${reportData.refId}_Report.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-
-                    await html2pdf().set(opt).from(element).save();
-
                     this.hideLoading();
                     
                     // Offer to send email immediately
                     if(reportData.clientEmail) {
-                        if(confirm("Report Saved & Downloaded! \n\nWould you like to open your email app to send the client their Reference ID now?")) {
+                        if(confirm("Intake Saved! \n\nWould you like to open your email app to send the client their Reference ID now?")) {
                             this.notifyClient(reportData.clientEmail, reportData.refId, reportData.clientName);
                         }
                     } else {
-                        alert("Report successfully saved and downloaded!");
+                        alert("Intake successfully saved to database!");
                     }
 
                     this.resetForm();
@@ -824,7 +770,6 @@
 
                 } catch (error) {
                     console.error("Submission Error:", error);
-                    // Display the exact error to the user without wiping the form
                     this.showErrorMsg(`Save failed: ${error.message}. Check Firebase rules.`);
                 }
             }
@@ -834,7 +779,6 @@
                 document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
                 this.selectedFiles = [];
                 document.getElementById('preview-grid').innerHTML = '';
-                document.getElementById('a4-photos-section').classList.add('hidden');
                 this.clearSignature();
                 this.resetRef();
                 this.syncA4();
