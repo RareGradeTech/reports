@@ -445,9 +445,11 @@
             appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
         };
         
-        // Cloudinary
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload";
-        const CLOUDINARY_PRESET = "YOUR_UNSIGNED_PRESET"; 
+        // ==========================================
+        // CLOUDINARY CREDENTIALS
+        // ==========================================
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqkujefxj/image/upload";
+        const CLOUDINARY_PRESET = "banter_box"; 
 
         class EnterpriseSystem {
             constructor() {
@@ -668,10 +670,6 @@
             }
 
             async uploadToCloudinary(file) {
-                if(!CLOUDINARY_PRESET || CLOUDINARY_PRESET === "YOUR_UNSIGNED_PRESET") {
-                    return null; 
-                }
-
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('upload_preset', CLOUDINARY_PRESET);
