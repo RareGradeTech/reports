@@ -22,13 +22,13 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
             color: var(--brand-primary);
-            overflow: hidden; /* Prevent scrolling on body, handle in containers */
+            overflow: hidden; 
         }
 
         /* --- 1. GLOBAL SPINNER OVERLAY --- */
         #global-spinner {
             position: fixed; inset: 0;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(8px);
             z-index: 99999;
             display: flex; flex-direction: column;
@@ -41,17 +41,17 @@
         }
         .spinner-ring {
             width: 60px; height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+            border: 4px solid rgba(37, 99, 235, 0.1);
             border-top-color: #3b82f6;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* --- 2. PIN LOCK SCREEN --- */
+        /* --- 2. PIN LOCK SCREEN (LIGHT THEME OPTIMIZED FOR DESKTOP) --- */
         #lock-screen {
             position: fixed; inset: 0;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             z-index: 50000;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
@@ -66,32 +66,36 @@
         .pin-dot {
             width: 16px; height: 16px;
             border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.2);
+            border: 2px solid #cbd5e1;
             transition: all 0.2s;
+            background: transparent;
         }
         .pin-dot.filled {
-            background: #3b82f6; border-color: #3b82f6;
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
+            background: #2563eb; border-color: #2563eb;
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
         }
         .pin-dot.error {
             background: #ef4444; border-color: #ef4444;
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
         }
         .numpad {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+            max-width: 320px; width: 100%;
         }
         .num-key {
-            width: 70px; height: 70px;
+            width: 75px; height: 75px;
+            margin: 0 auto;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px; font-weight: 500; color: white;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 26px; font-weight: 600; color: #0f172a;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             cursor: pointer; transition: all 0.1s;
             user-select: none;
         }
-        .num-key:hover { background: rgba(255,255,255,0.15); }
-        .num-key:active { transform: scale(0.92); background: #3b82f6; border-color: #3b82f6; }
+        .num-key:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .num-key:active { transform: scale(0.92); background: #e2e8f0; }
         
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
@@ -145,7 +149,6 @@
             border-radius: 8px; cursor: crosshair; width: 100%; height: 120px;
         }
 
-        /* Scrollbar styling */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -156,15 +159,15 @@
 
     <div id="global-spinner">
         <div class="spinner-ring"></div>
-        <p id="spinner-text" class="text-white mt-4 font-medium tracking-wide">Processing...</p>
+        <p id="spinner-text" class="text-slate-800 mt-4 font-bold tracking-wide">Processing...</p>
     </div>
 
     <div id="lock-screen">
-        <div class="bg-white p-3 rounded-2xl mb-6 shadow-2xl">
-            <i class="fa-solid fa-shield-halved text-4xl text-blue-600"></i>
+        <div class="bg-blue-50 p-4 rounded-2xl mb-6 shadow-sm border border-blue-100">
+            <i class="fa-solid fa-shield-halved text-5xl text-blue-600"></i>
         </div>
-        <h1 class="text-3xl font-bold text-white mb-2">Rare Grade Tech</h1>
-        <p class="text-slate-400 text-sm">Enter Security PIN to access enterprise system</p>
+        <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Rare Grade Tech</h1>
+        <p class="text-slate-500 text-sm font-medium">Enter Security PIN or use your keyboard</p>
         
         <div id="pin-display" class="pin-display">
             <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -180,20 +183,20 @@
             <div class="num-key" onclick="app.pressPin('7')">7</div>
             <div class="num-key" onclick="app.pressPin('8')">8</div>
             <div class="num-key" onclick="app.pressPin('9')">9</div>
-            <div class="num-key text-red-400" onclick="app.clearPin()"><i class="fa-solid fa-xmark"></i></div>
+            <div class="num-key text-red-500 bg-red-50 hover:bg-red-100 border-red-100" onclick="app.clearPin()"><i class="fa-solid fa-xmark"></i></div>
             <div class="num-key" onclick="app.pressPin('0')">0</div>
-            <div class="num-key text-slate-400" onclick="app.backspacePin()"><i class="fa-solid fa-delete-left"></i></div>
+            <div class="num-key text-slate-500" onclick="app.backspacePin()"><i class="fa-solid fa-delete-left"></i></div>
         </div>
-        <p class="text-slate-500 text-xs mt-10">System locked automatically after inactivity.</p>
+        <p class="text-slate-400 text-xs mt-10">System locks automatically after 15m of inactivity.</p>
     </div>
 
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10">
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div class="p-6 border-b border-slate-100 flex items-center gap-3">
             <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
                 <i class="fa-solid fa-bolt"></i>
             </div>
             <div>
-                <h2 class="font-bold text-sm tracking-tight">RARE GRADE</h2>
+                <h2 class="font-bold text-sm tracking-tight text-slate-800">RARE GRADE</h2>
                 <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Enterprise</p>
             </div>
         </div>
@@ -217,7 +220,7 @@
                     K
                 </div>
                 <div class="flex-1 overflow-hidden">
-                    <p class="text-xs font-bold truncate">Katlego</p>
+                    <p class="text-xs font-bold text-slate-800 truncate">Katlego</p>
                     <p class="text-[10px] text-slate-500">Admin</p>
                 </div>
                 <button onclick="app.lockSystem()" class="text-slate-400 hover:text-red-500 transition-colors p-2" title="Lock System">
@@ -381,8 +384,8 @@
                         <div class="mt-8 grid grid-cols-2 gap-8">
                             <div>
                                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Client Details</h3>
-                                <p class="font-bold text-slate-800 text-lg" id="a4-name">John Doe</p>
-                                <p class="text-slate-600 text-sm" id="a4-phone">000 000 0000</p>
+                                <p class="font-bold text-slate-800 text-lg" id="a4-name">Not specified</p>
+                                <p class="text-slate-600 text-sm" id="a4-phone">---</p>
                             </div>
                             <div>
                                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Technician Details</h3>
@@ -442,7 +445,7 @@
         class EnterpriseSystem {
             constructor() {
                 // Config
-                this.SYSTEM_PIN = "1234"; // Define the unlock PIN here
+                this.SYSTEM_PIN = "12345"; // Updated to 5 digits
                 this.pinInput = "";
                 
                 // Signature Canvas
@@ -453,10 +456,30 @@
                 // Init
                 this.initTime();
                 this.initSignaturePad();
+                this.initKeyboardListener();
                 
                 // Setup default A4 values
                 document.getElementById('a4-date').innerText = "Date: " + new Date().toLocaleDateString();
                 document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000);
+            }
+
+            // ==========================================
+            // KEYBOARD LISTENER
+            // ==========================================
+            initKeyboardListener() {
+                window.addEventListener('keydown', (e) => {
+                    const lockScreen = document.getElementById('lock-screen');
+                    // Only process keyboard PIN if the lock screen is active
+                    if (!lockScreen.classList.contains('unlocked')) {
+                        if (e.key >= '0' && e.key <= '9') {
+                            this.pressPin(e.key);
+                        } else if (e.key === 'Backspace') {
+                            this.backspacePin();
+                        } else if (e.key === 'Escape' || e.key === 'Delete') {
+                            this.clearPin();
+                        }
+                    }
+                });
             }
 
             // ==========================================
@@ -501,7 +524,7 @@
                 if (this.pinInput === this.SYSTEM_PIN) {
                     // Success
                     screen.classList.add('unlocked');
-                    this.clearPin(); // reset for next time
+                    this.clearPin(); 
                 } else {
                     // Error
                     dots.forEach(dot => dot.classList.add('error'));
@@ -526,7 +549,6 @@
                 document.getElementById('spinner-text').innerText = text;
                 spinner.classList.add('active');
 
-                // Auto hide if duration provided (simulating fetch)
                 if (duration > 0) {
                     setTimeout(() => {
                         this.hideLoading();
@@ -542,19 +564,15 @@
             // NAVIGATION
             // ==========================================
             navigate(viewId) {
-                // Hide all views
                 document.getElementById('view-dashboard').classList.add('hidden');
                 document.getElementById('view-registry').classList.add('hidden');
                 document.getElementById('view-intake').classList.add('hidden');
                 
-                // Remove active class from nav
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-                // Show selected view
                 document.getElementById('view-' + viewId).classList.remove('hidden');
                 document.getElementById('nav-' + viewId).classList.add('active');
 
-                // Update Title
                 const titles = { 'dashboard': 'Overview', 'registry': 'Client Registry', 'intake': 'Device Intake Form' };
                 document.getElementById('page-title').innerText = titles[viewId];
             }
@@ -563,7 +581,6 @@
             // FORM TO A4 SYNC LOGIC
             // ==========================================
             syncA4() {
-                // Text Inputs
                 const name = document.getElementById('in-name').value;
                 document.getElementById('a4-name').innerText = name ? name : "Not specified";
 
@@ -576,7 +593,6 @@
                 const issue = document.getElementById('in-issue').value;
                 document.getElementById('a4-issue').innerText = issue ? issue : "No issue described.";
 
-                // Checkboxes logic (Swap FontAwesome classes)
                 this.updateCheckboxIcon('chk-power', 'sq-power');
                 this.updateCheckboxIcon('chk-cracks', 'sq-cracks');
                 this.updateCheckboxIcon('chk-data', 'sq-data');
@@ -599,7 +615,6 @@
                 this.canvas = document.getElementById('sig-canvas');
                 this.ctx = this.canvas.getContext('2d');
                 
-                // Resize canvas to match display size for correct mouse coords
                 const rect = this.canvas.getBoundingClientRect();
                 this.canvas.width = rect.width;
                 this.canvas.height = rect.height;
@@ -612,7 +627,7 @@
 
             startDraw(e) {
                 this.isDrawing = true;
-                this.draw(e); // allow drawing a single dot
+                this.draw(e); 
             }
 
             draw(e) {
@@ -623,7 +638,7 @@
 
                 this.ctx.lineWidth = 2;
                 this.ctx.lineCap = 'round';
-                this.ctx.strokeStyle = '#0f172a'; // Slate 900
+                this.ctx.strokeStyle = '#0f172a'; 
                 
                 this.ctx.lineTo(x, y);
                 this.ctx.stroke();
@@ -633,7 +648,7 @@
 
             endDraw() {
                 this.isDrawing = false;
-                this.ctx.beginPath(); // Reset path so next click doesn't connect
+                this.ctx.beginPath(); 
             }
 
             clearSignature() {
@@ -655,11 +670,9 @@
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // Simulate network delay for UX, then generate
                 setTimeout(() => {
                     html2pdf().set(opt).from(element).save().then(() => {
                         this.hideLoading();
-                        // Reset ref for next report
                         document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000);
                     });
                 }, 800);
@@ -683,7 +696,6 @@
         window.addEventListener('resize', () => {
             const canvas = document.getElementById('sig-canvas');
             if(canvas) {
-                // Note: Resizing clears the canvas context in HTML5
                 const rect = canvas.getBoundingClientRect();
                 canvas.width = rect.width;
                 canvas.height = rect.height;
