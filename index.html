@@ -3,156 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rare Grade Tech | Enterprise Secure</title>
+    <title>Rare Grade Tech | Secure Enterprise Portal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
-            --brand-primary: #0f172a; /* Slate 900 */
-            --brand-accent: #2563eb; /* Blue 600 */
-            --bg-body: #f8fafc; /* Slate 50 */
-            --border-subtle: #e2e8f0; /* Slate 200 */
+            --brand-primary: #0f172a;
+            --brand-accent: #2563eb;
+            --bg-body: #f8fafc;
+            --border-subtle: #e2e8f0;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--brand-primary);
-            overflow: hidden; 
-        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--brand-primary); overflow: hidden; }
 
-        /* --- 1. GLOBAL SPINNER OVERLAY --- */
+        /* --- GLOBAL SPINNER OVERLAY --- */
         #global-spinner {
-            position: fixed; inset: 0;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 99999;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.3s ease;
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px);
+            z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        #global-spinner.active {
-            opacity: 1; pointer-events: all;
-        }
+        #global-spinner.active { opacity: 1; pointer-events: all; }
         .spinner-ring {
-            width: 60px; height: 60px;
-            border: 4px solid rgba(37, 99, 235, 0.1);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 60px; height: 60px; border: 4px solid rgba(37, 99, 235, 0.1); border-top-color: #3b82f6;
+            border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* --- 2. PIN LOCK SCREEN (LIGHT THEME OPTIMIZED FOR DESKTOP) --- */
+        /* --- PIN LOCK SCREEN --- */
         #lock-screen {
-            position: fixed; inset: 0;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            z-index: 50000;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            position: fixed; inset: 0; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            z-index: 50000; display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: transform 0.6s cubic-bezier(0.8, 0, 0.2, 1);
         }
-        #lock-screen.unlocked {
-            transform: translateY(-100%);
-        }
-        .pin-display {
-            display: flex; gap: 16px; margin: 30px 0;
-        }
+        #lock-screen.unlocked { transform: translateY(-100%); }
+        .pin-display { display: flex; gap: 16px; margin: 30px 0; }
         .pin-dot {
-            width: 16px; height: 16px;
-            border-radius: 50%;
-            border: 2px solid #cbd5e1;
-            transition: all 0.2s;
-            background: transparent;
+            width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1;
+            transition: all 0.2s; background: transparent;
         }
-        .pin-dot.filled {
-            background: #2563eb; border-color: #2563eb;
-            box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
-        }
-        .pin-dot.error {
-            background: #ef4444; border-color: #ef4444;
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
-        }
-        .numpad {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-            max-width: 320px; width: 100%;
-        }
+        .pin-dot.filled { background: #2563eb; border-color: #2563eb; box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); }
+        .pin-dot.error { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 320px; width: 100%; }
         .num-key {
-            width: 75px; height: 75px;
-            margin: 0 auto;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px; font-weight: 600; color: #0f172a;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            cursor: pointer; transition: all 0.1s;
-            user-select: none;
+            width: 75px; height: 75px; margin: 0 auto; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 600; color: #0f172a;
+            background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            cursor: pointer; transition: all 0.1s; user-select: none;
         }
         .num-key:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .num-key:active { transform: scale(0.92); background: #e2e8f0; }
-        
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-2px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
-            40%, 60% { transform: translate3d(8px, 0, 0); }
-        }
 
-        /* --- 3. UI COMPONENTS --- */
+        /* --- UI COMPONENTS --- */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid var(--border-subtle); border-radius: 16px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
         .nav-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; border-radius: 12px;
-            color: #64748b; font-weight: 500;
-            transition: all 0.2s; cursor: pointer;
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px;
+            color: #64748b; font-weight: 500; transition: all 0.2s; cursor: pointer;
         }
         .nav-item:hover { background: #f1f5f9; color: var(--brand-primary); }
         .nav-item.active { background: var(--brand-primary); color: white; }
-        
         .custom-input {
-            width: 100%; padding: 12px 16px;
-            background: #f8fafc; border: 1px solid #cbd5e1;
-            border-radius: 10px; font-size: 14px;
-            transition: all 0.2s; outline: none;
+            width: 100%; padding: 12px 16px; background: #f8fafc; border: 1px solid #cbd5e1;
+            border-radius: 10px; font-size: 14px; transition: all 0.2s; outline: none;
         }
-        .custom-input:focus {
-            border-color: var(--brand-accent); background: white;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
+        .custom-input:focus { border-color: var(--brand-accent); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
-        /* --- 4. A4 PRINT/PDF CANVAS --- */
-        .a4-wrapper {
-            background: #e2e8f0; padding: 40px;
-            display: flex; justify-content: center;
-            overflow-y: auto; height: 100%;
+        /* --- CLOUDINARY UPLOAD ZONE --- */
+        .upload-zone {
+            border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; text-align: center;
+            background: #f8fafc; cursor: pointer; transition: all 0.2s;
         }
+        .upload-zone:hover { border-color: #3b82f6; background: #eff6ff; }
+        .img-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+        .img-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+        /* --- MODAL --- */
+        #update-modal {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            z-index: 40000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        #update-modal.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.3s; }
+        #update-modal.active .modal-content { transform: translateY(0); }
+
+        /* --- A4 PRINT/PDF CANVAS --- */
+        .a4-wrapper { background: #e2e8f0; padding: 40px; display: flex; justify-content: center; overflow-y: auto; height: 100%; }
         .a4-paper {
-            width: 210mm; min-height: 297mm;
-            background: white; padding: 20mm;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 210mm; min-height: 297mm; background: white; padding: 20mm;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
-        .sig-pad {
-            border: 1px dashed #cbd5e1; background: #f8fafc;
-            border-radius: 8px; cursor: crosshair; width: 100%; height: 120px;
-        }
+        .sig-pad { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: crosshair; width: 100%; height: 120px; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="flex h-screen">
@@ -167,7 +123,7 @@
             <i class="fa-solid fa-shield-halved text-5xl text-blue-600"></i>
         </div>
         <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Rare Grade Tech</h1>
-        <p class="text-slate-500 text-sm font-medium">Enter Security PIN or use your keyboard</p>
+        <p class="text-slate-500 text-sm font-medium">Enter Security PIN (12345)</p>
         
         <div id="pin-display" class="pin-display">
             <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -183,11 +139,10 @@
             <div class="num-key" onclick="app.pressPin('7')">7</div>
             <div class="num-key" onclick="app.pressPin('8')">8</div>
             <div class="num-key" onclick="app.pressPin('9')">9</div>
-            <div class="num-key text-red-500 bg-red-50 hover:bg-red-100 border-red-100" onclick="app.clearPin()"><i class="fa-solid fa-xmark"></i></div>
+            <div class="num-key text-red-500 bg-red-50" onclick="app.clearPin()"><i class="fa-solid fa-xmark"></i></div>
             <div class="num-key" onclick="app.pressPin('0')">0</div>
             <div class="num-key text-slate-500" onclick="app.backspacePin()"><i class="fa-solid fa-delete-left"></i></div>
         </div>
-        <p class="text-slate-400 text-xs mt-10">System locks automatically after 15m of inactivity.</p>
     </div>
 
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
@@ -215,17 +170,12 @@
         </nav>
 
         <div class="p-4 border-t border-slate-100">
-            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors">
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
-                    K
-                </div>
+            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer" onclick="app.lockSystem()" title="Lock System">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">K</div>
                 <div class="flex-1 overflow-hidden">
                     <p class="text-xs font-bold text-slate-800 truncate">Katlego</p>
-                    <p class="text-[10px] text-slate-500">Admin</p>
+                    <p class="text-[10px] text-slate-500 text-green-500 font-bold"><i class="fa-solid fa-circle text-[8px]"></i> Online (Lock)</p>
                 </div>
-                <button onclick="app.lockSystem()" class="text-slate-400 hover:text-red-500 transition-colors p-2" title="Lock System">
-                    <i class="fa-solid fa-lock"></i>
-                </button>
             </div>
         </div>
     </aside>
@@ -246,58 +196,39 @@
 
         <section id="view-dashboard" class="flex-1 overflow-y-auto p-8 block">
             <div class="grid grid-cols-4 gap-6 mb-8">
-                <div class="glass-panel p-6 border-t-4 border-blue-500">
-                    <div class="text-blue-500 mb-2"><i class="fa-solid fa-microchip text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800">12</div>
-                    <div class="text-sm text-slate-500 font-medium">Active Repairs</div>
+                <div class="glass-panel p-6 border-t-4 border-amber-500">
+                    <div class="text-amber-500 mb-2"><i class="fa-solid fa-clock-rotate-left text-2xl"></i></div>
+                    <div class="text-3xl font-bold text-slate-800" id="stat-pending">0</div>
+                    <div class="text-sm text-slate-500 font-medium">Pending Repairs</div>
                 </div>
                 <div class="glass-panel p-6 border-t-4 border-emerald-500">
-                    <div class="text-emerald-500 mb-2"><i class="fa-solid fa-check-double text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800">48</div>
-                    <div class="text-sm text-slate-500 font-medium">Completed This Month</div>
-                </div>
-                <div class="glass-panel p-6 border-t-4 border-amber-500">
-                    <div class="text-amber-500 mb-2"><i class="fa-solid fa-boxes-packing text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800">3</div>
-                    <div class="text-sm text-slate-500 font-medium">Waiting on Parts</div>
+                    <div class="text-emerald-500 mb-2"><i class="fa-solid fa-box-open text-2xl"></i></div>
+                    <div class="text-3xl font-bold text-slate-800" id="stat-ready">0</div>
+                    <div class="text-sm text-slate-500 font-medium">Ready for Collection</div>
                 </div>
                 <div class="glass-panel p-6 border-t-4 border-slate-800">
                     <div class="text-slate-800 mb-2"><i class="fa-solid fa-users text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800">156</div>
-                    <div class="text-sm text-slate-500 font-medium">Total Clients</div>
+                    <div class="text-3xl font-bold text-slate-800" id="stat-total">0</div>
+                    <div class="text-sm text-slate-500 font-medium">Total Records</div>
                 </div>
             </div>
 
             <div class="glass-panel overflow-hidden">
                 <div class="p-5 border-b border-slate-200 bg-white">
-                    <h3 class="font-bold text-slate-800">Recent Activity Stream</h3>
+                    <h3 class="font-bold text-slate-800">Recent Intake Stream</h3>
                 </div>
                 <div class="p-0">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-4 font-medium">ID</th>
+                                <th class="p-4 font-medium">Ref ID</th>
                                 <th class="p-4 font-medium">Client</th>
                                 <th class="p-4 font-medium">Device</th>
                                 <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="text-sm">
-                            <tr class="border-b border-slate-100 hover:bg-slate-50">
-                                <td class="p-4 font-mono text-xs text-slate-500">RGT-892</td>
-                                <td class="p-4 font-medium text-slate-800">Precious M.</td>
-                                <td class="p-4">Lenovo IdeaPad 3</td>
-                                <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md text-xs font-semibold">In Repair</span></td>
-                                <td class="p-4 text-right"><button class="text-blue-600 hover:underline font-medium">View</button></td>
-                            </tr>
-                            <tr class="border-b border-slate-100 hover:bg-slate-50">
-                                <td class="p-4 font-mono text-xs text-slate-500">RGT-891</td>
-                                <td class="p-4 font-medium text-slate-800">Dips (WhatsApp)</td>
-                                <td class="p-4">Samsung Galaxy A07</td>
-                                <td class="p-4"><span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-md text-xs font-semibold">Diagnostic</span></td>
-                                <td class="p-4 text-right"><button class="text-blue-600 hover:underline font-medium">View</button></td>
-                            </tr>
+                        <tbody id="dash-recent-table" class="text-sm">
+                            <tr><td colspan="4" class="p-8 text-center text-slate-400">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -305,15 +236,29 @@
         </section>
 
         <section id="view-registry" class="flex-1 overflow-y-auto p-8 hidden">
-            <div class="glass-panel p-10 text-center">
-                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 text-2xl">
-                    <i class="fa-solid fa-users-viewfinder"></i>
+            <div class="glass-panel overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800">Database & Service Queue</h3>
+                    <div class="relative w-72">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" id="search-input" onkeyup="app.filterRegistry()" placeholder="Search Name, Phone, or ID..." class="custom-input pl-10 py-2 text-sm">
+                    </div>
                 </div>
-                <h3 class="font-bold text-lg text-slate-800">Client Database</h3>
-                <p class="text-slate-500 text-sm mb-6">Manage all enterprise and retail clients here.</p>
-                <button onclick="app.showLoading('Syncing database...', 1500)" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-semibold shadow-sm">
-                    <i class="fa-solid fa-rotate mr-2"></i> Sync Data
-                </button>
+                <div class="max-h-[60vh] overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0">
+                                <th class="p-4 font-medium">Ref ID</th>
+                                <th class="p-4 font-medium">Client Name</th>
+                                <th class="p-4 font-medium">Device / Issue</th>
+                                <th class="p-4 font-medium">Status</th>
+                                <th class="p-4 font-medium text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registry-table" class="text-sm">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -322,7 +267,7 @@
                 <div class="w-96 bg-white border-r border-slate-200 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
                     <div class="p-6 border-b border-slate-100">
                         <h2 class="font-bold text-lg text-slate-800">Intake Form</h2>
-                        <p class="text-xs text-slate-500">Capture device details securely.</p>
+                        <p class="text-xs text-slate-500">Device will be saved as <span class="font-bold text-amber-500">Pending</span>.</p>
                     </div>
                     
                     <div class="p-6 space-y-6">
@@ -335,28 +280,36 @@
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Hardware Condition</label>
                             <input type="text" id="in-device" class="custom-input" placeholder="Device Model (e.g. Lenovo IdeaPad)" oninput="app.syncA4()">
-                            <textarea id="in-issue" class="custom-input h-24 resize-none" placeholder="Reported Fault / Symptoms..." oninput="app.syncA4()"></textarea>
+                            <textarea id="in-issue" class="custom-input h-20 resize-none" placeholder="Reported Fault / Symptoms..." oninput="app.syncA4()"></textarea>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Device Photos</label>
+                            <input type="file" id="file-input" multiple accept="image/*" class="hidden" onchange="app.handleFiles(this)">
+                            <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
+                                <p class="text-sm font-semibold text-slate-700">Click to attach photos</p>
+                            </div>
+                            <div id="preview-grid" class="img-preview-grid"></div>
                         </div>
 
                         <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Pre-Repair Audit</label>
-                            
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" onchange="app.syncA4()">
+                                <input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
                                 <span class="text-sm font-medium text-slate-700">Device Powers On</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-cracks" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Screen/Body Cracks Noted</span>
+                                <input type="checkbox" id="chk-cracks" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
+                                <span class="text-sm font-medium text-slate-700">Screen/Body Cracks</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-data" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Client Waives Data Loss Liability</span>
+                                <input type="checkbox" id="chk-data" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
+                                <span class="text-sm font-medium text-slate-700">Client Waives Data Loss</span>
                             </label>
                         </div>
 
-                        <button onclick="app.generatePDF()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-file-pdf"></i> Finalize & Export PDF
+                        <button onclick="app.submitIntake()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Save Intake & Export PDF
                         </button>
                     </div>
                 </div>
@@ -381,52 +334,54 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 grid grid-cols-2 gap-8">
+                        <div class="mt-6 grid grid-cols-2 gap-8">
                             <div>
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Client Details</h3>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Client Details</h3>
                                 <p class="font-bold text-slate-800 text-lg" id="a4-name">Not specified</p>
                                 <p class="text-slate-600 text-sm" id="a4-phone">---</p>
                             </div>
                             <div>
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Technician Details</h3>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Technician Details</h3>
                                 <p class="font-bold text-slate-800">Katlego</p>
-                                <p class="text-slate-600 text-sm">Lead Developer / Hardware Tech</p>
+                                <p class="text-slate-600 text-sm">Lead Developer</p>
                             </div>
                         </div>
 
-                        <div class="mt-10 bg-slate-50 border border-slate-200 rounded-lg p-6">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Device Audit & Fault Report</h3>
-                            <div class="space-y-4">
+                        <div class="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-5">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Device Audit & Fault Report</h3>
+                            <div class="space-y-3">
                                 <div>
                                     <span class="text-xs font-bold text-slate-500">DEVICE / MODEL:</span>
                                     <p class="font-medium text-slate-800 mt-1" id="a4-device">Not specified</p>
                                 </div>
                                 <div>
                                     <span class="text-xs font-bold text-slate-500">REPORTED ISSUE:</span>
-                                    <p class="font-medium text-slate-800 mt-1 bg-white p-3 border border-slate-200 rounded text-sm min-h-[60px]" id="a4-issue">No issue described.</p>
+                                    <p class="font-medium text-slate-800 mt-1 bg-white p-2 border border-slate-200 rounded text-sm min-h-[40px]" id="a4-issue">No issue described.</p>
                                 </div>
                             </div>
-
-                            <div class="mt-6 pt-4 border-t border-slate-200 grid grid-cols-2 gap-y-2 text-sm">
+                            <div class="mt-4 pt-3 border-t border-slate-200 grid grid-cols-2 gap-y-2 text-sm">
                                 <div class="flex items-center gap-2"><i class="fa-regular fa-square" id="sq-power"></i> Powers On</div>
                                 <div class="flex items-center gap-2"><i class="fa-regular fa-square" id="sq-cracks"></i> Pre-existing physical damage</div>
                                 <div class="flex items-center gap-2 col-span-2 text-blue-700 font-medium"><i class="fa-regular fa-square" id="sq-data"></i> Client accepts data loss liability</div>
                             </div>
                         </div>
 
-                        <div class="mt-auto pt-8">
-                            <div class="bg-slate-100 p-4 rounded text-[10px] text-slate-500 mb-8 leading-relaxed">
-                                <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss during hardware or software repair. Devices abandoned for more than 90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition noted above is accurate.
+                        <div id="a4-photos-section" class="mt-6 hidden">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Visual Evidence Appendix</h3>
+                            <div id="a4-photos-grid" class="flex gap-4">
+                                </div>
+                        </div>
+
+                        <div class="mt-auto pt-6">
+                            <div class="bg-slate-100 p-3 rounded text-[10px] text-slate-500 mb-6 leading-relaxed">
+                                <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss. Devices abandoned for >90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition noted above.
                             </div>
                             
                             <div class="flex justify-between items-end">
                                 <div class="w-1/2 pr-8">
                                     <p class="text-xs font-bold text-slate-500 mb-2">Client Digital Signature</p>
                                     <canvas id="sig-canvas" class="sig-pad"></canvas>
-                                    <div class="flex justify-between mt-1 text-[10px] text-slate-400">
-                                        <span>Sign above</span>
-                                        <button onclick="app.clearSignature()" class="no-print hover:text-red-500">Clear</button>
-                                    </div>
+                                    <button onclick="app.clearSignature()" class="no-print text-[10px] text-red-500 mt-1 hover:underline">Clear</button>
                                 </div>
                                 <div class="w-1/3 border-t border-slate-800 pt-2 text-center">
                                     <p class="text-xs font-bold text-slate-800">Rare Grade Tech Authorized</p>
@@ -439,195 +394,460 @@
             </div>
         </section>
 
+        <div id="update-modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Technician Update</h2>
+                    <button onclick="app.closeModal()" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4 text-sm">
+                    <p class="text-xs text-slate-500 uppercase font-bold">Ref ID: <span id="mod-ref" class="text-blue-600">---</span></p>
+                    <p class="font-medium text-slate-800 mt-1"><span id="mod-client">---</span> | <span id="mod-device">---</span></p>
+                </div>
+
+                <div class="space-y-4">
+                    <input type="hidden" id="mod-db-key">
+                    
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 uppercase">Technician / Developer Name</label>
+                        <input type="text" id="mod-tech-name" class="custom-input mt-1" placeholder="e.g. Katlego">
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 uppercase">Diagnosis / Work Done</label>
+                        <textarea id="mod-notes" class="custom-input mt-1 h-24 resize-none" placeholder="Describe the fix or parts used..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 uppercase">Update Status</label>
+                        <select id="mod-status" class="custom-input mt-1 font-bold">
+                            <option value="Pending" class="text-amber-600">Pending</option>
+                            <option value="Ready for Collection" class="text-emerald-600">Ready for Collection</option>
+                            <option value="Completed & Collected" class="text-blue-600">Completed & Collected</option>
+                        </select>
+                    </div>
+
+                    <button onclick="app.saveTechnicianUpdate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition-all">
+                        Save Update
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
+        // ==========================================
+        // YOUR API CONFIGURATION
+        // ==========================================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
+            authDomain: "test-17881.firebaseapp.com",
+            databaseURL: "https://test-17881-default-rtdb.firebaseio.com",
+            projectId: "test-17881",
+            storageBucket: "test-17881.firebasestorage.app",
+            messagingSenderId: "1057428047643",
+            appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
+        };
+        
+        // Cloudinary (Optional, replace if needed)
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload";
+        const CLOUDINARY_PRESET = "YOUR_UNSIGNED_PRESET"; 
+
         class EnterpriseSystem {
             constructor() {
-                // Config
-                this.SYSTEM_PIN = "12345"; // Updated to 5 digits
+                this.SYSTEM_PIN = "12345";
                 this.pinInput = "";
                 
-                // Signature Canvas
                 this.canvas = null;
                 this.ctx = null;
                 this.isDrawing = false;
+                
+                this.selectedFiles = [];
+                this.db = null;
+                this.reportsData = []; // Local cache for searching
 
-                // Init
+                this.initFirebase();
                 this.initTime();
                 this.initSignaturePad();
                 this.initKeyboardListener();
                 
-                // Setup default A4 values
                 document.getElementById('a4-date').innerText = "Date: " + new Date().toLocaleDateString();
+                this.resetRef();
+            }
+
+            // ==========================================
+            // FIREBASE & LIVE DATA
+            // ==========================================
+            initFirebase() {
+                firebase.initializeApp(FIREBASE_CONFIG);
+                this.db = firebase.database();
+                
+                // Real-time Listener on 'reports' node
+                this.db.ref('reports').on('value', snapshot => {
+                    this.reportsData = [];
+                    snapshot.forEach(child => {
+                        this.reportsData.push({ key: child.key, ...child.val() });
+                    });
+                    
+                    // Sort descending by timestamp
+                    this.reportsData.sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    this.updateDashboard();
+                    this.filterRegistry(); // Re-render table applying current search filter
+                });
+            }
+
+            updateDashboard() {
+                let pendingCount = 0;
+                let readyCount = 0;
+
+                const tbody = document.getElementById('dash-recent-table');
+                tbody.innerHTML = '';
+
+                // Stats and top 5 recent
+                this.reportsData.forEach((report, index) => {
+                    if(report.status === 'Pending') pendingCount++;
+                    if(report.status === 'Ready for Collection') readyCount++;
+
+                    if (index < 5) {
+                        const tr = document.createElement('tr');
+                        tr.className = "border-b border-slate-100";
+                        tr.innerHTML = `
+                            <td class="p-4 font-mono text-xs text-slate-500">${report.refId}</td>
+                            <td class="p-4 font-medium text-slate-800">${report.clientName}</td>
+                            <td class="p-4">${report.device}</td>
+                            <td class="p-4">${this.getStatusBadge(report.status)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+                });
+
+                if(this.reportsData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400">No records found.</td></tr>';
+                }
+
+                document.getElementById('stat-pending').innerText = pendingCount;
+                document.getElementById('stat-ready').innerText = readyCount;
+                document.getElementById('stat-total').innerText = this.reportsData.length;
+            }
+
+            filterRegistry() {
+                const search = document.getElementById('search-input').value.toLowerCase();
+                const tbody = document.getElementById('registry-table');
+                tbody.innerHTML = '';
+
+                const filtered = this.reportsData.filter(r => 
+                    (r.clientName && r.clientName.toLowerCase().includes(search)) ||
+                    (r.refId && r.refId.toLowerCase().includes(search)) ||
+                    (r.clientPhone && r.clientPhone.includes(search))
+                );
+
+                filtered.forEach(report => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-4 font-mono text-xs text-slate-500">${report.refId}</td>
+                        <td class="p-4">
+                            <div class="font-medium text-slate-800">${report.clientName}</div>
+                            <div class="text-xs text-slate-500">${report.clientPhone}</div>
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">${report.device}</td>
+                        <td class="p-4">${this.getStatusBadge(report.status)}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="app.openModal('${report.key}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded text-xs font-semibold transition-all border border-blue-200 hover:border-blue-600">
+                                Update Repair
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                if(filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
+                }
+            }
+
+            getStatusBadge(status) {
+                if (status === 'Pending') return '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Pending</span>';
+                if (status === 'Ready for Collection') return '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Ready</span>';
+                return '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Collected</span>';
+            }
+
+            // ==========================================
+            // TECHNICIAN UPDATE MODAL
+            // ==========================================
+            openModal(dbKey) {
+                const report = this.reportsData.find(r => r.key === dbKey);
+                if(!report) return;
+
+                document.getElementById('mod-db-key').value = dbKey;
+                document.getElementById('mod-ref').innerText = report.refId;
+                document.getElementById('mod-client').innerText = report.clientName;
+                document.getElementById('mod-device').innerText = report.device;
+                
+                document.getElementById('mod-tech-name').value = report.techName || "";
+                document.getElementById('mod-notes').value = report.techNotes || "";
+                document.getElementById('mod-status').value = report.status || "Pending";
+
+                document.getElementById('update-modal').classList.add('active');
+            }
+
+            closeModal() {
+                document.getElementById('update-modal').classList.remove('active');
+            }
+
+            async saveTechnicianUpdate() {
+                const dbKey = document.getElementById('mod-db-key').value;
+                const techName = document.getElementById('mod-tech-name').value;
+                const techNotes = document.getElementById('mod-notes').value;
+                const status = document.getElementById('mod-status').value;
+
+                this.showLoading("Saving update...");
+
+                try {
+                    await this.db.ref('reports/' + dbKey).update({
+                        techName: techName,
+                        techNotes: techNotes,
+                        status: status,
+                        lastUpdated: Date.now()
+                    });
+                    this.hideLoading();
+                    this.closeModal();
+                } catch (error) {
+                    console.error("Error updating", error);
+                    this.hideLoading();
+                    alert("Failed to update database.");
+                }
+            }
+
+            // ==========================================
+            // INTAKE: Cloudinary -> Firebase -> PDF
+            // ==========================================
+            handleFiles(input) {
+                if (input.files) {
+                    for(let i=0; i<input.files.length; i++) this.selectedFiles.push(input.files[i]);
+                    this.renderLocalPreviews();
+                }
+            }
+
+            renderLocalPreviews() {
+                const grid = document.getElementById('preview-grid');
+                grid.innerHTML = '';
+                this.selectedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result; img.className = "img-thumb";
+                        grid.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            async uploadToCloudinary(file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_PRESET);
+
+                try {
+                    const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    return data.secure_url;
+                } catch (err) {
+                    console.error("Cloudinary failed", err);
+                    return null;
+                }
+            }
+
+            async submitIntake() {
+                if(!document.getElementById('in-name').value || !document.getElementById('in-device').value) {
+                    alert("Please fill in Client Name and Device Model.");
+                    return;
+                }
+
+                this.showLoading("Uploading Photos...", 0);
+
+                // 1. Upload to Cloudinary (If files exist)
+                let uploadedUrls = [];
+                if(CLOUDINARY_PRESET !== "YOUR_UNSIGNED_PRESET") {
+                    for (let file of this.selectedFiles) {
+                        const url = await this.uploadToCloudinary(file);
+                        if (url) uploadedUrls.push(url);
+                    }
+                }
+
+                this.showLoading("Saving to Firebase Database...", 0);
+
+                // 2. Build Data Object (Defaults to Pending)
+                const reportData = {
+                    refId: document.getElementById('a4-ref').innerText.replace('REF: ', ''),
+                    clientName: document.getElementById('in-name').value,
+                    clientPhone: document.getElementById('in-phone').value,
+                    device: document.getElementById('in-device').value,
+                    issue: document.getElementById('in-issue').value,
+                    checks: {
+                        power: document.getElementById('chk-power').checked,
+                        cracks: document.getElementById('chk-cracks').checked,
+                        dataWaiver: document.getElementById('chk-data').checked
+                    },
+                    photos: uploadedUrls,
+                    signatureBase64: this.canvas.toDataURL(),
+                    timestamp: Date.now(),
+                    status: 'Pending' // <--- DEFAULT STATUS AS REQUESTED
+                };
+
+                // 3. Save to Firebase
+                try {
+                    await this.db.ref('reports').push(reportData);
+                } catch (e) {
+                    console.error("Firebase Error", e);
+                    alert("Error saving to database. Check console.");
+                    this.hideLoading();
+                    return;
+                }
+
+                // 4. Inject Images into A4 Appendix for PDF
+                if (uploadedUrls.length > 0) {
+                    const appendix = document.getElementById('a4-photos-section');
+                    const grid = document.getElementById('a4-photos-grid');
+                    appendix.classList.remove('hidden');
+                    grid.innerHTML = '';
+                    uploadedUrls.forEach(url => {
+                        const img = document.createElement('img');
+                        img.src = url; img.style.height = "120px"; img.style.objectFit = "cover"; img.style.borderRadius = "4px";
+                        grid.appendChild(img);
+                    });
+                }
+
+                // 5. Generate PDF
+                this.showLoading("Generating PDF Report...", 0);
+                const element = document.getElementById('a4-document');
+                const opt = {
+                    margin: 0, filename: `${reportData.refId}_Report.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    this.hideLoading();
+                    this.resetForm();
+                    // Go to registry to see the new Pending item
+                    this.navigate('registry');
+                });
+            }
+
+            resetForm() {
+                document.querySelectorAll('input[type="text"], input[type="tel"], textarea').forEach(i => i.value = '');
+                document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
+                this.selectedFiles = [];
+                document.getElementById('preview-grid').innerHTML = '';
+                document.getElementById('a4-photos-section').classList.add('hidden');
+                this.clearSignature();
+                this.resetRef();
+                this.syncA4();
+            }
+
+            resetRef() {
                 document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000);
             }
 
             // ==========================================
-            // KEYBOARD LISTENER
+            // PIN & SECURITY
             // ==========================================
             initKeyboardListener() {
                 window.addEventListener('keydown', (e) => {
                     const lockScreen = document.getElementById('lock-screen');
-                    // Only process keyboard PIN if the lock screen is active
                     if (!lockScreen.classList.contains('unlocked')) {
-                        if (e.key >= '0' && e.key <= '9') {
-                            this.pressPin(e.key);
-                        } else if (e.key === 'Backspace') {
-                            this.backspacePin();
-                        } else if (e.key === 'Escape' || e.key === 'Delete') {
-                            this.clearPin();
-                        }
+                        if (e.key >= '0' && e.key <= '9') this.pressPin(e.key);
+                        else if (e.key === 'Backspace') this.backspacePin();
+                        else if (e.key === 'Escape' || e.key === 'Delete') this.clearPin();
                     }
                 });
             }
 
-            // ==========================================
-            // PIN LOCK LOGIC
-            // ==========================================
             pressPin(digit) {
                 if (this.pinInput.length < 5) {
                     this.pinInput += digit;
                     this.updatePinDisplay();
                 }
-                
-                if (this.pinInput.length === 5) {
-                    this.validatePin();
-                }
+                if (this.pinInput.length === 5) this.validatePin();
             }
 
-            clearPin() {
-                this.pinInput = "";
-                this.updatePinDisplay();
-            }
-
-            backspacePin() {
-                this.pinInput = this.pinInput.slice(0, -1);
-                this.updatePinDisplay();
-            }
+            clearPin() { this.pinInput = ""; this.updatePinDisplay(); }
+            backspacePin() { this.pinInput = this.pinInput.slice(0, -1); this.updatePinDisplay(); }
 
             updatePinDisplay() {
                 const dots = document.querySelectorAll('.pin-dot');
                 dots.forEach((dot, index) => {
-                    dot.className = 'pin-dot'; // reset
-                    if (index < this.pinInput.length) {
-                        dot.classList.add('filled');
-                    }
+                    dot.className = 'pin-dot';
+                    if (index < this.pinInput.length) dot.classList.add('filled');
                 });
             }
 
             validatePin() {
-                const screen = document.getElementById('lock-screen');
-                const display = document.getElementById('pin-display');
-                const dots = document.querySelectorAll('.pin-dot');
-
                 if (this.pinInput === this.SYSTEM_PIN) {
-                    // Success
-                    screen.classList.add('unlocked');
+                    document.getElementById('lock-screen').classList.add('unlocked');
                     this.clearPin(); 
                 } else {
-                    // Error
-                    dots.forEach(dot => dot.classList.add('error'));
-                    display.classList.add('shake');
-                    
+                    document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.add('error'));
+                    document.getElementById('pin-display').classList.add('shake');
                     setTimeout(() => {
-                        display.classList.remove('shake');
+                        document.getElementById('pin-display').classList.remove('shake');
                         this.clearPin();
                     }, 500);
                 }
             }
 
-            lockSystem() {
-                document.getElementById('lock-screen').classList.remove('unlocked');
-            }
+            lockSystem() { document.getElementById('lock-screen').classList.remove('unlocked'); }
 
             // ==========================================
-            // SPINNER LOGIC
+            // UI UTILS
             // ==========================================
             showLoading(text = "Processing...", duration = 0) {
-                const spinner = document.getElementById('global-spinner');
                 document.getElementById('spinner-text').innerText = text;
-                spinner.classList.add('active');
-
-                if (duration > 0) {
-                    setTimeout(() => {
-                        this.hideLoading();
-                    }, duration);
-                }
+                document.getElementById('global-spinner').classList.add('active');
+                if (duration > 0) setTimeout(() => this.hideLoading(), duration);
             }
 
-            hideLoading() {
-                document.getElementById('global-spinner').classList.remove('active');
-            }
+            hideLoading() { document.getElementById('global-spinner').classList.remove('active'); }
 
-            // ==========================================
-            // NAVIGATION
-            // ==========================================
             navigate(viewId) {
                 document.getElementById('view-dashboard').classList.add('hidden');
                 document.getElementById('view-registry').classList.add('hidden');
                 document.getElementById('view-intake').classList.add('hidden');
-                
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
+                
                 document.getElementById('view-' + viewId).classList.remove('hidden');
                 document.getElementById('nav-' + viewId).classList.add('active');
-
-                const titles = { 'dashboard': 'Overview', 'registry': 'Client Registry', 'intake': 'Device Intake Form' };
+                const titles = { 'dashboard': 'Overview', 'registry': 'Client Registry & Queue', 'intake': 'Device Intake Form' };
                 document.getElementById('page-title').innerText = titles[viewId];
             }
 
-            // ==========================================
-            // FORM TO A4 SYNC LOGIC
-            // ==========================================
             syncA4() {
-                const name = document.getElementById('in-name').value;
-                document.getElementById('a4-name').innerText = name ? name : "Not specified";
-
-                const phone = document.getElementById('in-phone').value;
-                document.getElementById('a4-phone').innerText = phone ? phone : "---";
-
-                const device = document.getElementById('in-device').value;
-                document.getElementById('a4-device').innerText = device ? device : "Not specified";
-
-                const issue = document.getElementById('in-issue').value;
-                document.getElementById('a4-issue').innerText = issue ? issue : "No issue described.";
-
-                this.updateCheckboxIcon('chk-power', 'sq-power');
-                this.updateCheckboxIcon('chk-cracks', 'sq-cracks');
-                this.updateCheckboxIcon('chk-data', 'sq-data');
+                document.getElementById('a4-name').innerText = document.getElementById('in-name').value || "Not specified";
+                document.getElementById('a4-phone').innerText = document.getElementById('in-phone').value || "---";
+                document.getElementById('a4-device').innerText = document.getElementById('in-device').value || "Not specified";
+                document.getElementById('a4-issue').innerText = document.getElementById('in-issue').value || "No issue described.";
+                
+                document.getElementById('sq-power').className = document.getElementById('chk-power').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
+                document.getElementById('sq-cracks').className = document.getElementById('chk-cracks').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
+                document.getElementById('sq-data').className = document.getElementById('chk-data').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
             }
 
-            updateCheckboxIcon(inputId, iconId) {
-                const isChecked = document.getElementById(inputId).checked;
-                const icon = document.getElementById(iconId);
-                if (isChecked) {
-                    icon.className = "fa-solid fa-square-check";
-                } else {
-                    icon.className = "fa-regular fa-square";
-                }
-            }
-
-            // ==========================================
-            // SIGNATURE PAD
-            // ==========================================
             initSignaturePad() {
                 this.canvas = document.getElementById('sig-canvas');
                 this.ctx = this.canvas.getContext('2d');
-                
                 const rect = this.canvas.getBoundingClientRect();
                 this.canvas.width = rect.width;
                 this.canvas.height = rect.height;
 
-                this.canvas.addEventListener('mousedown', (e) => this.startDraw(e));
+                this.canvas.addEventListener('mousedown', (e) => { this.isDrawing = true; this.draw(e); });
                 this.canvas.addEventListener('mousemove', (e) => this.draw(e));
-                this.canvas.addEventListener('mouseup', () => this.endDraw());
-                this.canvas.addEventListener('mouseout', () => this.endDraw());
-            }
-
-            startDraw(e) {
-                this.isDrawing = true;
-                this.draw(e); 
+                this.canvas.addEventListener('mouseup', () => { this.isDrawing = false; this.ctx.beginPath(); });
+                this.canvas.addEventListener('mouseout', () => { this.isDrawing = false; this.ctx.beginPath(); });
             }
 
             draw(e) {
@@ -646,53 +866,17 @@
                 this.ctx.moveTo(x, y);
             }
 
-            endDraw() {
-                this.isDrawing = false;
-                this.ctx.beginPath(); 
-            }
+            clearSignature() { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); }
 
-            clearSignature() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            }
-
-            // ==========================================
-            // PDF GENERATION
-            // ==========================================
-            generatePDF() {
-                this.showLoading("Compiling Secure PDF...");
-                
-                const element = document.getElementById('a4-document');
-                const opt = {
-                    margin: 0,
-                    filename: 'RGT_Intake_Report.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                setTimeout(() => {
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        this.hideLoading();
-                        document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000);
-                    });
-                }, 800);
-            }
-
-            // ==========================================
-            // UTILS
-            // ==========================================
             initTime() {
                 setInterval(() => {
-                    const now = new Date();
-                    document.getElementById('live-time').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('live-time').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 }, 1000);
             }
         }
 
-        // Initialize App
         const app = new EnterpriseSystem();
 
-        // Handle window resize for canvas signature accuracy
         window.addEventListener('resize', () => {
             const canvas = document.getElementById('sig-canvas');
             if(canvas) {
@@ -701,7 +885,6 @@
                 canvas.height = rect.height;
             }
         });
-
     </script>
 </body>
 </html>
