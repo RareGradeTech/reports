@@ -77,15 +77,6 @@
         }
         .custom-input:focus { border-color: var(--brand-accent); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
-        /* --- CLOUDINARY UPLOAD ZONE --- */
-        .upload-zone {
-            border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; text-align: center;
-            background: #f8fafc; cursor: pointer; transition: all 0.2s;
-        }
-        .upload-zone:hover { border-color: #3b82f6; background: #eff6ff; }
-        .img-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-        .img-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
-
         /* --- MODAL --- */
         #update-modal {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
@@ -99,6 +90,14 @@
             transform: translateY(20px); transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden;
         }
         #update-modal.active .modal-content { transform: translateY(0); }
+
+        /* --- A4 PREVIEW CANVAS --- */
+        .a4-wrapper { background: #e2e8f0; padding: 40px; display: flex; justify-content: center; overflow-y: auto; height: 100%; }
+        .a4-paper {
+            width: 210mm; min-height: 297mm; background: white; padding: 20mm;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .sig-pad { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: crosshair; width: 100%; height: 120px; }
 
         /* Scrollbars */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -160,10 +159,6 @@
             </div>
             <div class="nav-item" onclick="app.navigate('intake')" id="nav-intake">
                 <i class="fa-solid fa-clipboard-list w-5 text-center"></i> Device Intake
-            </div>
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-6">Technician Tools</div>
-            <div class="nav-item" onclick="app.navigate('camera')" id="nav-camera">
-                <i class="fa-solid fa-camera w-5 text-center text-blue-500"></i> Attach Photos
             </div>
         </nav>
 
@@ -264,7 +259,7 @@
 
         <section id="view-intake" class="flex-1 hidden h-full">
             <div class="flex h-full">
-                <div class="w-1/2 bg-white border-r border-slate-200 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 max-w-lg mx-auto">
+                <div class="w-96 bg-white border-r border-slate-200 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
                     <div class="p-6 border-b border-slate-100">
                         <h2 class="font-bold text-lg text-slate-800">Intake Form</h2>
                         <p class="text-xs text-slate-500">Device will be saved as <span class="font-bold text-amber-500">Pending</span>.</p>
@@ -273,38 +268,29 @@
                     <div class="p-6 space-y-6">
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Client Details</label>
-                            <input type="text" id="in-name" class="custom-input" placeholder="Full Name">
-                            <input type="tel" id="in-phone" class="custom-input" placeholder="Phone Number">
-                            <input type="email" id="in-email" class="custom-input" placeholder="Email Address (Optional)">
+                            <input type="text" id="in-name" class="custom-input" placeholder="Full Name" oninput="app.syncA4()">
+                            <input type="tel" id="in-phone" class="custom-input" placeholder="Phone Number" oninput="app.syncA4()">
+                            <input type="email" id="in-email" class="custom-input" placeholder="Email Address (Optional)" oninput="app.syncA4()">
                         </div>
 
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Hardware Condition</label>
-                            <input type="text" id="in-device" class="custom-input" placeholder="Device Model (e.g. Lenovo IdeaPad)">
-                            <textarea id="in-issue" class="custom-input h-20 resize-none" placeholder="Reported Fault / Symptoms..."></textarea>
-                        </div>
-
-                        <div class="space-y-3">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Device Photos (Optional)</label>
-                            <input type="file" id="file-input" multiple accept="image/*" class="hidden" onchange="app.handleFiles(this, 'preview-grid')">
-                            <div class="upload-zone" onclick="document.getElementById('file-input').click()">
-                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
-                                <p class="text-sm font-semibold text-slate-700">Click to attach photos</p>
-                            </div>
-                            <div id="preview-grid" class="img-preview-grid"></div>
+                            <input type="text" id="in-device" class="custom-input" placeholder="Device Model (e.g. Lenovo IdeaPad)" oninput="app.syncA4()">
+                            <textarea id="in-issue" class="custom-input h-20 resize-none" placeholder="Reported Fault / Symptoms..." oninput="app.syncA4()"></textarea>
                         </div>
 
                         <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Pre-Repair Audit</label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded">
+                                <input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
                                 <span class="text-sm font-medium text-slate-700">Device Powers On</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-cracks" class="w-4 h-4 text-blue-600 rounded">
-                                <span class="text-sm font-medium text-slate-700">Screen/Body Cracks</span>
+                                <input type="checkbox" id="chk-cracks" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
+                                <span class="text-sm font-medium text-slate-700">Screen/Body Cracks Noted</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-data" class="w-4 h-4 text-blue-600 rounded">
+                                <input type="checkbox" id="chk-data" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
                                 <span class="text-sm font-medium text-slate-700">Client Waives Data Loss</span>
                             </label>
                         </div>
@@ -319,38 +305,77 @@
                         </button>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <section id="view-camera" class="flex-1 overflow-y-auto p-8 hidden">
-            <div class="max-w-xl mx-auto glass-panel p-8">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 text-2xl">
-                        <i class="fa-solid fa-camera"></i>
-                    </div>
-                    <h2 class="text-xl font-bold text-slate-800">Attach Evidence Photos</h2>
-                    <p class="text-sm text-slate-500 mt-2">Enter the Reference ID and snap photos directly from your device to attach them to an existing repair.</p>
-                </div>
-
-                <div class="space-y-6">
-                    <div>
-                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Repair Ref ID</label>
-                        <input type="text" id="cam-ref-id" class="custom-input mt-1 font-mono uppercase" placeholder="e.g. 1234">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Take / Select Photos</label>
-                        <input type="file" id="cam-file-input" multiple accept="image/*" capture="environment" class="hidden" onchange="app.handleCamFiles(this)">
-                        <div class="upload-zone border-blue-300 bg-blue-50 mt-1" onclick="document.getElementById('cam-file-input').click()">
-                            <i class="fa-solid fa-camera-retro text-4xl text-blue-600 mb-2"></i>
-                            <p class="text-sm font-bold text-blue-800">Open Camera / Gallery</p>
+                <div class="flex-1 a4-wrapper" id="a4-container">
+                    <div class="a4-paper flex flex-col" id="a4-document">
+                        <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6">
+                            <div class="flex items-center gap-4">
+                                <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-16 h-16 object-cover rounded-lg shadow-sm border border-slate-200">
+                                <div>
+                                    <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-none">RARE GRADE TECH</h1>
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">IT & Software Engineering</p>
+                                    <p class="text-xs text-slate-600 mt-2">info@raregradetech.co.za<br>015 065 0979 / 061 527 0749</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <h2 class="text-3xl font-bold text-slate-300">INTAKE</h2>
+                                <p class="text-sm font-bold text-slate-800 mt-2 font-mono" id="a4-ref">REF: RGT-0000</p>
+                                <p class="text-xs text-slate-500 mt-1" id="a4-date">Date Received: </p>
+                            </div>
                         </div>
-                        <div id="cam-preview-grid" class="img-preview-grid mt-4"></div>
-                    </div>
 
-                    <button onclick="app.uploadAttachedPhotos()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Attach to Repair
-                    </button>
+                        <div class="mt-6 grid grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Client Details</h3>
+                                <p class="font-bold text-slate-800 text-lg" id="a4-name">Not specified</p>
+                                <p class="text-slate-600 text-sm" id="a4-phone">---</p>
+                                <p class="text-slate-500 text-xs mt-1" id="a4-email">---</p>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Technician Details</h3>
+                                <p class="font-bold text-slate-800">Katlego</p>
+                                <p class="text-slate-600 text-sm">Lead Developer</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-5">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Device Audit & Fault Report</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-xs font-bold text-slate-500">DEVICE / MODEL:</span>
+                                    <p class="font-medium text-slate-800 mt-1" id="a4-device">Not specified</p>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-slate-500">REPORTED ISSUE:</span>
+                                    <p class="font-medium text-slate-800 mt-1 bg-white p-2 border border-slate-200 rounded text-sm min-h-[40px]" id="a4-issue">No issue described.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-200 grid grid-cols-2 gap-y-2 text-sm">
+                                <div class="flex items-center gap-2"><i class="fa-regular fa-square" id="sq-power"></i> Powers On</div>
+                                <div class="flex items-center gap-2"><i class="fa-regular fa-square" id="sq-cracks"></i> Pre-existing physical damage</div>
+                                <div class="flex items-center gap-2 col-span-2 text-blue-700 font-medium"><i class="fa-regular fa-square" id="sq-data"></i> Client accepts data loss liability</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto pt-6">
+                            <div class="bg-slate-100 p-3 rounded text-[10px] text-slate-500 mb-6 leading-relaxed">
+                                <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss. Devices abandoned for >90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition noted above.
+                            </div>
+                            
+                            <div class="flex justify-between items-end">
+                                <div class="w-1/2 pr-8">
+                                    <p class="text-xs font-bold text-slate-500 mb-2">Client Digital Signature</p>
+                                    <div class="border border-slate-200 bg-slate-50 h-16 rounded mb-1 flex items-center justify-center text-slate-300 text-xs">
+                                        Signature captured on left
+                                    </div>
+                                </div>
+                                <div class="w-1/3 border-t border-slate-800 pt-2 text-center">
+                                    <p class="text-xs font-bold text-slate-800">Rare Grade Tech Authorized</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </section>
@@ -458,10 +483,6 @@
             messagingSenderId: "1057428047643",
             appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
         };
-        
-        // Cloudinary Configuration
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqkujefxj/image/upload";
-        const CLOUDINARY_PRESET = "banter_box"; 
 
         class EnterpriseSystem {
             constructor() {
@@ -472,9 +493,6 @@
                 this.ctx = null;
                 this.isDrawing = false;
                 
-                this.intakeFiles = []; // Files for new intake
-                this.camFiles = [];    // Files for standalone camera attachment
-
                 this.db = null;
                 this.reportsData = [];
 
@@ -482,6 +500,9 @@
                 this.initTime();
                 this.initSignaturePad();
                 this.initKeyboardListener();
+                
+                this.resetRef();
+                document.getElementById('a4-date').innerText = "Date Received: " + this.formatDate(Date.now());
             }
 
             formatDate(timestamp) {
@@ -610,10 +631,8 @@
                 const report = this.reportsData.find(r => r.key === dbKey);
                 if(!report) return;
 
-                // Set DB Key
                 document.getElementById('mod-db-key').value = dbKey;
                 
-                // Populate Read-Only Left Side
                 document.getElementById('mod-ref').innerText = `RGT-${report.refId}`;
                 document.getElementById('mod-date-in').innerText = this.formatDate(report.timestamp);
                 document.getElementById('mod-client').innerText = report.clientName;
@@ -622,7 +641,6 @@
                 document.getElementById('mod-device').innerText = report.device;
                 document.getElementById('mod-issue').innerText = report.issue || 'No issue described.';
 
-                // Checkboxes
                 const setIcon = (id, condition) => {
                     const el = document.getElementById(id);
                     if(condition) { el.className = "fa-solid fa-square-check text-blue-500"; } 
@@ -632,7 +650,6 @@
                 setIcon('mod-chk-cracks', report.checks?.cracks);
                 setIcon('mod-chk-data', report.checks?.dataWaiver);
 
-                // Populate Image Gallery
                 const gallery = document.getElementById('mod-photo-gallery');
                 gallery.innerHTML = '';
                 if(report.photos && report.photos.length > 0) {
@@ -640,15 +657,14 @@
                         const img = document.createElement('img');
                         img.src = url;
                         img.className = "w-full aspect-square object-cover rounded-lg border border-slate-200 shadow-sm";
-                        img.onclick = () => window.open(url, '_blank'); // Click to view full size
+                        img.onclick = () => window.open(url, '_blank'); 
                         img.style.cursor = 'pointer';
                         gallery.appendChild(img);
                     });
                 } else {
-                    gallery.innerHTML = '<p class="text-xs text-slate-400 col-span-2 italic bg-slate-50 p-4 rounded text-center">No photos attached to this repair.</p>';
+                    gallery.innerHTML = '<p class="text-xs text-slate-400 col-span-2 italic bg-slate-50 p-4 rounded text-center border border-dashed border-slate-200">No photos attached to this repair.</p>';
                 }
 
-                // Populate Editable Right Side
                 document.getElementById('mod-tech-name').value = report.techName || "Katlego";
                 document.getElementById('mod-notes').value = report.techNotes || "";
                 document.getElementById('mod-status').value = report.status || "Pending";
@@ -692,130 +708,8 @@
             }
 
             // ==========================================
-            // STANDALONE CAMERA / PHOTO ATTACHMENT
+            // INTAKE: Save to Firebase Only
             // ==========================================
-            handleCamFiles(input) {
-                if (input.files) {
-                    for(let i=0; i<input.files.length; i++) this.camFiles.push(input.files[i]);
-                    
-                    const grid = document.getElementById('cam-preview-grid');
-                    grid.innerHTML = '';
-                    this.camFiles.forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const img = document.createElement('img');
-                            img.src = e.target.result; img.className = "img-thumb shadow-sm";
-                            grid.appendChild(img);
-                        }
-                        reader.readAsDataURL(file);
-                    });
-                }
-            }
-
-            async uploadAttachedPhotos() {
-                let refId = document.getElementById('cam-ref-id').value.trim().toUpperCase();
-                
-                // Remove RGT- prefix if user typed it
-                if(refId.startsWith('RGT-')) {
-                    refId = refId.replace('RGT-', '');
-                }
-
-                if(!refId || this.camFiles.length === 0) {
-                    alert("Please enter a Reference ID and select at least one photo.");
-                    return;
-                }
-
-                // 1. Find the report in Firebase data
-                const report = this.reportsData.find(r => r.refId === refId);
-                
-                if(!report) {
-                    alert(`Could not find a repair with Reference ID: RGT-${refId}`);
-                    return;
-                }
-
-                this.showLoading("Uploading to Cloudinary...", 0);
-
-                try {
-                    // 2. Upload new photos to Cloudinary
-                    let newUrls = [];
-                    for (let file of this.camFiles) {
-                        const url = await this.uploadToCloudinary(file);
-                        if (url) newUrls.push(url);
-                    }
-
-                    if(newUrls.length === 0) {
-                        throw new Error("Failed to upload images to Cloudinary.");
-                    }
-
-                    this.showLoading("Attaching to Repair File...", 0);
-
-                    // 3. Merge with existing photos
-                    let existingPhotos = report.photos || [];
-                    let mergedPhotos = [...existingPhotos, ...newUrls];
-
-                    // 4. Update Firebase
-                    await this.db.ref('reports/' + report.key).update({
-                        photos: mergedPhotos
-                    });
-
-                    this.hideLoading();
-                    alert(`Successfully attached ${newUrls.length} photo(s) to RGT-${refId}!`);
-                    
-                    // Reset View
-                    document.getElementById('cam-ref-id').value = '';
-                    document.getElementById('cam-preview-grid').innerHTML = '';
-                    this.camFiles = [];
-                    
-                    // Optional: open the modal so they can see it
-                    this.openModal(report.key);
-
-                } catch (error) {
-                    console.error("Camera Upload Error:", error);
-                    this.showErrorMsg(`Failed to attach photos: ${error.message}`);
-                }
-            }
-
-            // ==========================================
-            // INTAKE: Cloudinary -> Firebase
-            // ==========================================
-            handleFiles(input, targetGridId) {
-                if (input.files) {
-                    for(let i=0; i<input.files.length; i++) this.intakeFiles.push(input.files[i]);
-                    
-                    const grid = document.getElementById(targetGridId);
-                    grid.innerHTML = '';
-                    this.intakeFiles.forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const img = document.createElement('img');
-                            img.src = e.target.result; img.className = "img-thumb shadow-sm";
-                            grid.appendChild(img);
-                        }
-                        reader.readAsDataURL(file);
-                    });
-                }
-            }
-
-            async uploadToCloudinary(file) {
-                if(!CLOUDINARY_PRESET || CLOUDINARY_PRESET === "YOUR_UNSIGNED_PRESET") {
-                    return null; 
-                }
-
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', CLOUDINARY_PRESET);
-
-                try {
-                    const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                    if(!res.ok) throw new Error("Upload failed");
-                    const data = await res.json();
-                    return data.secure_url;
-                } catch (err) {
-                    console.warn("Cloudinary upload failed, skipping photo.", err);
-                    return null;
-                }
-            }
-
             showErrorMsg(msg) {
                 document.getElementById('spinner-ring').style.display = 'none';
                 document.getElementById('spinner-text').innerText = "An error occurred";
@@ -840,24 +734,10 @@
                 }
 
                 try {
-                    this.showLoading("Processing Intake...", 0);
-
-                    // 1. Upload to Cloudinary (If files exist)
-                    let uploadedUrls = [];
-                    if (this.intakeFiles && this.intakeFiles.length > 0) {
-                        this.showLoading("Uploading Photos to Cloudinary...", 0);
-                        for (let file of this.intakeFiles) {
-                            const url = await this.uploadToCloudinary(file);
-                            if (url) uploadedUrls.push(url);
-                        }
-                    }
-
                     this.showLoading("Saving data to Firebase...", 0);
                     
-                    // Generate a 4 digit Ref ID
                     const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
 
-                    // 2. Build Data Object
                     const reportData = {
                         refId: generatedRef,
                         clientName: name,
@@ -870,19 +750,17 @@
                             cracks: document.getElementById('chk-cracks').checked,
                             dataWaiver: document.getElementById('chk-data').checked
                         },
-                        photos: uploadedUrls,
+                        photos: [], // Empty array, to be populated by external page
                         signatureBase64: this.canvas.toDataURL(),
                         timestamp: Date.now(),
                         dateCollected: null,
                         status: 'Pending' 
                     };
 
-                    // 3. Save to Firebase 
                     await this.db.ref('reports').push(reportData);
                     
                     this.hideLoading();
                     
-                    // Offer to send email immediately
                     if(reportData.clientEmail) {
                         if(confirm(`Intake Saved! REF: RGT-${generatedRef}\n\nWould you like to open your email app to send the client their Reference ID now?`)) {
                             this.notifyClient(reportData.clientEmail, `RGT-${generatedRef}`, reportData.clientName);
@@ -903,9 +781,13 @@
             resetIntakeForm() {
                 document.querySelectorAll('#view-intake input[type="text"], #view-intake input[type="tel"], #view-intake input[type="email"], #view-intake textarea').forEach(i => i.value = '');
                 document.querySelectorAll('#view-intake input[type="checkbox"]').forEach(i => i.checked = false);
-                this.intakeFiles = [];
-                document.getElementById('preview-grid').innerHTML = '';
                 this.clearSignature();
+                this.resetRef();
+                this.syncA4();
+            }
+
+            resetRef() {
+                document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000);
             }
 
             // ==========================================
@@ -975,22 +857,32 @@
                 document.getElementById('view-dashboard').classList.add('hidden');
                 document.getElementById('view-registry').classList.add('hidden');
                 document.getElementById('view-intake').classList.add('hidden');
-                document.getElementById('view-camera').classList.add('hidden');
                 
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 
                 document.getElementById('view-' + viewId).classList.remove('hidden');
                 document.getElementById('nav-' + viewId).classList.add('active');
                 
-                const titles = { 'dashboard': 'Overview', 'registry': 'Client Registry & Queue', 'intake': 'Device Intake Form', 'camera': 'Attach Photos' };
+                const titles = { 'dashboard': 'Overview', 'registry': 'Client Registry & Queue', 'intake': 'Device Intake Form' };
                 document.getElementById('page-title').innerText = titles[viewId];
+            }
+
+            syncA4() {
+                document.getElementById('a4-name').innerText = document.getElementById('in-name').value || "Not specified";
+                document.getElementById('a4-phone').innerText = document.getElementById('in-phone').value || "---";
+                document.getElementById('a4-email').innerText = document.getElementById('in-email').value || "---";
+                document.getElementById('a4-device').innerText = document.getElementById('in-device').value || "Not specified";
+                document.getElementById('a4-issue').innerText = document.getElementById('in-issue').value || "No issue described.";
+                
+                document.getElementById('sq-power').className = document.getElementById('chk-power').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
+                document.getElementById('sq-cracks').className = document.getElementById('chk-cracks').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
+                document.getElementById('sq-data').className = document.getElementById('chk-data').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
             }
 
             initSignaturePad() {
                 this.canvas = document.getElementById('sig-canvas');
                 this.ctx = this.canvas.getContext('2d');
                 
-                // Allow CSS to load first, then resize
                 setTimeout(() => {
                     const rect = this.canvas.getBoundingClientRect();
                     this.canvas.width = rect.width;
@@ -1002,7 +894,6 @@
                 this.canvas.addEventListener('mouseup', () => { this.isDrawing = false; this.ctx.beginPath(); });
                 this.canvas.addEventListener('mouseout', () => { this.isDrawing = false; this.ctx.beginPath(); });
                 
-                // Touch support for mobile
                 this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.isDrawing = true; this.draw(e.touches[0]); });
                 this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); this.draw(e.touches[0]); });
                 this.canvas.addEventListener('touchend', () => { this.isDrawing = false; this.ctx.beginPath(); });
@@ -1037,7 +928,7 @@
 
         window.addEventListener('resize', () => {
             const canvas = document.getElementById('sig-canvas');
-            if(canvas && canvas.offsetParent !== null) { // only resize if visible
+            if(canvas && canvas.offsetParent !== null) { 
                 const rect = canvas.getBoundingClientRect();
                 canvas.width = rect.width;
                 canvas.height = rect.height;
