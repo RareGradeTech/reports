@@ -11,8 +11,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -120,8 +118,8 @@
     </div>
 
     <div id="lock-screen">
-        <div class="bg-blue-50 p-4 rounded-2xl mb-6 shadow-sm border border-blue-100">
-            <i class="fa-solid fa-shield-halved text-5xl text-blue-600"></i>
+        <div class="bg-white p-2 rounded-full mb-6 shadow-md border border-slate-200 overflow-hidden w-28 h-28 flex items-center justify-center">
+            <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-full h-full object-cover rounded-full">
         </div>
         <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Rare Grade Tech</h1>
         <p class="text-slate-500 text-sm font-medium">Enter Security PIN (12345)</p>
@@ -148,9 +146,7 @@
 
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-            <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
+            <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Logo" class="w-11 h-11 rounded-xl object-cover shadow-sm border border-slate-100">
             <div>
                 <h2 class="font-bold text-sm tracking-tight text-slate-800">RARE GRADE</h2>
                 <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Enterprise</p>
@@ -322,9 +318,7 @@
                     <div class="a4-paper flex flex-col" id="a4-document">
                         <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6">
                             <div class="flex items-center gap-4">
-                                <div class="w-14 h-14 bg-slate-900 rounded-xl flex items-center justify-center text-white text-2xl">
-                                    <i class="fa-solid fa-bolt"></i>
-                                </div>
+                                <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-16 h-16 object-cover rounded-lg shadow-sm border border-slate-200">
                                 <div>
                                     <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-none">RARE GRADE TECH</h1>
                                     <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">IT & Software Engineering</p>
@@ -591,7 +585,7 @@
 
             notifyClient(email, refId, name) {
                 const subject = encodeURIComponent(`Repair Intake Confirmation: ${refId}`);
-                const body = encodeURIComponent(`Hello ${name},\n\nYour device has been securely logged at Rare Grade Tech.\n\nYour Reference ID is: ${refId}\n\nWe will notify you via email or phone when your repair is ready for collection.\n\nRegards,\nThe Rare Grade Tech Team`);
+                const body = encodeURIComponent(`Hello ${name},\n\nYour device has been securely logged at Rare Grade Tech.\n\nYour Reference ID is: ${refId}\n\nWe will notify you via email or phone when your repair is ready for collection.\n\nRegards,\nKatlego\nThe Rare Grade Tech Team`);
                 window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
             }
 
@@ -607,7 +601,7 @@
                 document.getElementById('mod-client').innerText = report.clientName;
                 document.getElementById('mod-device').innerText = report.device;
                 
-                document.getElementById('mod-tech-name').value = report.techName || "";
+                document.getElementById('mod-tech-name').value = report.techName || "Katlego";
                 document.getElementById('mod-notes').value = report.techNotes || "";
                 document.getElementById('mod-status').value = report.status || "Pending";
 
