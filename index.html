@@ -116,7 +116,7 @@
     <div id="global-spinner">
         <div class="spinner-ring"></div>
         <p id="spinner-text" class="text-slate-800 mt-4 font-bold tracking-wide">Processing...</p>
-    </div>
+        <p id="spinner-subtext" class="text-slate-500 text-sm mt-1"></p> </div>
 
     <div id="lock-screen">
         <div class="bg-blue-50 p-4 rounded-2xl mb-6 shadow-sm border border-blue-100">
@@ -224,11 +224,12 @@
                                 <th class="p-4 font-medium">Ref ID</th>
                                 <th class="p-4 font-medium">Client</th>
                                 <th class="p-4 font-medium">Device</th>
+                                <th class="p-4 font-medium">Date Received</th>
                                 <th class="p-4 font-medium">Status</th>
                             </tr>
                         </thead>
                         <tbody id="dash-recent-table" class="text-sm">
-                            <tr><td colspan="4" class="p-8 text-center text-slate-400">Loading data...</td></tr>
+                            <tr><td colspan="5" class="p-8 text-center text-slate-400">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -244,13 +245,14 @@
                         <input type="text" id="search-input" onkeyup="app.filterRegistry()" placeholder="Search Name, Phone, or ID..." class="custom-input pl-10 py-2 text-sm">
                     </div>
                 </div>
-                <div class="max-h-[60vh] overflow-y-auto">
+                <div class="max-h-[70vh] overflow-y-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
                                 <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Client Name</th>
+                                <th class="p-4 font-medium">Client Details</th>
                                 <th class="p-4 font-medium">Device / Issue</th>
+                                <th class="p-4 font-medium">Dates (In/Out)</th>
                                 <th class="p-4 font-medium">Status</th>
                                 <th class="p-4 font-medium text-right">Action</th>
                             </tr>
@@ -275,6 +277,7 @@
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Client Details</label>
                             <input type="text" id="in-name" class="custom-input" placeholder="Full Name" oninput="app.syncA4()">
                             <input type="tel" id="in-phone" class="custom-input" placeholder="Phone Number" oninput="app.syncA4()">
+                            <input type="email" id="in-email" class="custom-input" placeholder="Email Address (Optional)" oninput="app.syncA4()">
                         </div>
 
                         <div class="space-y-3">
@@ -330,7 +333,7 @@
                             <div class="text-right">
                                 <h2 class="text-3xl font-bold text-slate-300">INTAKE</h2>
                                 <p class="text-sm font-bold text-slate-800 mt-2 font-mono" id="a4-ref">REF: RGT-0000</p>
-                                <p class="text-xs text-slate-500 mt-1" id="a4-date">Date: </p>
+                                <p class="text-xs text-slate-500 mt-1" id="a4-date">Date Received: </p>
                             </div>
                         </div>
 
@@ -339,6 +342,7 @@
                                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Client Details</h3>
                                 <p class="font-bold text-slate-800 text-lg" id="a4-name">Not specified</p>
                                 <p class="text-slate-600 text-sm" id="a4-phone">---</p>
+                                <p class="text-slate-500 text-xs mt-1" id="a4-email">---</p>
                             </div>
                             <div>
                                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Technician Details</h3>
@@ -426,6 +430,7 @@
                             <option value="Ready for Collection" class="text-emerald-600">Ready for Collection</option>
                             <option value="Completed & Collected" class="text-slate-600">Completed & Collected</option>
                         </select>
+                        <p class="text-[10px] text-slate-500 mt-1">Setting to "Completed & Collected" will automatically set the Collection Date.</p>
                     </div>
 
                     <button onclick="app.saveTechnicianUpdate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition-all">
@@ -439,7 +444,7 @@
 
     <script>
         // ==========================================
-        // FIREBASE CONFIGURATION (LIVE)
+        // FIREBASE CONFIGURATION
         // ==========================================
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
@@ -451,7 +456,7 @@
             appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
         };
         
-        // Cloudinary (Replace with your actual preset later, or leave as is to skip upload safely)
+        // Cloudinary
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload";
         const CLOUDINARY_PRESET = "YOUR_UNSIGNED_PRESET"; 
 
@@ -466,15 +471,22 @@
                 
                 this.selectedFiles = [];
                 this.db = null;
-                this.reportsData = []; // Cache for real-time table
+                this.reportsData = [];
 
                 this.initFirebase();
                 this.initTime();
                 this.initSignaturePad();
                 this.initKeyboardListener();
                 
-                document.getElementById('a4-date').innerText = "Date: " + new Date().toLocaleDateString();
                 this.resetRef();
+                document.getElementById('a4-date').innerText = "Date Received: " + this.formatDate(Date.now());
+            }
+
+            // Format date helper
+            formatDate(timestamp) {
+                if(!timestamp) return "---";
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
             }
 
             // ==========================================
@@ -484,16 +496,13 @@
                 firebase.initializeApp(FIREBASE_CONFIG);
                 this.db = firebase.database();
                 
-                // Real-time Listener on 'reports' node
                 this.db.ref('reports').on('value', snapshot => {
                     this.reportsData = [];
                     snapshot.forEach(child => {
                         this.reportsData.push({ key: child.key, ...child.val() });
                     });
                     
-                    // Sort descending by timestamp
                     this.reportsData.sort((a, b) => b.timestamp - a.timestamp);
-                    
                     this.updateDashboard();
                     this.filterRegistry(); 
                 });
@@ -517,6 +526,7 @@
                             <td class="p-4 font-mono text-xs text-slate-500">${report.refId}</td>
                             <td class="p-4 font-medium text-slate-800">${report.clientName}</td>
                             <td class="p-4">${report.device}</td>
+                            <td class="p-4 text-xs text-slate-500">${this.formatDate(report.timestamp)}</td>
                             <td class="p-4">${this.getStatusBadge(report.status)}</td>
                         `;
                         tbody.appendChild(tr);
@@ -524,7 +534,7 @@
                 });
 
                 if(this.reportsData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400">No records found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No records found.</td></tr>';
                 }
 
                 document.getElementById('stat-pending').innerText = pendingCount;
@@ -540,19 +550,31 @@
                 const filtered = this.reportsData.filter(r => 
                     (r.clientName && r.clientName.toLowerCase().includes(search)) ||
                     (r.refId && r.refId.toLowerCase().includes(search)) ||
-                    (r.clientPhone && r.clientPhone.includes(search))
+                    (r.clientPhone && r.clientPhone.includes(search)) ||
+                    (r.clientEmail && r.clientEmail.toLowerCase().includes(search))
                 );
 
                 filtered.forEach(report => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                    
+                    // Email notify button logic
+                    let notifyBtn = "";
+                    if(report.clientEmail) {
+                        notifyBtn = `<button onclick="app.notifyClient('${report.clientEmail}', '${report.refId}', '${report.clientName}')" class="ml-2 text-slate-400 hover:text-blue-500" title="Send Email Receipt"><i class="fa-regular fa-envelope"></i></button>`;
+                    }
+
                     tr.innerHTML = `
                         <td class="p-4 font-mono text-xs text-slate-500">${report.refId}</td>
                         <td class="p-4">
                             <div class="font-medium text-slate-800">${report.clientName}</div>
-                            <div class="text-xs text-slate-500">${report.clientPhone}</div>
+                            <div class="text-xs text-slate-500">${report.clientPhone} ${notifyBtn}</div>
                         </td>
                         <td class="p-4 text-sm text-slate-600">${report.device}</td>
+                        <td class="p-4 text-xs text-slate-500">
+                            <div>In: <span class="font-medium text-slate-700">${this.formatDate(report.timestamp)}</span></div>
+                            <div>Out: <span class="font-medium text-slate-700">${report.dateCollected ? this.formatDate(report.dateCollected) : '---'}</span></div>
+                        </td>
                         <td class="p-4">${this.getStatusBadge(report.status)}</td>
                         <td class="p-4 text-right">
                             <button onclick="app.openModal('${report.key}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded text-xs font-semibold transition-all border border-blue-200 hover:border-blue-600">
@@ -564,7 +586,7 @@
                 });
 
                 if(filtered.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
                 }
             }
 
@@ -572,6 +594,15 @@
                 if (status === 'Pending') return '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Pending</span>';
                 if (status === 'Ready for Collection') return '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Ready</span>';
                 return '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Collected</span>';
+            }
+
+            // ==========================================
+            // EMAIL NOTIFICATION (mailto:)
+            // ==========================================
+            notifyClient(email, refId, name) {
+                const subject = encodeURIComponent(`Repair Intake Confirmation: ${refId}`);
+                const body = encodeURIComponent(`Hello ${name},\n\nYour device has been securely logged at Rare Grade Tech.\n\nYour Reference ID is: ${refId}\n\nWe will notify you via email or phone when your repair is ready for collection.\n\nRegards,\nThe Rare Grade Tech Team`);
+                window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
             }
 
             // ==========================================
@@ -606,23 +637,31 @@
                 this.showLoading("Saving update...");
 
                 try {
-                    await this.db.ref('reports/' + dbKey).update({
+                    let updateData = {
                         techName: techName,
                         techNotes: techNotes,
                         status: status,
                         lastUpdated: Date.now()
-                    });
+                    };
+
+                    // Automatically mark collected date if status is completed
+                    if(status === 'Completed & Collected') {
+                        updateData.dateCollected = Date.now();
+                    }
+
+                    await this.db.ref('reports/' + dbKey).update(updateData);
+                    
                     this.hideLoading();
                     this.closeModal();
                 } catch (error) {
-                    console.error("Error updating", error);
+                    console.error("Firebase Update Error", error);
                     this.hideLoading();
-                    alert("Failed to update database.");
+                    this.showErrorMsg(`Update failed: ${error.message}`);
                 }
             }
 
             // ==========================================
-            // INTAKE & BULLETPROOF PDF EXPORT
+            // INTAKE: Cloudinary -> Firebase -> PDF
             // ==========================================
             handleFiles(input) {
                 if (input.files) {
@@ -646,10 +685,9 @@
             }
 
             async uploadToCloudinary(file) {
-                // Failsafe if Cloudinary isn't set up yet
+                // Return null immediately if not configured so the app doesn't crash
                 if(!CLOUDINARY_PRESET || CLOUDINARY_PRESET === "YOUR_UNSIGNED_PRESET") {
-                    console.warn("Cloudinary not configured. Skipping image.");
-                    return null;
+                    return null; 
                 }
 
                 const formData = new FormData();
@@ -658,17 +696,37 @@
 
                 try {
                     const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                    if(!res.ok) throw new Error("Upload response not OK");
+                    if(!res.ok) throw new Error("Upload failed");
                     const data = await res.json();
                     return data.secure_url;
                 } catch (err) {
-                    console.error("Cloudinary failed", err);
-                    return null; // Don't break the app, just return null
+                    console.warn("Cloudinary upload failed, skipping photo.", err);
+                    return null;
                 }
             }
 
+            // SHOW ERROR UI Helper
+            showErrorMsg(msg) {
+                document.getElementById('spinner-ring').style.display = 'none';
+                document.getElementById('spinner-text').innerText = "An error occurred";
+                document.getElementById('spinner-text').classList.add('text-red-600');
+                document.getElementById('spinner-subtext').innerText = msg;
+                
+                // Hide after 5 seconds
+                setTimeout(() => {
+                    this.hideLoading();
+                    // reset spinner styles for next time
+                    document.getElementById('spinner-ring').style.display = 'block';
+                    document.getElementById('spinner-text').classList.remove('text-red-600');
+                    document.getElementById('spinner-subtext').innerText = "";
+                }, 5000);
+            }
+
             async submitIntake() {
-                if(!document.getElementById('in-name').value || !document.getElementById('in-device').value) {
+                const name = document.getElementById('in-name').value;
+                const device = document.getElementById('in-device').value;
+
+                if(!name || !device) {
                     alert("Please fill in Client Name and Device Model.");
                     return;
                 }
@@ -679,21 +737,22 @@
                     // 1. Upload to Cloudinary (If files exist)
                     let uploadedUrls = [];
                     if (this.selectedFiles && this.selectedFiles.length > 0) {
-                        this.showLoading("Uploading Photos...", 0);
+                        this.showLoading("Uploading Photos to Cloudinary...", 0);
                         for (let file of this.selectedFiles) {
                             const url = await this.uploadToCloudinary(file);
                             if (url) uploadedUrls.push(url);
                         }
                     }
 
-                    this.showLoading("Saving to Firebase...", 0);
+                    this.showLoading("Saving data to Firebase...", 0);
 
                     // 2. Build Data Object
                     const reportData = {
                         refId: document.getElementById('a4-ref').innerText.replace('REF: ', ''),
-                        clientName: document.getElementById('in-name').value,
+                        clientName: name,
                         clientPhone: document.getElementById('in-phone').value,
-                        device: document.getElementById('in-device').value,
+                        clientEmail: document.getElementById('in-email').value,
+                        device: device,
                         issue: document.getElementById('in-issue').value,
                         checks: {
                             power: document.getElementById('chk-power').checked,
@@ -703,10 +762,12 @@
                         photos: uploadedUrls,
                         signatureBase64: this.canvas.toDataURL(),
                         timestamp: Date.now(),
+                        dateCollected: null, // Null until technician marks completed
                         status: 'Pending' 
                     };
 
-                    // 3. Save to Firebase
+                    // 3. Save to Firebase 
+                    // This is where it usually fails if rules are strict
                     await this.db.ref('reports').push(reportData);
 
                     // 4. Inject Images into A4 Appendix for PDF safely
@@ -718,7 +779,7 @@
                         grid.innerHTML = '';
                         uploadedUrls.forEach(url => {
                             const img = new Image();
-                            img.crossOrigin = "Anonymous"; // CRITICAL FOR HTML2PDF TO NOT GET STUCK
+                            img.crossOrigin = "Anonymous"; // MUST BE ANONYMOUS
                             img.src = url; 
                             img.style.height = "120px"; 
                             img.style.objectFit = "cover"; 
@@ -726,8 +787,7 @@
                             grid.appendChild(img);
                         });
                         
-                        // Give images a fraction of a second to load into DOM before capturing
-                        await new Promise(r => setTimeout(r, 600)); 
+                        await new Promise(r => setTimeout(r, 500)); 
                     } else {
                         appendix.classList.add('hidden');
                         grid.innerHTML = '';
@@ -736,33 +796,41 @@
                     // 5. Generate PDF
                     this.showLoading("Generating PDF Report...", 0);
                     const element = document.getElementById('a4-document');
-                    
-                    // Scroll to top to prevent html2canvas clipping bugs
                     window.scrollTo(0,0); 
 
                     const opt = {
                         margin: 0, 
                         filename: `${reportData.refId}_Report.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true, allowTaint: true }, // allowTaint is a failsafe
+                        html2canvas: { scale: 2, useCORS: true },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
 
                     await html2pdf().set(opt).from(element).save();
 
                     this.hideLoading();
+                    
+                    // Offer to send email immediately
+                    if(reportData.clientEmail) {
+                        if(confirm("Report Saved & Downloaded! \n\nWould you like to open your email app to send the client their Reference ID now?")) {
+                            this.notifyClient(reportData.clientEmail, reportData.refId, reportData.clientName);
+                        }
+                    } else {
+                        alert("Report successfully saved and downloaded!");
+                    }
+
                     this.resetForm();
                     this.navigate('registry');
 
                 } catch (error) {
                     console.error("Submission Error:", error);
-                    this.hideLoading();
-                    alert("An error occurred. Check console. The form will not be lost.");
+                    // Display the exact error to the user without wiping the form
+                    this.showErrorMsg(`Save failed: ${error.message}. Check Firebase rules.`);
                 }
             }
 
             resetForm() {
-                document.querySelectorAll('input[type="text"], input[type="tel"], textarea').forEach(i => i.value = '');
+                document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], textarea').forEach(i => i.value = '');
                 document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
                 this.selectedFiles = [];
                 document.getElementById('preview-grid').innerHTML = '';
@@ -834,7 +902,10 @@
                 if (duration > 0) setTimeout(() => this.hideLoading(), duration);
             }
 
-            hideLoading() { document.getElementById('global-spinner').classList.remove('active'); }
+            hideLoading() { 
+                document.getElementById('global-spinner').classList.remove('active'); 
+                document.getElementById('spinner-subtext').innerText = "";
+            }
 
             navigate(viewId) {
                 document.getElementById('view-dashboard').classList.add('hidden');
@@ -851,6 +922,7 @@
             syncA4() {
                 document.getElementById('a4-name').innerText = document.getElementById('in-name').value || "Not specified";
                 document.getElementById('a4-phone').innerText = document.getElementById('in-phone').value || "---";
+                document.getElementById('a4-email').innerText = document.getElementById('in-email').value || "---";
                 document.getElementById('a4-device').innerText = document.getElementById('in-device').value || "Not specified";
                 document.getElementById('a4-issue').innerText = document.getElementById('in-issue').value || "No issue described.";
                 
