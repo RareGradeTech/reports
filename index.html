@@ -78,18 +78,18 @@
         .custom-input:focus { border-color: var(--brand-accent); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
         /* --- MODAL --- */
-        #update-modal {
+        .system-modal {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
             z-index: 40000; display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 20px;
         }
-        #update-modal.active { opacity: 1; pointer-events: all; }
+        .system-modal.active { opacity: 1; pointer-events: all; }
         .modal-content { 
             background: white; width: 100%; max-width: 900px; max-height: 90vh; 
             border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
             transform: translateY(20px); transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden;
         }
-        #update-modal.active .modal-content { transform: translateY(0); }
+        .system-modal.active .modal-content { transform: translateY(0); }
 
         /* --- A4 PREVIEW CANVAS --- */
         .a4-wrapper { background: #e2e8f0; padding: 40px; display: flex; justify-content: center; overflow-y: auto; height: 100%; }
@@ -149,8 +149,8 @@
             </div>
         </div>
 
-        <nav class="flex-1 p-4 space-y-1">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-2">Core Workflow</div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-2">Hardware Division</div>
             <div class="nav-item active" onclick="app.navigate('dashboard')" id="nav-dashboard">
                 <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
             </div>
@@ -159,6 +159,14 @@
             </div>
             <div class="nav-item" onclick="app.navigate('intake')" id="nav-intake">
                 <i class="fa-solid fa-clipboard-list w-5 text-center"></i> Device Intake
+            </div>
+
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-6 border-t border-slate-100 pt-5">Software Division</div>
+            <div class="nav-item" onclick="app.navigate('soft-registry')" id="nav-soft-registry">
+                <i class="fa-solid fa-code-branch w-5 text-center"></i> Project Registry
+            </div>
+            <div class="nav-item" onclick="app.navigate('soft-intake')" id="nav-soft-intake">
+                <i class="fa-solid fa-laptop-code w-5 text-center"></i> Software Intake
             </div>
         </nav>
 
@@ -199,16 +207,21 @@
                     <div class="text-3xl font-bold text-slate-800" id="stat-ready">0</div>
                     <div class="text-sm text-slate-500 font-medium">Ready for Collection</div>
                 </div>
+                <div class="glass-panel p-6 border-t-4 border-blue-600">
+                    <div class="text-blue-600 mb-2"><i class="fa-solid fa-code text-2xl"></i></div>
+                    <div class="text-3xl font-bold text-slate-800" id="stat-software">0</div>
+                    <div class="text-sm text-slate-500 font-medium">Active Software Projects</div>
+                </div>
                 <div class="glass-panel p-6 border-t-4 border-slate-800">
                     <div class="text-slate-800 mb-2"><i class="fa-solid fa-users text-2xl"></i></div>
                     <div class="text-3xl font-bold text-slate-800" id="stat-total">0</div>
-                    <div class="text-sm text-slate-500 font-medium">Total Records</div>
+                    <div class="text-sm text-slate-500 font-medium">Total Hardware Records</div>
                 </div>
             </div>
 
             <div class="glass-panel overflow-hidden">
                 <div class="p-5 border-b border-slate-200 bg-white">
-                    <h3 class="font-bold text-slate-800">Recent Intake Stream</h3>
+                    <h3 class="font-bold text-slate-800">Recent Hardware Intake Stream</h3>
                 </div>
                 <div class="p-0">
                     <table class="w-full text-left border-collapse">
@@ -232,7 +245,7 @@
         <section id="view-registry" class="flex-1 overflow-y-auto p-8 hidden">
             <div class="glass-panel overflow-hidden">
                 <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800">Database & Service Queue</h3>
+                    <h3 class="font-bold text-slate-800">Hardware Database & Queue</h3>
                     <div class="relative w-72">
                         <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
                         <input type="text" id="search-input" onkeyup="app.filterRegistry()" placeholder="Search Name, Phone, or ID..." class="custom-input pl-10 py-2 text-sm">
@@ -251,7 +264,36 @@
                             </tr>
                         </thead>
                         <tbody id="registry-table" class="text-sm">
-                            </tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-soft-registry" class="flex-1 overflow-y-auto p-8 hidden">
+            <div class="glass-panel overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800">Software Projects Pipeline</h3>
+                    <div class="relative w-72">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" id="search-soft-input" onkeyup="app.filterSoftRegistry()" placeholder="Search Project or Client..." class="custom-input pl-10 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="max-h-[70vh] overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                                <th class="p-4 font-medium">Ref ID</th>
+                                <th class="p-4 font-medium">Project Name</th>
+                                <th class="p-4 font-medium">Client / Company</th>
+                                <th class="p-4 font-medium">Platform</th>
+                                <th class="p-4 font-medium">Deadline</th>
+                                <th class="p-4 font-medium">Status</th>
+                                <th class="p-4 font-medium text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="soft-registry-table" class="text-sm">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -259,9 +301,9 @@
 
         <section id="view-intake" class="flex-1 hidden h-full">
             <div class="flex h-full">
-                <div class="w-96 bg-white border-r border-slate-200 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
+                <div class="w-96 bg-white border-r border-slate-200 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 shrink-0">
                     <div class="p-6 border-b border-slate-100">
-                        <h2 class="font-bold text-lg text-slate-800">Intake Form</h2>
+                        <h2 class="font-bold text-lg text-slate-800">Hardware Intake</h2>
                         <p class="text-xs text-slate-500">Device will be saved as <span class="font-bold text-amber-500">Pending</span>.</p>
                     </div>
                     
@@ -380,11 +422,79 @@
             </div>
         </section>
 
-        <div id="update-modal">
+        <section id="view-soft-intake" class="flex-1 overflow-y-auto p-8 hidden">
+            <div class="glass-panel max-w-4xl mx-auto overflow-hidden">
+                <div class="p-6 border-b border-slate-200 bg-white">
+                    <h2 class="font-bold text-xl text-slate-800"><i class="fa-solid fa-code text-blue-600 mr-2"></i> Software Project Intake</h2>
+                    <p class="text-sm text-slate-500 mt-1">Log new development requests, systems, or apps for the engineering team.</p>
+                </div>
+                
+                <div class="p-8 space-y-8 bg-slate-50">
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Client / Company Info</h3>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Client or Company Name</label>
+                                <input type="text" id="soft-client-name" class="custom-input mt-1" placeholder="e.g. Mapbox Logistics">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Contact Phone</label>
+                                <input type="tel" id="soft-client-phone" class="custom-input mt-1" placeholder="Phone Number">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Contact Email</label>
+                                <input type="email" id="soft-client-email" class="custom-input mt-1" placeholder="Email Address">
+                            </div>
+                        </div>
+
+                        <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Project Metdata</h3>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Project Name</label>
+                                <input type="text" id="soft-project-name" class="custom-input mt-1" placeholder="e.g. Vynix Social">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Target Platform</label>
+                                <select id="soft-platform" class="custom-input mt-1">
+                                    <option value="Web Application">Web Application</option>
+                                    <option value="Mobile App (iOS/Android)">Mobile App (iOS/Android)</option>
+                                    <option value="Landing Page / Website">Landing Page / Website</option>
+                                    <option value="Desktop Software">Desktop Software</option>
+                                    <option value="API / Backend System">API / Backend System</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Target Deadline</label>
+                                <input type="date" id="soft-deadline" class="custom-input mt-1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Engineering Specifications</h3>
+                        <div>
+                            <label class="text-xs text-slate-500 font-medium">Preferred Tech Stack (Optional)</label>
+                            <input type="text" id="soft-stack" class="custom-input mt-1 font-mono text-sm" placeholder="e.g. Firebase, React Native, Mapbox">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500 font-medium">Core Requirements & Features</label>
+                            <textarea id="soft-requirements" class="custom-input mt-1 h-32 resize-none" placeholder="Detail the core functionalities, user roles, and business logic required..."></textarea>
+                        </div>
+                    </div>
+
+                    <button onclick="app.submitSoftwareIntake()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-laptop-code"></i> Submit Project to Pipeline
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div id="update-modal" class="system-modal">
             <div class="modal-content flex flex-col h-full">
                 <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
                     <h2 class="text-xl font-bold text-slate-800">Repair Details & Update</h2>
-                    <button onclick="app.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                    <button onclick="app.closeModal('update-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 
                 <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
@@ -424,13 +534,6 @@
                                 <div class="flex items-center gap-2 col-span-2"><i id="mod-chk-data" class="fa-solid fa-square-check text-blue-500"></i> Data Liability Waived</div>
                             </div>
                         </div>
-
-                        <div class="bg-white border border-slate-200 rounded-xl p-4">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Device Photos / Evidence</h3>
-                            <div id="mod-photo-gallery" class="grid grid-cols-2 gap-2">
-                                <p class="text-xs text-slate-400 col-span-2 italic">No photos attached.</p>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="w-full md:w-2/5 p-6 overflow-y-auto bg-white flex flex-col">
@@ -460,8 +563,86 @@
                             </div>
                         </div>
 
-                        <button onclick="app.saveTechnicianUpdate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
-                            Save Update
+                        <button onclick="app.saveTechnicianUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
+                            Save Hardware Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="soft-modal" class="system-modal">
+            <div class="modal-content flex flex-col h-full">
+                <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
+                    <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-code text-blue-600 mr-2"></i> Engineering Dashboard</h2>
+                    <button onclick="app.closeModal('soft-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
+                    <div class="w-full md:w-3/5 p-6 overflow-y-auto border-r border-slate-100 bg-slate-50">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Project ID</p>
+                                <p class="font-mono text-lg font-bold text-blue-600" id="mod-soft-ref">---</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Target Deadline</p>
+                                <p class="font-medium text-sm text-red-600" id="mod-soft-deadline">---</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 rounded-xl p-5 mb-6 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-800" id="mod-soft-project">---</h3>
+                            <p class="text-sm font-medium text-slate-500 mb-4" id="mod-soft-client">---</p>
+                            
+                            <div class="grid grid-cols-2 gap-4 mt-4 border-t border-slate-100 pt-4">
+                                <div>
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Platform</p>
+                                    <p class="text-sm font-medium text-slate-800 mt-1" id="mod-soft-platform">---</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Requested Stack</p>
+                                    <p class="text-sm font-mono text-slate-800 mt-1" id="mod-soft-stack">---</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Core Requirements & Business Logic</h3>
+                            <div class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed" id="mod-soft-requirements">---</div>
+                        </div>
+                    </div>
+
+                    <div class="w-full md:w-2/5 p-6 overflow-y-auto bg-white flex flex-col">
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-terminal text-slate-800"></i> Developer Controls</h3>
+                        
+                        <input type="hidden" id="mod-soft-db-key">
+                        
+                        <div class="space-y-5 flex-1">
+                            <div>
+                                <label class="text-xs font-bold text-slate-700 uppercase">Assigned Dev</label>
+                                <input type="text" id="mod-soft-dev" class="custom-input mt-1" placeholder="e.g. Katlego">
+                            </div>
+                            
+                            <div>
+                                <label class="text-xs font-bold text-slate-700 uppercase">Development Notes / Commits</label>
+                                <textarea id="mod-soft-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Log progress, repository links, or blockers..."></textarea>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-slate-700 uppercase">Project Phase</label>
+                                <select id="mod-soft-status" class="custom-input mt-1 font-bold">
+                                    <option value="Requirements Gathering" class="text-slate-600">Requirements Gathering</option>
+                                    <option value="UI/UX Design" class="text-purple-600">UI/UX Design</option>
+                                    <option value="In Development" class="text-blue-600">In Development</option>
+                                    <option value="Testing & QA" class="text-amber-600">Testing & QA</option>
+                                    <option value="Deployed / Completed" class="text-emerald-600">Deployed / Completed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button onclick="app.saveSoftwareUpdate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
+                            Push Status Update
                         </button>
                     </div>
                 </div>
@@ -494,7 +675,8 @@
                 this.isDrawing = false;
                 
                 this.db = null;
-                this.reportsData = [];
+                this.reportsData = []; // Hardware
+                this.softwareData = []; // Software
 
                 this.initFirebase();
                 this.initTime();
@@ -518,22 +700,33 @@
                 firebase.initializeApp(FIREBASE_CONFIG);
                 this.db = firebase.database();
                 
+                // Hardware Listener
                 this.db.ref('reports').on('value', snapshot => {
                     this.reportsData = [];
                     snapshot.forEach(child => {
                         this.reportsData.push({ key: child.key, ...child.val() });
                     });
-                    
                     this.reportsData.sort((a, b) => b.timestamp - a.timestamp);
                     this.updateDashboard();
                     this.filterRegistry(); 
                 });
+
+                // Software Listener
+                this.db.ref('software_projects').on('value', snapshot => {
+                    this.softwareData = [];
+                    snapshot.forEach(child => {
+                        this.softwareData.push({ key: child.key, ...child.val() });
+                    });
+                    this.softwareData.sort((a, b) => b.timestamp - a.timestamp);
+                    this.updateDashboard(); // Updates software stat
+                    this.filterSoftRegistry();
+                });
             }
 
             updateDashboard() {
+                // Hardware Stats
                 let pendingCount = 0;
                 let readyCount = 0;
-
                 const tbody = document.getElementById('dash-recent-table');
                 tbody.innerHTML = '';
 
@@ -557,14 +750,22 @@
                 });
 
                 if(this.reportsData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No records found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No hardware records found.</td></tr>';
                 }
 
+                // Update Stat Cards
                 document.getElementById('stat-pending').innerText = pendingCount;
                 document.getElementById('stat-ready').innerText = readyCount;
                 document.getElementById('stat-total').innerText = this.reportsData.length;
+
+                // Software Stats (Active = anything not deployed/completed)
+                let activeSoftCount = this.softwareData.filter(s => s.status !== 'Deployed / Completed').length;
+                document.getElementById('stat-software').innerText = activeSoftCount;
             }
 
+            // ==========================================
+            // HARDWARE METHODS
+            // ==========================================
             filterRegistry() {
                 const search = document.getElementById('search-input').value.toLowerCase();
                 const tbody = document.getElementById('registry-table');
@@ -599,17 +800,15 @@
                         </td>
                         <td class="p-4">${this.getStatusBadge(report.status)}</td>
                         <td class="p-4 text-right">
-                            <button onclick="app.openModal('${report.key}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-blue-200 hover:border-blue-600 shadow-sm">
-                                View & Update
+                            <button onclick="app.openModal('${report.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">
+                                View / Update
                             </button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                if(filtered.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
-                }
+                if(filtered.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
             }
 
             getStatusBadge(status) {
@@ -618,14 +817,150 @@
                 return '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Collected</span>';
             }
 
-            notifyClient(email, refId, name) {
-                const subject = encodeURIComponent(`Repair Intake Confirmation: ${refId}`);
-                const body = encodeURIComponent(`Hello ${name},\n\nYour device has been securely logged at Rare Grade Tech.\n\nYour Reference ID is: ${refId}\n\nWe will notify you via email or phone when your repair is ready for collection.\n\nRegards,\nKatlego\nThe Rare Grade Tech Team`);
-                window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+            // ==========================================
+            // SOFTWARE METHODS
+            // ==========================================
+            filterSoftRegistry() {
+                const search = document.getElementById('search-soft-input').value.toLowerCase();
+                const tbody = document.getElementById('soft-registry-table');
+                tbody.innerHTML = '';
+
+                const filtered = this.softwareData.filter(s => 
+                    (s.clientName && s.clientName.toLowerCase().includes(search)) ||
+                    (s.projectName && s.projectName.toLowerCase().includes(search)) ||
+                    (s.refId && s.refId.toLowerCase().includes(search))
+                );
+
+                filtered.forEach(project => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-100 hover:bg-blue-50 transition-colors";
+                    
+                    tr.innerHTML = `
+                        <td class="p-4 font-mono text-xs text-blue-600 font-bold">SFT-${project.refId}</td>
+                        <td class="p-4 font-bold text-slate-800">${project.projectName}</td>
+                        <td class="p-4 text-sm text-slate-600">${project.clientName}</td>
+                        <td class="p-4 text-xs font-medium text-slate-500">${project.platform}</td>
+                        <td class="p-4 text-xs font-medium ${new Date(project.deadline) < new Date() && project.status !== 'Deployed / Completed' ? 'text-red-500' : 'text-slate-700'}">${project.deadline || 'No Date'}</td>
+                        <td class="p-4">${this.getSoftStatusBadge(project.status)}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="app.openSoftModal('${project.key}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-blue-200 hover:border-blue-600 shadow-sm">
+                                Open Repo / Specs
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                if(filtered.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">No software projects found.</td></tr>';
             }
 
+            getSoftStatusBadge(status) {
+                const styles = {
+                    'Requirements Gathering': 'bg-slate-100 text-slate-600',
+                    'UI/UX Design': 'bg-purple-100 text-purple-700',
+                    'In Development': 'bg-blue-100 text-blue-700',
+                    'Testing & QA': 'bg-amber-100 text-amber-700',
+                    'Deployed / Completed': 'bg-emerald-100 text-emerald-700'
+                };
+                const css = styles[status] || 'bg-slate-100 text-slate-600';
+                return `<span class="${css} px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">${status}</span>`;
+            }
+
+            async submitSoftwareIntake() {
+                const clientName = document.getElementById('soft-client-name').value;
+                const projectName = document.getElementById('soft-project-name').value;
+                const platform = document.getElementById('soft-platform').value;
+
+                if(!clientName || !projectName) {
+                    alert("Client Name and Project Name are required.");
+                    return;
+                }
+
+                this.showLoading("Saving project specification...");
+
+                try {
+                    const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
+                    
+                    const softwareData = {
+                        refId: generatedRef,
+                        clientName: clientName,
+                        clientPhone: document.getElementById('soft-client-phone').value,
+                        clientEmail: document.getElementById('soft-client-email').value,
+                        projectName: projectName,
+                        platform: platform,
+                        deadline: document.getElementById('soft-deadline').value,
+                        techStack: document.getElementById('soft-stack').value || "TBD",
+                        requirements: document.getElementById('soft-requirements').value,
+                        timestamp: Date.now(),
+                        status: 'Requirements Gathering',
+                        devNotes: '',
+                        devAssigned: ''
+                    };
+
+                    await this.db.ref('software_projects').push(softwareData);
+                    
+                    this.hideLoading();
+                    alert(`Software Project Logged!\nID: SFT-${generatedRef}`);
+                    
+                    // Reset fields
+                    document.querySelectorAll('#view-soft-intake input, #view-soft-intake textarea').forEach(i => i.value = '');
+                    document.getElementById('soft-platform').selectedIndex = 0;
+                    
+                    this.navigate('soft-registry');
+                } catch(error) {
+                    console.error("Software Push Error", error);
+                    this.showErrorMsg(`Failed to save project: ${error.message}`);
+                }
+            }
+
+            openSoftModal(dbKey) {
+                const project = this.softwareData.find(s => s.key === dbKey);
+                if(!project) return;
+
+                document.getElementById('mod-soft-db-key').value = dbKey;
+                
+                document.getElementById('mod-soft-ref').innerText = `SFT-${project.refId}`;
+                document.getElementById('mod-soft-deadline').innerText = project.deadline || "None set";
+                document.getElementById('mod-soft-project').innerText = project.projectName;
+                document.getElementById('mod-soft-client').innerText = project.clientName;
+                document.getElementById('mod-soft-platform').innerText = project.platform;
+                document.getElementById('mod-soft-stack').innerText = project.techStack;
+                document.getElementById('mod-soft-requirements').innerText = project.requirements || "No specific requirements provided.";
+
+                document.getElementById('mod-soft-dev').value = project.devAssigned || "";
+                document.getElementById('mod-soft-notes').value = project.devNotes || "";
+                document.getElementById('mod-soft-status').value = project.status || "Requirements Gathering";
+
+                document.getElementById('soft-modal').classList.add('active');
+            }
+
+            async saveSoftwareUpdate() {
+                const dbKey = document.getElementById('mod-soft-db-key').value;
+                const devName = document.getElementById('mod-soft-dev').value;
+                const notes = document.getElementById('mod-soft-notes').value;
+                const status = document.getElementById('mod-soft-status').value;
+
+                this.showLoading("Pushing status update...");
+
+                try {
+                    await this.db.ref('software_projects/' + dbKey).update({
+                        devAssigned: devName,
+                        devNotes: notes,
+                        status: status,
+                        lastUpdated: Date.now()
+                    });
+                    
+                    this.hideLoading();
+                    this.closeModal('soft-modal');
+                } catch (error) {
+                    console.error("Firebase Update Error", error);
+                    this.showErrorMsg(`Update failed: ${error.message}`);
+                }
+            }
+
+
             // ==========================================
-            // TECHNICIAN UPDATE MODAL (EXPANDED)
+            // MODAL & GLOBAL UTILS
             // ==========================================
             openModal(dbKey) {
                 const report = this.reportsData.find(r => r.key === dbKey);
@@ -650,30 +985,15 @@
                 setIcon('mod-chk-cracks', report.checks?.cracks);
                 setIcon('mod-chk-data', report.checks?.dataWaiver);
 
-                const gallery = document.getElementById('mod-photo-gallery');
-                gallery.innerHTML = '';
-                if(report.photos && report.photos.length > 0) {
-                    report.photos.forEach(url => {
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.className = "w-full aspect-square object-cover rounded-lg border border-slate-200 shadow-sm";
-                        img.onclick = () => window.open(url, '_blank'); 
-                        img.style.cursor = 'pointer';
-                        gallery.appendChild(img);
-                    });
-                } else {
-                    gallery.innerHTML = '<p class="text-xs text-slate-400 col-span-2 italic bg-slate-50 p-4 rounded text-center border border-dashed border-slate-200">No photos attached to this repair.</p>';
-                }
-
-                document.getElementById('mod-tech-name').value = report.techName || "Katlego";
+                document.getElementById('mod-tech-name').value = report.techName || "";
                 document.getElementById('mod-notes').value = report.techNotes || "";
                 document.getElementById('mod-status').value = report.status || "Pending";
 
                 document.getElementById('update-modal').classList.add('active');
             }
 
-            closeModal() {
-                document.getElementById('update-modal').classList.remove('active');
+            closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
             }
 
             async saveTechnicianUpdate() {
@@ -699,29 +1019,17 @@
                     await this.db.ref('reports/' + dbKey).update(updateData);
                     
                     this.hideLoading();
-                    this.closeModal();
+                    this.closeModal('update-modal');
                 } catch (error) {
                     console.error("Firebase Update Error", error);
-                    this.hideLoading();
                     this.showErrorMsg(`Update failed: ${error.message}`);
                 }
             }
 
-            // ==========================================
-            // INTAKE: Save to Firebase Only
-            // ==========================================
-            showErrorMsg(msg) {
-                document.getElementById('spinner-ring').style.display = 'none';
-                document.getElementById('spinner-text').innerText = "An error occurred";
-                document.getElementById('spinner-text').classList.add('text-red-600');
-                document.getElementById('spinner-subtext').innerText = msg;
-                
-                setTimeout(() => {
-                    this.hideLoading();
-                    document.getElementById('spinner-ring').style.display = 'block';
-                    document.getElementById('spinner-text').classList.remove('text-red-600');
-                    document.getElementById('spinner-subtext').innerText = "";
-                }, 5000);
+            notifyClient(email, refId, name) {
+                const subject = encodeURIComponent(`Intake Confirmation: ${refId}`);
+                const body = encodeURIComponent(`Hello ${name},\n\nYour request has been securely logged at Rare Grade Tech.\n\nYour Reference ID is: ${refId}\n\nWe will notify you of any updates.\n\nRegards,\nThe Rare Grade Tech Team`);
+                window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
             }
 
             async submitIntake() {
@@ -735,7 +1043,6 @@
 
                 try {
                     this.showLoading("Saving data to Firebase...", 0);
-                    
                     const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
 
                     const reportData = {
@@ -750,7 +1057,7 @@
                             cracks: document.getElementById('chk-cracks').checked,
                             dataWaiver: document.getElementById('chk-data').checked
                         },
-                        photos: [], // Empty array, to be populated by external page
+                        photos: [], 
                         signatureBase64: this.canvas.toDataURL(),
                         timestamp: Date.now(),
                         dateCollected: null,
@@ -791,8 +1098,58 @@
             }
 
             // ==========================================
-            // PIN & SECURITY
+            // UI & SECURITY LOGIC
             // ==========================================
+            showErrorMsg(msg) {
+                document.getElementById('spinner-ring').style.display = 'none';
+                document.getElementById('spinner-text').innerText = "An error occurred";
+                document.getElementById('spinner-text').classList.add('text-red-600');
+                document.getElementById('spinner-subtext').innerText = msg;
+                
+                setTimeout(() => {
+                    this.hideLoading();
+                    document.getElementById('spinner-ring').style.display = 'block';
+                    document.getElementById('spinner-text').classList.remove('text-red-600');
+                    document.getElementById('spinner-subtext').innerText = "";
+                }, 5000);
+            }
+
+            showLoading(text = "Processing...", duration = 0) {
+                document.getElementById('spinner-text').innerText = text;
+                document.getElementById('global-spinner').classList.add('active');
+                if (duration > 0) setTimeout(() => this.hideLoading(), duration);
+            }
+
+            hideLoading() { 
+                document.getElementById('global-spinner').classList.remove('active'); 
+                document.getElementById('spinner-subtext').innerText = "";
+            }
+
+            navigate(viewId) {
+                // Hide all views
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-registry').classList.add('hidden');
+                document.getElementById('view-intake').classList.add('hidden');
+                document.getElementById('view-soft-registry').classList.add('hidden');
+                document.getElementById('view-soft-intake').classList.add('hidden');
+                
+                // Unhighlight all nav items
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                
+                // Show selected
+                document.getElementById('view-' + viewId).classList.remove('hidden');
+                document.getElementById('nav-' + viewId).classList.add('active');
+                
+                const titles = { 
+                    'dashboard': 'Overview Dashboard', 
+                    'registry': 'Hardware Client Registry', 
+                    'intake': 'Device Intake Form',
+                    'soft-registry': 'Software Project Pipeline',
+                    'soft-intake': 'Software Specifications Log'
+                };
+                document.getElementById('page-title').innerText = titles[viewId] || 'Portal';
+            }
+
             initKeyboardListener() {
                 window.addEventListener('keydown', (e) => {
                     const lockScreen = document.getElementById('lock-screen');
@@ -838,34 +1195,6 @@
             }
 
             lockSystem() { document.getElementById('lock-screen').classList.remove('unlocked'); }
-
-            // ==========================================
-            // UI UTILS
-            // ==========================================
-            showLoading(text = "Processing...", duration = 0) {
-                document.getElementById('spinner-text').innerText = text;
-                document.getElementById('global-spinner').classList.add('active');
-                if (duration > 0) setTimeout(() => this.hideLoading(), duration);
-            }
-
-            hideLoading() { 
-                document.getElementById('global-spinner').classList.remove('active'); 
-                document.getElementById('spinner-subtext').innerText = "";
-            }
-
-            navigate(viewId) {
-                document.getElementById('view-dashboard').classList.add('hidden');
-                document.getElementById('view-registry').classList.add('hidden');
-                document.getElementById('view-intake').classList.add('hidden');
-                
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                
-                document.getElementById('view-' + viewId).classList.remove('hidden');
-                document.getElementById('nav-' + viewId).classList.add('active');
-                
-                const titles = { 'dashboard': 'Overview', 'registry': 'Client Registry & Queue', 'intake': 'Device Intake Form' };
-                document.getElementById('page-title').innerText = titles[viewId];
-            }
 
             syncA4() {
                 document.getElementById('a4-name').innerText = document.getElementById('in-name').value || "Not specified";
