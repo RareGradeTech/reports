@@ -289,7 +289,7 @@
                                 <th class="p-4 font-medium">Platform</th>
                                 <th class="p-4 font-medium">Deadline</th>
                                 <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium text-right">Action</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="soft-registry-table" class="text-sm">
@@ -502,7 +502,6 @@
                 </div>
                 
                 <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
-                    
                     <div class="w-full md:w-3/5 p-6 overflow-y-auto border-r border-slate-100 bg-slate-50">
                         <div class="flex justify-between items-start mb-6">
                             <div>
@@ -542,20 +541,16 @@
 
                     <div class="w-full md:w-2/5 p-6 overflow-y-auto bg-white flex flex-col">
                         <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-screwdriver-wrench text-blue-500"></i> Technician Input</h3>
-                        
                         <input type="hidden" id="mod-db-key">
-                        
                         <div class="space-y-5 flex-1">
                             <div>
                                 <label class="text-xs font-bold text-slate-700 uppercase">Technician Name</label>
                                 <input type="text" id="mod-tech-name" class="custom-input mt-1" placeholder="e.g. Katlego">
                             </div>
-                            
                             <div>
                                 <label class="text-xs font-bold text-slate-700 uppercase">Diagnosis / Work Done</label>
                                 <textarea id="mod-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Describe the fix or parts used..."></textarea>
                             </div>
-
                             <div>
                                 <label class="text-xs font-bold text-slate-700 uppercase">Update Status</label>
                                 <select id="mod-status" class="custom-input mt-1 font-bold">
@@ -566,7 +561,6 @@
                                 <p class="text-[10px] text-slate-500 mt-1 leading-tight">Setting to "Completed & Collected" will automatically stamp the Collection Date.</p>
                             </div>
                         </div>
-
                         <button onclick="app.saveTechnicianUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
                             Save Hardware Update
                         </button>
@@ -657,6 +651,87 @@
             </div>
         </div>
 
+        <div id="edit-soft-modal" class="system-modal">
+            <div class="modal-content flex flex-col h-full">
+                <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0 bg-slate-50">
+                    <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-pen-to-square text-blue-600 mr-2"></i> Edit Software Project</h2>
+                    <button onclick="app.closeModal('edit-soft-modal')" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-6 bg-white">
+                    <input type="hidden" id="edit-soft-db-key">
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Client Info</h3>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Client or Company Name</label>
+                                <input type="text" id="edit-soft-client-name" class="custom-input mt-1">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-slate-500 font-medium">Phone</label>
+                                    <input type="tel" id="edit-soft-client-phone" class="custom-input mt-1">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-slate-500 font-medium">Email</label>
+                                    <input type="email" id="edit-soft-client-email" class="custom-input mt-1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Project Metadata</h3>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Project Name</label>
+                                <input type="text" id="edit-soft-project-name" class="custom-input mt-1">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-slate-500 font-medium">Platform</label>
+                                    <select id="edit-soft-platform" class="custom-input mt-1">
+                                        <option value="Web Application">Web Application</option>
+                                        <option value="Mobile App (iOS/Android)">Mobile App (iOS/Android)</option>
+                                        <option value="Landing Page / Website">Landing Page / Website</option>
+                                        <option value="Desktop Software">Desktop Software</option>
+                                        <option value="API / Backend System">API / Backend System</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-slate-500 font-medium">Deadline</label>
+                                    <input type="date" id="edit-soft-deadline" class="custom-input mt-1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mt-6 pt-6 border-t border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Engineering Specifications</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Repository Link</label>
+                                <input type="url" id="edit-soft-repo" class="custom-input mt-1 text-blue-600">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Preferred Tech Stack</label>
+                                <input type="text" id="edit-soft-stack" class="custom-input mt-1 font-mono text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500 font-medium">Core Requirements & Features</label>
+                            <textarea id="edit-soft-requirements" class="custom-input mt-1 h-32 resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 border-t border-slate-100 bg-slate-50 shrink-0">
+                    <button onclick="app.saveSoftwareEdit()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Project Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -726,7 +801,7 @@
                         this.softwareData.push({ key: child.key, ...child.val() });
                     });
                     this.softwareData.sort((a, b) => b.timestamp - a.timestamp);
-                    this.updateDashboard(); // Updates software stat
+                    this.updateDashboard(); 
                     this.filterSoftRegistry();
                 });
             }
@@ -761,12 +836,11 @@
                     tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No hardware records found.</td></tr>';
                 }
 
-                // Update Stat Cards
                 document.getElementById('stat-pending').innerText = pendingCount;
                 document.getElementById('stat-ready').innerText = readyCount;
                 document.getElementById('stat-total').innerText = this.reportsData.length;
 
-                // Software Stats (Active = anything not deployed/completed)
+                // Software Stats
                 let activeSoftCount = this.softwareData.filter(s => s.status !== 'Deployed / Completed').length;
                 document.getElementById('stat-software').innerText = activeSoftCount;
             }
@@ -850,9 +924,15 @@
                         <td class="p-4 text-xs font-medium text-slate-500">${project.platform}</td>
                         <td class="p-4 text-xs font-medium ${new Date(project.deadline) < new Date() && project.status !== 'Deployed / Completed' ? 'text-red-500' : 'text-slate-700'}">${project.deadline || 'No Date'}</td>
                         <td class="p-4">${this.getSoftStatusBadge(project.status)}</td>
-                        <td class="p-4 text-right">
-                            <button onclick="app.openSoftModal('${project.key}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-blue-200 hover:border-blue-600 shadow-sm">
-                                Open Repo / Specs
+                        <td class="p-4 text-right flex justify-end gap-2 items-center">
+                            <button onclick="app.openSoftModal('${project.key}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-all border border-blue-200 hover:border-blue-600 shadow-sm">
+                                Dashboard
+                            </button>
+                            <button onclick="app.editSoftwareProject('${project.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white w-8 h-8 flex items-center justify-center rounded transition-all border border-slate-200" title="Edit Project">
+                                <i class="fa-solid fa-pen text-[10px]"></i>
+                            </button>
+                            <button onclick="app.deleteSoftwareProject('${project.key}')" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white w-8 h-8 flex items-center justify-center rounded transition-all border border-red-200" title="Delete Project">
+                                <i class="fa-solid fa-trash text-[10px]"></i>
                             </button>
                         </td>
                     `;
@@ -981,6 +1061,72 @@
                 }
             }
 
+            // --- ADMIN EDIT & DELETE ACTIONS ---
+            deleteSoftwareProject(dbKey) {
+                if(confirm("WARNING: Are you sure you want to permanently delete this software project? This action cannot be undone.")) {
+                    this.showLoading("Deleting project...");
+                    this.db.ref('software_projects/' + dbKey).remove()
+                        .then(() => {
+                            this.hideLoading();
+                        })
+                        .catch(error => {
+                            console.error("Delete Error", error);
+                            this.showErrorMsg(`Delete failed: ${error.message}`);
+                        });
+                }
+            }
+
+            editSoftwareProject(dbKey) {
+                const project = this.softwareData.find(s => s.key === dbKey);
+                if(!project) return;
+
+                document.getElementById('edit-soft-db-key').value = dbKey;
+                document.getElementById('edit-soft-client-name').value = project.clientName || '';
+                document.getElementById('edit-soft-client-phone').value = project.clientPhone || '';
+                document.getElementById('edit-soft-client-email').value = project.clientEmail || '';
+                document.getElementById('edit-soft-project-name').value = project.projectName || '';
+                document.getElementById('edit-soft-platform').value = project.platform || 'Web Application';
+                document.getElementById('edit-soft-deadline').value = project.deadline || '';
+                document.getElementById('edit-soft-repo').value = project.repoLink || '';
+                document.getElementById('edit-soft-stack').value = project.techStack || '';
+                document.getElementById('edit-soft-requirements').value = project.requirements || '';
+
+                document.getElementById('edit-soft-modal').classList.add('active');
+            }
+
+            async saveSoftwareEdit() {
+                const dbKey = document.getElementById('edit-soft-db-key').value;
+                const clientName = document.getElementById('edit-soft-client-name').value;
+                const projectName = document.getElementById('edit-soft-project-name').value;
+
+                if(!clientName || !projectName) {
+                    alert("Client Name and Project Name are required fields.");
+                    return;
+                }
+
+                this.showLoading("Saving changes to database...");
+
+                try {
+                    await this.db.ref('software_projects/' + dbKey).update({
+                        clientName: clientName,
+                        clientPhone: document.getElementById('edit-soft-client-phone').value,
+                        clientEmail: document.getElementById('edit-soft-client-email').value,
+                        projectName: projectName,
+                        platform: document.getElementById('edit-soft-platform').value,
+                        deadline: document.getElementById('edit-soft-deadline').value,
+                        repoLink: document.getElementById('edit-soft-repo').value,
+                        techStack: document.getElementById('edit-soft-stack').value,
+                        requirements: document.getElementById('edit-soft-requirements').value,
+                        lastUpdated: Date.now()
+                    });
+                    
+                    this.hideLoading();
+                    this.closeModal('edit-soft-modal');
+                } catch(error) {
+                    console.error("Firebase Update Error", error);
+                    this.showErrorMsg(`Update failed: ${error.message}`);
+                }
+            }
 
             // ==========================================
             // MODAL & GLOBAL UTILS
