@@ -474,6 +474,10 @@
                     <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Engineering Specifications</h3>
                         <div>
+                            <label class="text-xs text-slate-500 font-medium">Repository Link (Optional)</label>
+                            <input type="url" id="soft-repo" class="custom-input mt-1 text-blue-600" placeholder="e.g. https://github.com/raregrade/project">
+                        </div>
+                        <div>
                             <label class="text-xs text-slate-500 font-medium">Preferred Tech Stack (Optional)</label>
                             <input type="text" id="soft-stack" class="custom-input mt-1 font-mono text-sm" placeholder="e.g. Firebase, React Native, Mapbox">
                         </div>
@@ -603,6 +607,10 @@
                                 <div>
                                     <p class="text-[10px] text-slate-500 uppercase font-bold">Requested Stack</p>
                                     <p class="text-sm font-mono text-slate-800 mt-1" id="mod-soft-stack">---</p>
+                                </div>
+                                <div class="col-span-2 pt-2">
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Repository Link</p>
+                                    <a href="#" target="_blank" id="mod-soft-repo" class="text-sm font-medium text-blue-600 hover:underline mt-1 block truncate">---</a>
                                 </div>
                             </div>
                         </div>
@@ -889,6 +897,7 @@
                         projectName: projectName,
                         platform: platform,
                         deadline: document.getElementById('soft-deadline').value,
+                        repoLink: document.getElementById('soft-repo').value || "", 
                         techStack: document.getElementById('soft-stack').value || "TBD",
                         requirements: document.getElementById('soft-requirements').value,
                         timestamp: Date.now(),
@@ -925,9 +934,23 @@
                 document.getElementById('mod-soft-client').innerText = project.clientName;
                 document.getElementById('mod-soft-platform').innerText = project.platform;
                 document.getElementById('mod-soft-stack').innerText = project.techStack;
+                
+                const repoEl = document.getElementById('mod-soft-repo');
+                if (project.repoLink) {
+                    repoEl.href = project.repoLink;
+                    repoEl.innerText = project.repoLink;
+                    repoEl.classList.remove('text-slate-400', 'pointer-events-none');
+                    repoEl.classList.add('text-blue-600');
+                } else {
+                    repoEl.removeAttribute('href');
+                    repoEl.innerText = "No repository linked";
+                    repoEl.classList.add('text-slate-400', 'pointer-events-none');
+                    repoEl.classList.remove('text-blue-600');
+                }
+
                 document.getElementById('mod-soft-requirements').innerText = project.requirements || "No specific requirements provided.";
 
-                document.getElementById('mod-soft-dev').value = project.devAssigned || "";
+                document.getElementById('mod-soft-dev').value = project.devAssigned || "Katlego";
                 document.getElementById('mod-soft-notes').value = project.devNotes || "";
                 document.getElementById('mod-soft-status').value = project.status || "Requirements Gathering";
 
@@ -985,7 +1008,7 @@
                 setIcon('mod-chk-cracks', report.checks?.cracks);
                 setIcon('mod-chk-data', report.checks?.dataWaiver);
 
-                document.getElementById('mod-tech-name').value = report.techName || "";
+                document.getElementById('mod-tech-name').value = report.techName || "Katlego";
                 document.getElementById('mod-notes').value = report.techNotes || "";
                 document.getElementById('mod-status').value = report.status || "Pending";
 
