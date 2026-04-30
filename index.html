@@ -110,7 +110,6 @@
             cursor: crosshair; width: 100%; height: 120px; touch-action: none;
         }
 
-        /* Scrollbars */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -122,10 +121,8 @@
             body, html { width: 210mm; height: 297mm; margin: 0; padding: 0; background: white !important; overflow: hidden !important; }
             aside, header, #lock-screen, #global-spinner, .no-print, .nav-item { display: none !important; }
             
-            /* Hide the Intake left form panel */
             #view-intake > div > div:first-child { display: none !important; }
             
-            /* Expand the wrapper and force absolute positioning to fill page */
             main, #view-intake, .flex, #a4-container { 
                 display: block !important; 
                 width: 100% !important; 
@@ -566,7 +563,7 @@
             </div>
         </section>
 
-        <!-- ADMIN MODAL (FULLY EDITABLE) -->
+        <!-- ADMIN MODAL (FULLY SECURE NON-DESTRUCTIVE EDITING) -->
         <div id="update-modal" class="system-modal">
             <div class="modal-content flex flex-col h-full">
                 <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
@@ -594,7 +591,6 @@
                             </div>
                         </div>
 
-                        <!-- EDITABLE CLIENT DETAILS -->
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Client Details</h3>
                             <div class="mb-2">
@@ -610,7 +606,6 @@
                             </div>
                         </div>
 
-                        <!-- EDITABLE DEVICE DETAILS -->
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Device & Fault Details</h3>
                             <div class="grid grid-cols-2 gap-4 mb-3">
@@ -628,7 +623,6 @@
                                 <textarea id="mod-issue" class="custom-input py-1.5 px-3 text-sm mt-1 h-16 resize-none" placeholder="Issue"></textarea>
                             </div>
                             
-                            <!-- ADMIN CHARGER EDIT -->
                             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" id="mod-chk-charger" class="w-4 h-4 text-blue-600 rounded" onchange="app.toggleAdminCharger()">
@@ -638,7 +632,7 @@
                             </div>
                         </div>
 
-                        <!-- PROCUREMENT LIST -->
+                        <!-- DISPLAY PROCUREMENT LIST -->
                         <div id="mod-procurement-section" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 shadow-sm hidden">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-blue-800 mb-3 border-b border-blue-100 pb-2"><i class="fa-solid fa-cart-shopping"></i> Required Procurement Parts</h3>
                             <ul id="mod-procurement-list" class="text-sm text-blue-900 space-y-2"></ul>
@@ -747,7 +741,6 @@
                 firebase.initializeApp(FIREBASE_CONFIG);
                 this.db = firebase.database();
                 
-                // Hardware Listener - Realtime Sync
                 this.db.ref('reports').on('value', snapshot => {
                     this.reportsData = [];
                     snapshot.forEach(child => {
@@ -757,14 +750,12 @@
                     this.updateDashboard();
                     this.filterRegistry(); 
                     
-                    // Live Update Open Modal if data changes remotely
                     const openModalKey = document.getElementById('mod-db-key').value;
                     if (document.getElementById('update-modal').classList.contains('active') && openModalKey) {
                         this.populateModalSilently(openModalKey);
                     }
                 });
 
-                // Software Listener
                 this.db.ref('software_projects').on('value', snapshot => {
                     this.softwareData = [];
                     snapshot.forEach(child => {
@@ -777,7 +768,6 @@
             }
 
             updateDashboard() {
-                // Hardware Stats
                 let pendingCount = 0;
                 let readyCount = 0;
                 const tbody = document.getElementById('dash-recent-table');
@@ -813,7 +803,6 @@
                 document.getElementById('stat-ready').innerText = readyCount;
                 document.getElementById('stat-total').innerText = this.reportsData.length;
 
-                // Software Stats
                 let activeSoftCount = this.softwareData.filter(s => s.status !== 'Deployed / Completed').length;
                 document.getElementById('stat-software').innerText = activeSoftCount;
             }
@@ -933,7 +922,6 @@
                 document.getElementById('a4-color').innerText = document.getElementById('in-color').value || "Not specified";
                 document.getElementById('a4-issue').innerText = document.getElementById('in-issue').value || "No issue described.";
                 
-                // Charger Check
                 const hasCharger = document.getElementById('chk-charger').checked;
                 const specs = document.getElementById('in-charger-specs').value;
                 if(hasCharger) {
@@ -948,7 +936,6 @@
                 document.getElementById('sq-cracks').className = document.getElementById('chk-cracks').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
                 document.getElementById('sq-data').className = document.getElementById('chk-data').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
 
-                // Sync Signature visually to the A4 side
                 const a4SigImg = document.getElementById('a4-sig-img');
                 const a4SigPlace = document.getElementById('a4-sig-placeholder');
                 
@@ -1021,7 +1008,6 @@
                 }
             }
 
-            // Software Intake Submission
             async submitSoftwareIntake() {
                 const clientName = document.getElementById('soft-client-name').value;
                 const projectName = document.getElementById('soft-project-name').value;
@@ -1058,7 +1044,6 @@
                     
                     alert(`Software Project successfully added to pipeline!\nProject ID: SFT-${generatedRef}`);
 
-                    // Reset form
                     document.querySelectorAll('#view-soft-intake input, #view-soft-intake textarea').forEach(i => i.value = '');
                     document.getElementById('soft-platform').value = 'Web Application';
                     
@@ -1104,7 +1089,6 @@
                 document.getElementById('mod-date-in').innerText = this.formatDate(report.timestamp);
                 document.getElementById('mod-days-in').innerHTML = this.getDaysInRepairText(report.timestamp, report.dateCollected);
                 
-                // Editable Inputs Sync
                 const safeSetInput = (id, val) => {
                     const el = document.getElementById(id);
                     if (!el.dataset.userModified && document.activeElement !== el) el.value = val || '';
@@ -1117,7 +1101,6 @@
                 safeSetInput('mod-color', report.color);
                 safeSetInput('mod-issue', report.issue);
                 
-                // Charger Sync Admin Side
                 const chargerChk = document.getElementById('mod-chk-charger');
                 const chargerSpecs = document.getElementById('mod-charger-specs');
                 
@@ -1128,7 +1111,6 @@
                     else chargerSpecs.classList.add('hidden');
                 }
 
-                // Signature Render
                 const sigImg = document.getElementById('mod-signature');
                 if (report.signatureBase64 && report.signatureBase64.length > 50) {
                     sigImg.src = report.signatureBase64;
@@ -1137,7 +1119,7 @@
                     sigImg.classList.add('hidden');
                 }
 
-                // Procurement Sync
+                // Procurement Sync Matrix parsing handles strictly mapped values correctly 
                 const procSec = document.getElementById('mod-procurement-section');
                 const procList = document.getElementById('mod-procurement-list');
                 procList.innerHTML = '';
@@ -1150,23 +1132,22 @@
                         procList.innerHTML += `<li><i class="fa-solid fa-circle text-[8px] text-blue-500 mr-2"></i><strong>${name}</strong>: ${details}</li>`;
                     };
                     
-                    if (p.screen?.needed) addPart('Screen', `${p.screen.specs || 'N/A'} (PN: ${p.screen.pn || 'N/A'})`);
-                    if (p.mobo?.needed) addPart('Motherboard', `PN: ${p.mobo.pn || 'N/A'}`);
-                    if (p.battery?.needed) addPart('Battery', `Model: ${p.battery.model || 'N/A'}`);
-                    if (p.ram?.needed) addPart('RAM', `${p.ram.capacity || 'N/A'} ${p.ram.type || ''}`);
-                    if (p.ssd?.needed) addPart('SSD', `${p.ssd.capacity || 'N/A'} ${p.ssd.type || ''}`);
-                    if (p.fan?.needed) addPart('Fan', `PN: ${p.fan.pn || 'N/A'}`);
-                    if (p.dcjack?.needed) addPart('DC Jack', p.dcjack.type || 'N/A');
-                    if (p.keyboard?.needed) addPart('Keyboard', `${p.keyboard.layout || 'N/A'} ${p.keyboard.backlit ? '(Backlit)' : ''}`);
-                    if (p.chassis?.needed) addPart('Chassis', p.chassis.desc || 'N/A');
-                    if (p.paste?.needed) addPart('Thermal Paste/Pads', p.paste.type || 'Required');
+                    if (p.screen && p.screen.needed) addPart('Screen', `${p.screen.specs || 'N/A'} (PN: ${p.screen.pn || 'N/A'})`);
+                    if (p.mobo && p.mobo.needed) addPart('Motherboard', `PN: ${p.mobo.pn || 'N/A'}`);
+                    if (p.battery && p.battery.needed) addPart('Battery', `Model: ${p.battery.model || 'N/A'}`);
+                    if (p.ram && p.ram.needed) addPart('RAM', `${p.ram.capacity || 'N/A'} ${p.ram.type || ''}`);
+                    if (p.ssd && p.ssd.needed) addPart('SSD', `${p.ssd.capacity || 'N/A'} ${p.ssd.type || ''}`);
+                    if (p.fan && p.fan.needed) addPart('Fan', `PN: ${p.fan.pn || 'N/A'}`);
+                    if (p.dcjack && p.dcjack.needed) addPart('DC Jack', p.dcjack.type || 'N/A');
+                    if (p.keyboard && p.keyboard.needed) addPart('Keyboard', `${p.keyboard.layout || 'N/A'} ${p.keyboard.backlit ? '(Backlit)' : ''}`);
+                    if (p.chassis && p.chassis.needed) addPart('Chassis', p.chassis.desc || 'N/A');
+                    if (p.paste && p.paste.needed) addPart('Thermal Paste/Pads', p.paste.type || 'Required');
                     if (p.other) addPart('Other', p.other);
                 }
                 
                 if (hasParts) procSec.classList.remove('hidden');
                 else procSec.classList.add('hidden');
 
-                // Photos Sync
                 const photoSec = document.getElementById('mod-photos-section');
                 const photoGrid = document.getElementById('mod-photos-grid');
                 photoGrid.innerHTML = '';
@@ -1183,12 +1164,11 @@
                 
                 renderPhotos(report.photosBefore);
                 renderPhotos(report.photosAfter);
-                renderPhotos(report.photos); // Legacy
+                renderPhotos(report.photos); 
                 
                 if (hasPhotos) photoSec.classList.remove('hidden');
                 else photoSec.classList.add('hidden');
 
-                // Tech updates sync
                 const statusSelect = document.getElementById('mod-status');
                 if(!statusSelect.dataset.userModified) {
                     statusSelect.value = report.status || "Pending";
@@ -1203,7 +1183,6 @@
                 document.getElementById('mod-db-key').value = dbKey;
                 document.getElementById('mod-ref').innerText = `RGT-${report.refId}`;
                 
-                // Track if user types to prevent live overwrite
                 const trackModified = (id) => {
                     const el = document.getElementById(id);
                     el.dataset.userModified = "";
@@ -1213,7 +1192,6 @@
                 
                 ['mod-client','mod-phone','mod-email','mod-device','mod-color','mod-issue','mod-notes','mod-status', 'mod-charger-specs'].forEach(trackModified);
                 
-                // Pre-fill the logged-in admin's name
                 document.getElementById('mod-tech-name').value = this.currentAdmin ? this.currentAdmin.name : "Admin";
                 
                 this.populateModalSilently(dbKey);
@@ -1232,6 +1210,7 @@
                 this.showLoading("Saving full update...");
 
                 try {
+                    // CRITICAL FIX: Explicitly exclude `partsRequired` from update payload, ensuring the Technician's selections are never overridden by the Admin app saves.
                     let updateData = {
                         clientName: document.getElementById('mod-client').value,
                         clientPhone: document.getElementById('mod-phone').value,
@@ -1243,7 +1222,7 @@
                             included: document.getElementById('mod-chk-charger').checked,
                             specs: document.getElementById('mod-charger-specs').value
                         },
-                        techName: document.getElementById('mod-tech-name').value, // Used current admin
+                        techName: document.getElementById('mod-tech-name').value, 
                         techNotes: document.getElementById('mod-notes').value,
                         status: document.getElementById('mod-status').value,
                         lastUpdated: Date.now()
@@ -1255,7 +1234,6 @@
 
                     await this.db.ref('reports/' + dbKey).update(updateData);
                     
-                    // Track this work in the specific employee's portal
                     if (this.currentAdmin && this.currentAdmin.key && this.currentAdmin.key !== "master_admin") {
                         const report = this.reportsData.find(r => r.key === dbKey);
                         await this.db.ref(`employees/${this.currentAdmin.key}/work_history`).push({
@@ -1289,7 +1267,6 @@
                 }
             }
 
-            // Keyboard/Pin Logic
             initKeyboardListener() {
                 window.addEventListener('keydown', (e) => {
                     const lockScreen = document.getElementById('lock-screen');
@@ -1334,8 +1311,6 @@
                 feedbackText.classList.remove('text-red-500', 'text-slate-500');
                 feedbackText.classList.add('text-blue-500');
 
-                // --- MASTER BYPASS ---
-                // If you are testing or the database is locked, use 12345
                 if (this.pinInput === "12345") {
                     this.currentAdmin = { key: "master_admin", name: "System Admin", employeeNumber: "12345" };
                     document.getElementById('lock-screen').classList.add('unlocked');
@@ -1418,13 +1393,11 @@
                 this.ctx = this.canvas.getContext('2d');
                 this.hasSignature = false;
 
-                // Mouse Events
                 this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
                 this.canvas.addEventListener('mousemove', (e) => this.draw(e));
                 this.canvas.addEventListener('mouseup', () => this.stopDrawing());
                 this.canvas.addEventListener('mouseout', () => this.stopDrawing());
                 
-                // Touch Events (Passive: False required to intercept scrolling)
                 this.canvas.addEventListener('touchstart', (e) => { 
                     e.preventDefault(); 
                     this.startDrawing(e); 
@@ -1482,7 +1455,7 @@
                 if (this.isDrawing) {
                     this.isDrawing = false;
                     this.ctx.closePath();
-                    this.syncA4(); // Auto Sync to document when pen lifts
+                    this.syncA4();
                 }
             }
 
@@ -1498,7 +1471,6 @@
                 }, 1000);
             }
 
-            // Standard Utility Functions (Notify, Lock screen, Drawing)
             notifyClient(email, refId, name) {
                 const subject = encodeURIComponent(`Intake Confirmation: ${refId}`);
                 const body = encodeURIComponent(`Hello ${name},\n\nYour request has been securely logged at Rare Grade Tech.\n\nYour Reference ID is: ${refId}\n\nWe will notify you of any updates.\n\nRegards,\nThe Rare Grade Tech Team`);
@@ -1551,21 +1523,17 @@
                 };
                 document.getElementById('page-title').innerText = titles[viewId] || 'Portal';
 
-                // Core fix: The canvas has 0 width if it initialized while hidden. 
-                // We recalculate and stretch it exactly when the view opens.
                 if (viewId === 'intake') {
                     setTimeout(() => {
                         const canvas = document.getElementById('sig-canvas');
                         if (canvas && canvas.parentElement) {
                             const rect = canvas.parentElement.getBoundingClientRect();
                             if (rect.width > 0 && canvas.width !== rect.width) {
-                                // Save any current strokes just in case
                                 const tempUrl = this.hasSignature ? canvas.toDataURL() : null;
                                 
                                 canvas.width = rect.width;
-                                canvas.height = 120; // 120px CSS height
+                                canvas.height = 120; 
                                 
-                                // Restore stroke if exists
                                 if (tempUrl) {
                                     const img = new Image();
                                     img.src = tempUrl;
@@ -1573,19 +1541,17 @@
                                 }
                             }
                         }
-                    }, 50); // slight delay ensures DOM has repainted display: block
+                    }, 50); 
                 }
             }
         }
 
         const app = new EnterpriseSystem();
 
-        // Safely capture window scaling overrides
         window.addEventListener('resize', () => {
             const canvas = document.getElementById('sig-canvas');
             if(canvas && canvas.offsetParent !== null) { 
                 const rect = canvas.parentElement.getBoundingClientRect();
-                // Prevent aggressive clearing unless physical width shifted heavily
                 if (Math.abs(canvas.width - rect.width) > 20) {
                     const tempUrl = app.hasSignature ? canvas.toDataURL() : null;
                     canvas.width = rect.width;
