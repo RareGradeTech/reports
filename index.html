@@ -563,7 +563,7 @@
             </div>
         </section>
 
-        <!-- ADMIN MODAL (FULLY SECURE NON-DESTRUCTIVE EDITING) -->
+        <!-- ADMIN MODAL (HARDWARE) -->
         <div id="update-modal" class="system-modal">
             <div class="modal-content flex flex-col h-full">
                 <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
@@ -679,6 +679,116 @@
                 </div>
             </div>
         </div>
+
+        <!-- SOFTWARE ADMIN MODAL -->
+        <div id="soft-update-modal" class="system-modal">
+            <div class="modal-content flex flex-col h-full">
+                <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
+                    <h2 class="text-xl font-bold text-slate-800">Software Project Control</h2>
+                    <div class="flex items-center">
+                        <button onclick="app.deleteSoftRecord()" class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-colors mr-3" title="Delete Record"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="app.closeModal('soft-update-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
+                    <div class="w-full md:w-3/5 p-6 overflow-y-auto border-r border-slate-100 bg-slate-50">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Project ID</p>
+                                <p class="font-mono text-lg font-bold text-purple-600" id="mod-soft-ref">---</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Date Logged</p>
+                                <p class="font-medium text-sm text-slate-800" id="mod-soft-date-in">---</p>
+                                <div class="mt-2">
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Time in Pipeline</p>
+                                    <p class="font-medium text-sm text-slate-800" id="mod-soft-days-in">---</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Client Details</h3>
+                            <div class="mb-2">
+                                <input type="text" id="mod-soft-client" class="custom-input py-1.5 px-3 font-bold text-slate-800" placeholder="Client / Company Name">
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="tel" id="mod-soft-phone" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Phone">
+                                <input type="email" id="mod-soft-email" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Email">
+                            </div>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Project Metadata</h3>
+                            <div class="grid grid-cols-2 gap-4 mb-3">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Project Name</span>
+                                    <input type="text" id="mod-soft-project" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Project Name">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Target Deadline</span>
+                                    <input type="date" id="mod-soft-deadline" class="custom-input py-1.5 px-3 text-sm mt-1">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-3">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Target Platform</span>
+                                    <select id="mod-soft-platform" class="custom-input py-1.5 px-3 text-sm mt-1">
+                                        <option value="Web Application">Web Application</option>
+                                        <option value="Mobile App (iOS/Android)">Mobile App (iOS/Android)</option>
+                                        <option value="Landing Page / Website">Landing Page / Website</option>
+                                        <option value="Desktop Software">Desktop Software</option>
+                                        <option value="API / Backend System">API / Backend System</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Preferred Stack</span>
+                                    <input type="text" id="mod-soft-stack" class="custom-input py-1.5 px-3 text-sm mt-1 font-mono" placeholder="Tech Stack">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Repository Link</span>
+                                <input type="url" id="mod-soft-repo" class="custom-input py-1.5 px-3 text-sm mt-1 text-blue-600" placeholder="Repo URL">
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Core Requirements</span>
+                                <textarea id="mod-soft-requirements" class="custom-input py-1.5 px-3 text-sm mt-1 h-24 resize-none" placeholder="Requirements"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DEV UPDATE PANE -->
+                    <div class="w-full md:w-2/5 p-6 overflow-y-auto bg-white flex flex-col">
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-terminal text-purple-500"></i> Development Control</h3>
+                        <input type="hidden" id="mod-soft-db-key">
+                        <div class="space-y-5 flex-1">
+                            <div>
+                                <label class="text-xs font-bold text-slate-700 uppercase">Assigned Developer</label>
+                                <input type="text" id="mod-soft-dev" class="custom-input mt-1 bg-purple-50 font-bold text-purple-700" placeholder="Developer Name">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-700 uppercase">Development Notes / Commits</label>
+                                <textarea id="mod-soft-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Progress notes..."></textarea>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-700 uppercase">Project Phase</label>
+                                <select id="mod-soft-status" class="custom-input mt-1 font-bold">
+                                    <option value="Requirements Gathering" class="text-slate-600">Requirements Gathering</option>
+                                    <option value="UI/UX Design" class="text-purple-600">UI/UX Design</option>
+                                    <option value="In Development" class="text-blue-600">In Development</option>
+                                    <option value="Testing & QA" class="text-amber-600">Testing & QA</option>
+                                    <option value="Deployed / Completed" class="text-emerald-600">Deployed / Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="app.saveSoftAdminUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
+                            Save Complete Project Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         </main>
 
@@ -731,7 +841,7 @@
                 const diffTime = Math.abs(end - timestamp);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 if (dateCollected) return `<span class="text-slate-400 font-medium">${diffDays} days total</span>`;
-                return `<span class="text-red-500 font-bold">${diffDays} days in repair</span>`;
+                return `<span class="text-red-500 font-bold">${diffDays} days in pipeline</span>`;
             }
 
             // ==========================================
@@ -764,6 +874,11 @@
                     this.softwareData.sort((a, b) => b.timestamp - a.timestamp);
                     this.updateDashboard(); 
                     this.filterSoftRegistry();
+
+                    const openSoftModalKey = document.getElementById('mod-soft-db-key').value;
+                    if (document.getElementById('soft-update-modal').classList.contains('active') && openSoftModalKey) {
+                        this.populateSoftModalSilently(openSoftModalKey);
+                    }
                 });
             }
 
@@ -881,8 +996,8 @@
                         <td class="p-4 text-red-600 text-xs font-bold">${project.deadline || '---'}</td>
                         <td class="p-4"><span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-[10px] font-bold uppercase">${project.status}</span></td>
                         <td class="p-4 text-right">
-                            <button class="bg-slate-50 text-slate-400 hover:bg-slate-800 hover:text-white px-3 py-1.5 rounded text-xs font-semibold transition-all border border-slate-200">
-                                Locked to Dev
+                            <button onclick="app.openSoftModal('${project.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">
+                                View / Update
                             </button>
                         </td>
                     `;
@@ -1198,9 +1313,63 @@
                 document.getElementById('update-modal').classList.add('active');
             }
 
+            // Software Modal Logic
+            populateSoftModalSilently(dbKey) {
+                const project = this.softwareData.find(r => r.key === dbKey);
+                if(!project) return;
+
+                document.getElementById('mod-soft-date-in').innerText = this.formatDate(project.timestamp);
+                document.getElementById('mod-soft-days-in').innerHTML = this.getDaysInRepairText(project.timestamp, project.dateCollected);
+
+                const safeSetInput = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (!el.dataset.userModified && document.activeElement !== el) el.value = val || '';
+                }
+                
+                safeSetInput('mod-soft-client', project.clientName);
+                safeSetInput('mod-soft-phone', project.clientPhone);
+                safeSetInput('mod-soft-email', project.clientEmail);
+                safeSetInput('mod-soft-project', project.projectName);
+                safeSetInput('mod-soft-platform', project.platform);
+                safeSetInput('mod-soft-deadline', project.deadline);
+                safeSetInput('mod-soft-repo', project.repoLink);
+                safeSetInput('mod-soft-stack', project.techStack);
+                safeSetInput('mod-soft-requirements', project.requirements);
+                safeSetInput('mod-soft-dev', project.devAssigned);
+                safeSetInput('mod-soft-notes', project.devNotes);
+                
+                const statusSelect = document.getElementById('mod-soft-status');
+                if(!statusSelect.dataset.userModified) {
+                    statusSelect.value = project.status || "Requirements Gathering";
+                }
+            }
+
+            openSoftModal(dbKey) {
+                const project = this.softwareData.find(r => r.key === dbKey);
+                if(!project) return;
+
+                document.getElementById('mod-soft-db-key').value = dbKey;
+                document.getElementById('mod-soft-ref').innerText = `SFT-${project.refId}`;
+                
+                const trackModified = (id) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.dataset.userModified = "";
+                        el.addEventListener('input', () => el.dataset.userModified = "true");
+                        el.addEventListener('change', () => el.dataset.userModified = "true");
+                    }
+                };
+                
+                ['mod-soft-client','mod-soft-phone','mod-soft-email','mod-soft-project','mod-soft-platform','mod-soft-deadline','mod-soft-repo','mod-soft-stack','mod-soft-requirements','mod-soft-dev','mod-soft-notes','mod-soft-status'].forEach(trackModified);
+                
+                this.populateSoftModalSilently(dbKey);
+                document.getElementById('soft-update-modal').classList.add('active');
+            }
+
             closeModal(modalId) {
                 document.getElementById(modalId).classList.remove('active');
                 if(modalId === 'update-modal') document.getElementById('mod-db-key').value = "";
+                if(modalId === 'soft-update-modal') document.getElementById('mod-soft-db-key').value = "";
             }
 
             async saveAdminUpdate() {
@@ -1251,6 +1420,48 @@
                 }
             }
 
+            async saveSoftAdminUpdate() {
+                const dbKey = document.getElementById('mod-soft-db-key').value;
+                if (!dbKey) return;
+                
+                this.showLoading("Saving software update...");
+
+                try {
+                    let updateData = {
+                        clientName: document.getElementById('mod-soft-client').value,
+                        clientPhone: document.getElementById('mod-soft-phone').value,
+                        clientEmail: document.getElementById('mod-soft-email').value,
+                        projectName: document.getElementById('mod-soft-project').value,
+                        platform: document.getElementById('mod-soft-platform').value,
+                        deadline: document.getElementById('mod-soft-deadline').value,
+                        repoLink: document.getElementById('mod-soft-repo').value,
+                        techStack: document.getElementById('mod-soft-stack').value,
+                        requirements: document.getElementById('mod-soft-requirements').value,
+                        devAssigned: document.getElementById('mod-soft-dev').value,
+                        devNotes: document.getElementById('mod-soft-notes').value,
+                        status: document.getElementById('mod-soft-status').value,
+                        lastUpdated: Date.now()
+                    };
+
+                    await this.db.ref('software_projects/' + dbKey).update(updateData);
+                    
+                    if (this.currentAdmin && this.currentAdmin.key && this.currentAdmin.key !== "master_admin") {
+                        const project = this.softwareData.find(r => r.key === dbKey);
+                        await this.db.ref(`employees/${this.currentAdmin.key}/work_history`).push({
+                            refId: `SFT-${project.refId}`,
+                            title: `Admin Update: ${updateData.projectName}`,
+                            timestamp: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                    
+                    this.hideLoading();
+                    this.closeModal('soft-update-modal');
+                } catch (error) {
+                    console.error("Firebase Update Error", error);
+                    this.showErrorMsg(`Update failed: ${error.message}`);
+                }
+            }
+
             async deleteRecord() {
                 const dbKey = document.getElementById('mod-db-key').value;
                 if(!dbKey) return;
@@ -1261,6 +1472,22 @@
                         await this.db.ref('reports/' + dbKey).remove();
                         this.hideLoading();
                         this.closeModal('update-modal');
+                    } catch (err) {
+                        this.showErrorMsg(`Delete failed: ${err.message}`);
+                    }
+                }
+            }
+
+            async deleteSoftRecord() {
+                const dbKey = document.getElementById('mod-soft-db-key').value;
+                if(!dbKey) return;
+                
+                if(confirm('Are you sure you want to completely delete this project from the database? This cannot be undone.')) {
+                    this.showLoading("Deleting Project...");
+                    try {
+                        await this.db.ref('software_projects/' + dbKey).remove();
+                        this.hideLoading();
+                        this.closeModal('soft-update-modal');
                     } catch (err) {
                         this.showErrorMsg(`Delete failed: ${err.message}`);
                     }
