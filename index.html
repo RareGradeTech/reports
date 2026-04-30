@@ -107,30 +107,36 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        /* --- PRINT CSS --- */
+        /* --- STRICT ONE-PAGE PRINT CSS --- */
+        @page { size: A4 portrait; margin: 0; }
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            body { background: white !important; overflow: visible !important; }
+            body, html { width: 210mm; height: 297mm; margin: 0; padding: 0; background: white !important; overflow: hidden !important; }
             aside, header, #lock-screen, #global-spinner, .no-print, .nav-item { display: none !important; }
             
             /* Hide the Intake left form panel */
             #view-intake > div > div:first-child { display: none !important; }
             
-            /* Expand the wrapper and force page break handling */
+            /* Expand the wrapper and force absolute positioning to fill page */
             main, #view-intake, .flex, #a4-container { 
                 display: block !important; 
                 width: 100% !important; 
-                height: auto !important; 
-                overflow: visible !important; 
-                position: static !important;
+                height: 100% !important; 
+                overflow: hidden !important; 
+                position: absolute !important;
+                top: 0; left: 0;
             }
             .a4-wrapper { padding: 0 !important; background: white !important; }
             .a4-paper { 
-                width: 100% !important; 
-                min-height: auto !important; 
-                padding: 0 !important;
+                width: 210mm !important; 
+                height: 297mm !important; 
+                max-height: 297mm !important;
+                padding: 15mm !important; /* Reduced padding slightly to prevent overflow */
                 box-shadow: none !important; 
                 margin: 0 !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+                page-break-inside: avoid !important;
             }
         }
     </style>
@@ -743,6 +749,7 @@
                     });
                     this.softwareData.sort((a, b) => b.timestamp - a.timestamp);
                     this.updateDashboard(); 
+                    this.filterSoftRegistry();
                 });
             }
 
@@ -786,7 +793,7 @@
             }
 
             // ==========================================
-            // HARDWARE METHODS
+            // LISTINGS & FILTERS
             // ==========================================
             filterRegistry() {
                 const search = document.getElementById('search-input').value.toLowerCase();
@@ -834,6 +841,39 @@
                 });
 
                 if(filtered.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
+            }
+
+            filterSoftRegistry() {
+                const search = document.getElementById('search-soft-input').value.toLowerCase();
+                const tbody = document.getElementById('soft-registry-table');
+                tbody.innerHTML = '';
+
+                const filtered = this.softwareData.filter(r => 
+                    (r.clientName && r.clientName.toLowerCase().includes(search)) ||
+                    (r.projectName && r.projectName.toLowerCase().includes(search)) ||
+                    (r.refId && r.refId.toLowerCase().includes(search))
+                );
+
+                filtered.forEach(project => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-4 font-mono text-xs text-slate-500">SFT-${project.refId}</td>
+                        <td class="p-4 font-medium text-slate-800">${project.projectName}</td>
+                        <td class="p-4 text-slate-600">${project.clientName}</td>
+                        <td class="p-4 text-xs text-slate-500 bg-slate-100 rounded inline-block mt-2">${project.platform}</td>
+                        <td class="p-4 text-red-600 text-xs font-bold">${project.deadline || '---'}</td>
+                        <td class="p-4"><span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-[10px] font-bold uppercase">${project.status}</span></td>
+                        <td class="p-4 text-right">
+                            <button class="bg-slate-50 text-slate-400 hover:bg-slate-800 hover:text-white px-3 py-1.5 rounded text-xs font-semibold transition-all border border-slate-200">
+                                Locked to Dev
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                if(filtered.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">No projects found.</td></tr>';
             }
 
             getStatusBadge(status) {
@@ -951,6 +991,55 @@
                 } catch (error) {
                     console.error("Submission Error:", error);
                     this.showErrorMsg(`Save failed: ${error.message}. Check Firebase rules.`);
+                }
+            }
+
+            // Software Intake Submission
+            async submitSoftwareIntake() {
+                const clientName = document.getElementById('soft-client-name').value;
+                const projectName = document.getElementById('soft-project-name').value;
+
+                if(!clientName || !projectName) {
+                    alert("Please fill in Client Name and Project Name.");
+                    return;
+                }
+
+                try {
+                    this.showLoading("Saving project to pipeline...", 0);
+                    const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
+
+                    const projectData = {
+                        refId: generatedRef,
+                        clientName: clientName,
+                        clientPhone: document.getElementById('soft-client-phone').value,
+                        clientEmail: document.getElementById('soft-client-email').value,
+                        projectName: projectName,
+                        platform: document.getElementById('soft-platform').value,
+                        deadline: document.getElementById('soft-deadline').value,
+                        repoLink: document.getElementById('soft-repo').value,
+                        techStack: document.getElementById('soft-stack').value,
+                        requirements: document.getElementById('soft-requirements').value,
+                        timestamp: Date.now(),
+                        status: 'Requirements Gathering',
+                        devAssigned: 'Pending',
+                        devNotes: ''
+                    };
+
+                    await this.db.ref('software_projects').push(projectData);
+                    
+                    this.hideLoading();
+                    
+                    alert(`Software Project successfully added to pipeline!\nProject ID: SFT-${generatedRef}`);
+
+                    // Reset form
+                    document.querySelectorAll('#view-soft-intake input, #view-soft-intake textarea').forEach(i => i.value = '');
+                    document.getElementById('soft-platform').value = 'Web Application';
+                    
+                    this.navigate('soft-registry');
+
+                } catch (error) {
+                    console.error("Submission Error:", error);
+                    this.showErrorMsg(`Save failed: ${error.message}`);
                 }
             }
 
