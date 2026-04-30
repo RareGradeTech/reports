@@ -85,7 +85,7 @@
         }
         .system-modal.active { opacity: 1; pointer-events: all; }
         .modal-content { 
-            background: white; width: 100%; max-width: 900px; max-height: 90vh; 
+            background: white; width: 100%; max-width: 1000px; max-height: 90vh; 
             border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
             transform: translateY(20px); transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden;
         }
@@ -430,7 +430,7 @@
                             <div class="flex justify-between items-end">
                                 <div class="w-1/2 pr-8">
                                     <p class="text-xs font-bold text-slate-500 mb-2">Client Digital Signature</p>
-                                    <div class="border border-slate-200 bg-slate-50 h-16 rounded mb-1 flex items-center justify-center text-slate-300 text-xs">
+                                    <div class="border border-slate-200 bg-slate-50 h-16 rounded mb-1 flex items-center justify-center text-slate-300 text-xs overflow-hidden">
                                         Signature captured on left
                                     </div>
                                 </div>
@@ -517,11 +517,15 @@
             </div>
         </section>
 
+        <!-- ADMIN MODAL (FULLY EDITABLE) -->
         <div id="update-modal" class="system-modal">
             <div class="modal-content flex flex-col h-full">
                 <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
-                    <h2 class="text-xl font-bold text-slate-800">Repair Details & Update</h2>
-                    <button onclick="app.closeModal('update-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                    <h2 class="text-xl font-bold text-slate-800">Repair Record Control</h2>
+                    <div class="flex items-center">
+                        <button onclick="app.deleteRecord()" class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-colors mr-3" title="Delete Record"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="app.closeModal('update-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
                 </div>
                 
                 <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
@@ -537,43 +541,58 @@
                             </div>
                         </div>
 
+                        <!-- EDITABLE CLIENT DETAILS -->
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Client Details</h3>
-                            <p class="font-bold text-slate-800" id="mod-client">---</p>
-                            <p class="text-sm text-slate-600 mt-1"><i class="fa-solid fa-phone text-slate-400 w-4"></i> <span id="mod-phone">---</span></p>
-                            <p class="text-sm text-slate-600 mt-1"><i class="fa-solid fa-envelope text-slate-400 w-4"></i> <span id="mod-email">---</span></p>
+                            <div class="mb-2">
+                                <input type="text" id="mod-client" class="custom-input py-1.5 px-3 font-bold text-slate-800" placeholder="Client Name">
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="tel" id="mod-phone" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Phone">
+                                <input type="email" id="mod-email" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Email">
+                            </div>
+                            <div class="mt-4">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Client Signature Captured</span>
+                                <img id="mod-signature" src="" class="h-16 mt-1 border border-slate-200 rounded hidden bg-white">
+                            </div>
                         </div>
 
+                        <!-- EDITABLE DEVICE DETAILS -->
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Device & Fault Report</h3>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Device & Fault Details</h3>
                             <div class="grid grid-cols-2 gap-4 mb-3">
                                 <div>
                                     <span class="text-[10px] font-bold text-slate-500 uppercase">Device Model</span>
-                                    <p class="font-medium text-slate-800" id="mod-device">---</p>
+                                    <input type="text" id="mod-device" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Device">
                                 </div>
                                 <div>
                                     <span class="text-[10px] font-bold text-slate-500 uppercase">Device Color</span>
-                                    <p class="font-medium text-slate-800" id="mod-color">---</p>
+                                    <input type="text" id="mod-color" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Color">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase">Charger Info</span>
-                                <p class="text-sm font-medium text-amber-700 bg-amber-50 p-2 border border-amber-100 rounded" id="mod-charger">---</p>
-                            </div>
-                            <div class="mb-3">
                                 <span class="text-[10px] font-bold text-slate-500 uppercase">Reported Issue</span>
-                                <p class="text-sm text-slate-700 bg-slate-50 p-2 rounded border border-slate-100 mt-1" id="mod-issue">---</p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-xs mt-4">
-                                <div class="flex items-center gap-2"><i id="mod-chk-power" class="fa-solid fa-square-check text-blue-500"></i> Powers On</div>
-                                <div class="flex items-center gap-2"><i id="mod-chk-cracks" class="fa-solid fa-square-check text-blue-500"></i> Physical Damage</div>
-                                <div class="flex items-center gap-2 col-span-2"><i id="mod-chk-data" class="fa-solid fa-square-check text-blue-500"></i> Data Liability Waived</div>
+                                <textarea id="mod-issue" class="custom-input py-1.5 px-3 text-sm mt-1 h-16 resize-none" placeholder="Issue"></textarea>
                             </div>
                         </div>
+
+                        <!-- PROCUREMENT LIST -->
+                        <div id="mod-procurement-section" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 shadow-sm hidden">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-800 mb-3 border-b border-blue-100 pb-2"><i class="fa-solid fa-cart-shopping"></i> Required Procurement Parts</h3>
+                            <ul id="mod-procurement-list" class="text-sm text-blue-900 space-y-2"></ul>
+                        </div>
+
+                        <!-- EVIDENCE PHOTOS -->
+                        <div id="mod-photos-section" class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm hidden">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2"><i class="fa-solid fa-camera"></i> Attached Evidence</h3>
+                            <div id="mod-photos-grid" class="grid grid-cols-3 gap-3"></div>
+                        </div>
+
                     </div>
 
+                    <!-- TECH UPDATE PANE -->
                     <div class="w-full md:w-2/5 p-6 overflow-y-auto bg-white flex flex-col">
-                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-screwdriver-wrench text-blue-500"></i> Technician Input</h3>
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-screwdriver-wrench text-blue-500"></i> Technical Update</h3>
                         <input type="hidden" id="mod-db-key">
                         <div class="space-y-5 flex-1">
                             <div>
@@ -597,8 +616,8 @@
                                 <p class="text-[10px] text-slate-500 mt-1 leading-tight">Setting to "Completed & Collected" will automatically stamp the Collection Date.</p>
                             </div>
                         </div>
-                        <button onclick="app.saveTechnicianUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
-                            Save Hardware Update
+                        <button onclick="app.saveAdminUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
+                            Save Complete File Update
                         </button>
                     </div>
                 </div>
@@ -681,7 +700,6 @@
                     });
                     this.softwareData.sort((a, b) => b.timestamp - a.timestamp);
                     this.updateDashboard(); 
-                    this.filterSoftRegistry();
                 });
             }
 
@@ -893,47 +911,94 @@
             }
 
             // ==========================================
-            // MODAL VIEW LOGIC & LIVE RE-POPULATION
+            // MODAL VIEW LOGIC & FULL ADMIN EDIT
             // ==========================================
             populateModalSilently(dbKey) {
                 const report = this.reportsData.find(r => r.key === dbKey);
                 if(!report) return;
 
                 document.getElementById('mod-date-in').innerText = this.formatDate(report.timestamp);
-                document.getElementById('mod-client').innerText = report.clientName;
-                document.getElementById('mod-phone').innerText = report.clientPhone || 'No phone provided';
-                document.getElementById('mod-email').innerText = report.clientEmail || 'No email provided';
-                document.getElementById('mod-device').innerText = report.device;
-                document.getElementById('mod-color').innerText = report.color || 'Not specified';
-                document.getElementById('mod-issue').innerText = report.issue || 'No issue described.';
-
-                // Charger UI Logic for Modal
-                let chargerStr = "None";
-                if(report.charger && report.charger.included) {
-                    chargerStr = report.charger.specs ? `Included (${report.charger.specs})` : `Included`;
-                }
-                document.getElementById('mod-charger').innerText = chargerStr;
-
-                const setIcon = (id, condition) => {
+                
+                // Editable Inputs Sync
+                const safeSetInput = (id, val) => {
                     const el = document.getElementById(id);
-                    if(condition) { el.className = "fa-solid fa-square-check text-blue-500"; } 
-                    else { el.className = "fa-regular fa-square text-slate-300"; }
-                };
-                setIcon('mod-chk-power', report.checks?.power);
-                setIcon('mod-chk-cracks', report.checks?.cracks);
-                setIcon('mod-chk-data', report.checks?.dataWaiver);
+                    if (!el.dataset.userModified && document.activeElement !== el) el.value = val || '';
+                }
+                
+                safeSetInput('mod-client', report.clientName);
+                safeSetInput('mod-phone', report.clientPhone);
+                safeSetInput('mod-email', report.clientEmail);
+                safeSetInput('mod-device', report.device);
+                safeSetInput('mod-color', report.color);
+                safeSetInput('mod-issue', report.issue);
+                
+                // Signature Render
+                const sigImg = document.getElementById('mod-signature');
+                if (report.signatureBase64 && report.signatureBase64.length > 50) {
+                    sigImg.src = report.signatureBase64;
+                    sigImg.classList.remove('hidden');
+                } else {
+                    sigImg.classList.add('hidden');
+                }
 
-                // Only update the technician inputs if they are currently completely blank,
-                // to prevent overwriting an admin typing a status update.
+                // Procurement Sync
+                const procSec = document.getElementById('mod-procurement-section');
+                const procList = document.getElementById('mod-procurement-list');
+                procList.innerHTML = '';
+                let hasParts = false;
+                
+                if (report.partsRequired) {
+                    const p = report.partsRequired;
+                    const addPart = (name, details) => {
+                        hasParts = true;
+                        procList.innerHTML += `<li><i class="fa-solid fa-circle text-[8px] text-blue-500 mr-2"></i><strong>${name}</strong>: ${details}</li>`;
+                    };
+                    
+                    if (p.screen?.needed) addPart('Screen', `${p.screen.specs || 'N/A'} (PN: ${p.screen.pn || 'N/A'})`);
+                    if (p.mobo?.needed) addPart('Motherboard', `PN: ${p.mobo.pn || 'N/A'}`);
+                    if (p.battery?.needed) addPart('Battery', `Model: ${p.battery.model || 'N/A'}`);
+                    if (p.ram?.needed) addPart('RAM', `${p.ram.capacity || 'N/A'} ${p.ram.type || ''}`);
+                    if (p.ssd?.needed) addPart('SSD', `${p.ssd.capacity || 'N/A'} ${p.ssd.type || ''}`);
+                    if (p.fan?.needed) addPart('Fan', `PN: ${p.fan.pn || 'N/A'}`);
+                    if (p.dcjack?.needed) addPart('DC Jack', p.dcjack.type || 'N/A');
+                    if (p.keyboard?.needed) addPart('Keyboard', `${p.keyboard.layout || 'N/A'} ${p.keyboard.backlit ? '(Backlit)' : ''}`);
+                    if (p.chassis?.needed) addPart('Chassis', p.chassis.desc || 'N/A');
+                    if (p.paste?.needed) addPart('Thermal Paste/Pads', p.paste.type || 'Required');
+                    if (p.other) addPart('Other', p.other);
+                }
+                
+                if (hasParts) procSec.classList.remove('hidden');
+                else procSec.classList.add('hidden');
+
+                // Photos Sync
+                const photoSec = document.getElementById('mod-photos-section');
+                const photoGrid = document.getElementById('mod-photos-grid');
+                photoGrid.innerHTML = '';
+                let hasPhotos = false;
+                
+                const renderPhotos = (arr) => {
+                    if(arr && arr.length > 0) {
+                        hasPhotos = true;
+                        arr.forEach(url => {
+                            photoGrid.innerHTML += `<img src="${url}" class="w-full aspect-square object-cover rounded border border-slate-200 shadow-sm cursor-pointer hover:opacity-80 transition" onclick="window.open('${url}','_blank')">`;
+                        });
+                    }
+                };
+                
+                renderPhotos(report.photosBefore);
+                renderPhotos(report.photosAfter);
+                renderPhotos(report.photos); // Legacy
+                
+                if (hasPhotos) photoSec.classList.remove('hidden');
+                else photoSec.classList.add('hidden');
+
+                // Tech updates sync
                 const statusSelect = document.getElementById('mod-status');
                 if(!statusSelect.dataset.userModified) {
                     statusSelect.value = report.status || "Pending";
                 }
-                
-                const noteInput = document.getElementById('mod-notes');
-                if(!noteInput.dataset.userModified && document.activeElement !== noteInput) {
-                    noteInput.value = report.techNotes || "";
-                }
+                safeSetInput('mod-notes', report.techNotes);
+                safeSetInput('mod-tech-name', report.techName);
             }
 
             openModal(dbKey) {
@@ -944,16 +1009,16 @@
                 document.getElementById('mod-ref').innerText = `RGT-${report.refId}`;
                 
                 // Track if user types to prevent live overwrite
-                const noteInput = document.getElementById('mod-notes');
-                const statusInput = document.getElementById('mod-status');
-                noteInput.dataset.userModified = "";
-                statusInput.dataset.userModified = "";
-                noteInput.addEventListener('input', () => noteInput.dataset.userModified = "true");
-                statusInput.addEventListener('change', () => statusInput.dataset.userModified = "true");
+                const trackModified = (id) => {
+                    const el = document.getElementById(id);
+                    el.dataset.userModified = "";
+                    el.addEventListener('input', () => el.dataset.userModified = "true");
+                    el.addEventListener('change', () => el.dataset.userModified = "true");
+                };
+                
+                ['mod-client','mod-phone','mod-email','mod-device','mod-color','mod-issue','mod-notes','mod-tech-name','mod-status'].forEach(trackModified);
                 
                 this.populateModalSilently(dbKey);
-                
-                document.getElementById('mod-tech-name').value = report.techName || "Katlego";
                 document.getElementById('update-modal').classList.add('active');
             }
 
@@ -962,23 +1027,27 @@
                 if(modalId === 'update-modal') document.getElementById('mod-db-key').value = "";
             }
 
-            async saveTechnicianUpdate() {
+            async saveAdminUpdate() {
                 const dbKey = document.getElementById('mod-db-key').value;
-                const techName = document.getElementById('mod-tech-name').value;
-                const techNotes = document.getElementById('mod-notes').value;
-                const status = document.getElementById('mod-status').value;
-
-                this.showLoading("Saving update...");
+                if (!dbKey) return;
+                
+                this.showLoading("Saving full update...");
 
                 try {
                     let updateData = {
-                        techName: techName,
-                        techNotes: techNotes,
-                        status: status,
+                        clientName: document.getElementById('mod-client').value,
+                        clientPhone: document.getElementById('mod-phone').value,
+                        clientEmail: document.getElementById('mod-email').value,
+                        device: document.getElementById('mod-device').value,
+                        color: document.getElementById('mod-color').value,
+                        issue: document.getElementById('mod-issue').value,
+                        techName: document.getElementById('mod-tech-name').value,
+                        techNotes: document.getElementById('mod-notes').value,
+                        status: document.getElementById('mod-status').value,
                         lastUpdated: Date.now()
                     };
 
-                    if(status === 'Completed & Collected') {
+                    if(updateData.status === 'Completed & Collected') {
                         updateData.dateCollected = Date.now();
                     }
 
@@ -989,6 +1058,22 @@
                 } catch (error) {
                     console.error("Firebase Update Error", error);
                     this.showErrorMsg(`Update failed: ${error.message}`);
+                }
+            }
+
+            async deleteRecord() {
+                const dbKey = document.getElementById('mod-db-key').value;
+                if(!dbKey) return;
+                
+                if(confirm('Are you sure you want to completely delete this record from the database? This cannot be undone.')) {
+                    this.showLoading("Deleting Record...");
+                    try {
+                        await this.db.ref('reports/' + dbKey).remove();
+                        this.hideLoading();
+                        this.closeModal('update-modal');
+                    } catch (err) {
+                        this.showErrorMsg(`Delete failed: ${err.message}`);
+                    }
                 }
             }
 
