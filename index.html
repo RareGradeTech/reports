@@ -58,522 +58,6 @@
         }
         .num-key:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .num-key:active { transform: scale(0.92); background: #e2e8f0; }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            50% { transform: translateX(8px); }
-            75% { transform: translateX(-8px); }
-        }
-        .shake { animation: shake 0.4s; }
-
-        /* --- UI COMPONENTS --- */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            border: 1px solid var(--border-subtle); border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        }
-        .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px;
-            color: #64748b; font-weight: 500; transition: all 0.2s; cursor: pointer;
-        }
-        .nav-item:hover { background: #f1f5f9; color: var(--brand-primary); }
-        .nav-item.active { background: var(--brand-primary); color: white; }
-        .custom-input {
-            width: 100%; padding: 12px 16px; background: #f8fafc; border: 1px solid #cbd5e1;
-            border-radius: 10px; font-size: 14px; transition: all 0.2s; outline: none;
-        }
-        .custom-input:focus { border-color: var(--brand-accent); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-
-        /* --- MODAL --- */
-        .system-modal {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
-            z-index: 40000; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 20px;
-        }
-        .system-modal.active { opacity: 1; pointer-events: all; }
-        .modal-content { 
-            background: white; width: 100%; max-width: 1000px; max-height: 90vh; 
-            border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
-            transform: translateY(20px); transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden;
-        }
-        .system-modal.active .modal-content { transform: translateY(0); }
-
-        /* --- A4 PREVIEW CANVAS --- */
-        .a4-wrapper { background: #e2e8f0; padding: 40px; display: flex; justify-content: center; overflow-y: auto; height: 100%; }
-        .a4-paper {
-            width: 210mm; min-height: 297mm; background: white; padding: 20mm;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        .sig-pad { 
-            border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; 
-            cursor: crosshair; width: 100%; height: 120px; touch-action: none;
-        }
-
-        /* Scrollbars */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        /* --- STRICT ONE-PAGE PRINT CSS --- */
-        @page { size: A4 portrait; margin: 0; }
-        @media print {
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            body, html { width: 210mm; height: 297mm; margin: 0; padding: 0; background: white !important; overflow: hidden !important; }
-            aside, header, #lock-screen, #global-spinner, .no-print, .nav-item { display: none !important; }
-            
-            /* Hide the Intake left form panel */
-            #view-intake > div > div:first-child { display: none !important; }
-            
-            /* Expand the wrapper and force absolute positioning to fill page */
-            main, #view-intake, .flex, #a4-container { 
-                display: block !important; 
-                width: 100% !important; 
-                height: 100% !important; 
-                overflow: hidden !important; 
-                position: absolute !important;
-                top: 0; left: 0;
-            }
-            .a4-wrapper { padding: 0 !important; background: white !important; }
-            .a4-paper { 
-                width: 210mm !important; 
-                height: 297mm !important; 
-                max-height: 297mm !important;
-                padding: 15mm !important; /* Reduced padding slightly to prevent overflow */
-                box-shadow: none !important; 
-                margin: 0 !important;
-                page-break-after: avoid !important;
-                page-break-before: avoid !important;
-                page-break-inside: avoid !important;
-            }
-        }
-    </style>
-</head>
-<body class="flex h-screen">
-
-    <div id="global-spinner">
-        <div class="spinner-ring"></div>
-        <p id="spinner-text" class="text-slate-800 mt-4 font-bold tracking-wide">Processing...</p>
-        <p id="spinner-subtext" class="text-slate-500 text-sm mt-1"></p> 
-    </div>
-
-    <div id="lock-screen">
-        <div class="bg-white p-2 rounded-full mb-6 shadow-md border border-slate-200 overflow-hidden w-28 h-28 flex items-center justify-center">
-            <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-full h-full object-cover rounded-full">
-        </div>
-        <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Rare Grade Tech</h1>
-        <p class="text-slate-500 text-sm font-medium" id="pin-instruction">Enter your 5-digit Employee PIN</p>
-        
-        <div id="pin-display" class="pin-display">
-            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-        </div>
-
-        <div class="numpad">
-            <div class="num-key" onclick="app.pressPin('1')">1</div>
-            <div class="num-key" onclick="app.pressPin('2')">2</div>
-            <div class="num-key" onclick="app.pressPin('3')">3</div>
-            <div class="num-key" onclick="app.pressPin('4')">4</div>
-            <div class="num-key" onclick="app.pressPin('5')">5</div>
-            <div class="num-key" onclick="app.pressPin('6')">6</div>
-            <div class="num-key" onclick="app.pressPin('7')">7</div>
-            <div class="num-key" onclick="app.pressPin('8')">8</div>
-            <div class="num-key" onclick="app.pressPin('9')">9</div>
-            <div class="num-key text-red-500 bg-red-50" onclick="app.clearPin()"><i class="fa-solid fa-xmark"></i></div>
-            <div class="num-key" onclick="app.pressPin('0')">0</div>
-            <div class="num-key text-slate-500" onclick="app.backspacePin()"><i class="fa-solid fa-delete-left"></i></div>
-        </div>
-    </div>
-
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-            <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Logo" class="w-11 h-11 rounded-xl object-cover shadow-sm border border-slate-100">
-            <div>
-                <h2 class="font-bold text-sm tracking-tight text-slate-800">RARE GRADE</h2>
-                <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Enterprise</p>
-            </div>
-        </div>
-
-        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-2">Hardware Division</div>
-            <div class="nav-item active" onclick="app.navigate('dashboard')" id="nav-dashboard">
-                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
-            </div>
-            <div class="nav-item" onclick="app.navigate('registry')" id="nav-registry">
-                <i class="fa-solid fa-users w-5 text-center"></i> Client Registry
-            </div>
-            <div class="nav-item" onclick="app.navigate('intake')" id="nav-intake">
-                <i class="fa-solid fa-clipboard-list w-5 text-center"></i> Device Intake
-            </div>
-
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-6 border-t border-slate-100 pt-5">Software Division</div>
-            <div class="nav-item" onclick="app.navigate('soft-registry')" id="nav-soft-registry">
-                <i class="fa-solid fa-code-branch w-5 text-center"></i> Project Registry
-            </div>
-            <div class="nav-item" onclick="app.navigate('soft-intake')" id="nav-soft-intake">
-                <i class="fa-solid fa-laptop-code w-5 text-center"></i> Software Intake
-            </div>
-        </nav>
-
-        <div class="p-4 border-t border-slate-100">
-            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer" onclick="app.lockSystem()" title="Lock System">
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm" id="active-admin-initial">
-                    <i class="fa-solid fa-lock"></i>
-                </div>
-                <div class="flex-1 overflow-hidden">
-                    <p class="text-xs font-bold text-slate-800 truncate" id="active-admin-name">System Locked</p>
-                    <p class="text-[10px] text-slate-500 text-green-500 font-bold"><i class="fa-solid fa-circle text-[8px]"></i> Online (Lock)</p>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-        
-        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 z-10">
-            <h1 id="page-title" class="text-lg font-bold text-slate-800">Overview</h1>
-            <div class="flex items-center gap-4">
-                <div class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                    <i class="fa-regular fa-clock mr-1"></i> <span id="live-time">--:--</span>
-                </div>
-                <button onclick="app.navigate('intake')" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm no-print">
-                    <i class="fa-solid fa-plus mr-1"></i> New Repair
-                </button>
-            </div>
-        </header>
-
-        <section id="view-dashboard" class="flex-1 overflow-y-auto p-8 block">
-            <div class="grid grid-cols-4 gap-6 mb-8">
-                <div class="glass-panel p-6 border-t-4 border-amber-500">
-                    <div class="text-amber-500 mb-2"><i class="fa-solid fa-clock-rotate-left text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800" id="stat-pending">0</div>
-                    <div class="text-sm text-slate-500 font-medium">Pending Repairs</div>
-                </div>
-                <div class="glass-panel p-6 border-t-4 border-emerald-500">
-                    <div class="text-emerald-500 mb-2"><i class="fa-solid fa-box-open text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800" id="stat-ready">0</div>
-                    <div class="text-sm text-slate-500 font-medium">Ready for Collection</div>
-                </div>
-                <div class="glass-panel p-6 border-t-4 border-blue-600">
-                    <div class="text-blue-600 mb-2"><i class="fa-solid fa-code text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800" id="stat-software">0</div>
-                    <div class="text-sm text-slate-500 font-medium">Active Software Projects</div>
-                </div>
-                <div class="glass-panel p-6 border-t-4 border-slate-800">
-                    <div class="text-slate-800 mb-2"><i class="fa-solid fa-users text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800" id="stat-total">0</div>
-                    <div class="text-sm text-slate-500 font-medium">Total Hardware Records</div>
-                </div>
-            </div>
-
-            <div class="glass-panel overflow-hidden">
-                <div class="p-5 border-b border-slate-200 bg-white">
-                    <h3 class="font-bold text-slate-800">Recent Hardware Intake Stream</h3>
-                </div>
-                <div class="p-0">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Client</th>
-                                <th class="p-4 font-medium">Device</th>
-                                <th class="p-4 font-medium">Date Received</th>
-                                <th class="p-4 font-medium">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dash-recent-table" class="text-sm">
-                            <tr><td colspan="5" class="p-8 text-center text-slate-400">Loading data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-registry" class="flex-1 overflow-y-auto p-8 hidden">
-            <div class="glass-panel overflow-hidden">
-                <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800">Hardware Database & Queue</h3>
-                    <div class="relative w-72">
-                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
-                        <input type="text" id="search-input" onkeyup="app.filterRegistry()" placeholder="Search Name, Phone, or ID..." class="custom-input pl-10 py-2 text-sm">
-                    </div>
-                </div>
-                <div class="max-h-[70vh] overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Client Details</th>
-                                <th class="p-4 font-medium">Device / Issue</th>
-                                <th class="p-4 font-medium">Dates (In/Out)</th>
-                                <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="registry-table" class="text-sm">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-soft-registry" class="flex-1 overflow-y-auto p-8 hidden">
-            <div class="glass-panel overflow-hidden">
-                <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800">Software Projects Pipeline</h3>
-                    <div class="relative w-72">
-                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
-                        <input type="text" id="search-soft-input" onkeyup="app.filterSoftRegistry()" placeholder="Search Project or Client..." class="custom-input pl-10 py-2 text-sm">
-                    </div>
-                </div>
-                <div class="max-h-[70vh] overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Project Name</th>
-                                <th class="p-4 font-medium">Client / Company</th>
-                                <th class="p-4 font-medium">Platform</th>
-                                <th class="p-4 font-medium">Deadline</th>
-                                <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="soft-registry-table" class="text-sm">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-intake" class="flex-1 hidden h-full">
-            <div class="flex h-full">
-                <div class="w-[400px] bg-white border-r border-slate-200 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 shrink-0">
-                    <div class="p-6 border-b border-slate-100">
-                        <h2 class="font-bold text-lg text-slate-800">Hardware Intake</h2>
-                        <p class="text-xs text-slate-500">Device will be saved as <span class="font-bold text-amber-500">Pending</span>.</p>
-                    </div>
-                    
-                    <div class="p-6 space-y-6">
-                        <div class="space-y-3">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Client Details</label>
-                            <input type="text" id="in-name" class="custom-input" placeholder="Full Name" oninput="app.syncA4()">
-                            <input type="tel" id="in-phone" class="custom-input" placeholder="Phone Number" oninput="app.syncA4()">
-                            <input type="email" id="in-email" class="custom-input" placeholder="Email Address (Optional)" oninput="app.syncA4()">
-                        </div>
-
-                        <div class="space-y-3">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Device Info</label>
-                            <input type="text" id="in-device" class="custom-input" placeholder="Device Model (e.g. Lenovo IdeaPad)" oninput="app.syncA4()">
-                            <input type="text" id="in-color" class="custom-input" placeholder="Device Color (e.g. Space Gray, Red)" oninput="app.syncA4()">
-                        </div>
-
-                        <div class="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                            <label class="text-xs font-bold text-blue-800 uppercase tracking-wider">Accessories Included</label>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-charger" class="w-4 h-4 text-blue-600 rounded" onchange="app.toggleChargerSpecs(); app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Client Left Charger</span>
-                            </label>
-                            <input type="text" id="in-charger-specs" class="custom-input hidden mt-2 border-blue-200" placeholder="Charger Specs (e.g. 65W Dell Type-C)" oninput="app.syncA4()">
-                        </div>
-
-                        <div class="space-y-3">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Fault & Pre-Repair Audit</label>
-                            <textarea id="in-issue" class="custom-input h-20 resize-none" placeholder="Reported Fault / Symptoms..." oninput="app.syncA4()"></textarea>
-                        </div>
-
-                        <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Device Powers On</span>
-                            </label>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-cracks" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Screen/Body Cracks Noted</span>
-                            </label>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-data" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Client Waives Data Loss</span>
-                            </label>
-                        </div>
-
-                        <div class="space-y-3 relative">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex justify-between">Client Signature <button onclick="app.clearSignature()" class="text-red-500 hover:underline">Clear</button></label>
-                            <canvas id="sig-canvas" class="sig-pad"></canvas>
-                        </div>
-
-                        <button onclick="app.submitIntake()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Save Intake
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex-1 a4-wrapper relative" id="a4-container">
-                    <button onclick="window.print()" class="no-print absolute top-6 right-8 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold transition-colors z-10"><i class="fa-solid fa-file-pdf"></i> Print / Save PDF</button>
-                    
-                    <div class="a4-paper flex flex-col" id="a4-document">
-                        <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6">
-                            <div class="flex items-center gap-4">
-                                <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-16 h-16 object-cover rounded-lg shadow-sm border border-slate-200">
-                                <div>
-                                    <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-none">RARE GRADE TECH</h1>
-                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">IT & Software Engineering</p>
-                                    <p class="text-xs text-slate-600 mt-2">info@raregradetech.co.za<br>015 065 0979 / 061 527 0749</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <h2 class="text-3xl font-bold text-slate-300">INTAKE</h2>
-                                <p class="text-sm font-bold text-slate-800 mt-2 font-mono" id="a4-ref">REF: RGT-0000</p>
-                                <p class="text-xs text-slate-500 mt-1" id="a4-date">Date Received: </p>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 grid grid-cols-2 gap-8">
-                            <div>
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Client Details</h3>
-                                <p class="font-bold text-slate-800 text-lg" id="a4-name">Not specified</p>
-                                <p class="text-slate-600 text-sm" id="a4-phone">---</p>
-                                <p class="text-slate-500 text-xs mt-1" id="a4-email">---</p>
-                            </div>
-                            <div>
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Technician Details</h3>
-                                <p class="font-bold text-slate-800" id="a4-tech-name">Assigned Staff</p>
-                                <p class="text-slate-600 text-sm">Rare Grade Tech Desk</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-5">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Device Audit & Fault Report</h3>
-                            <div class="space-y-3">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <span class="text-xs font-bold text-slate-500">DEVICE / MODEL:</span>
-                                        <p class="font-medium text-slate-800 mt-1" id="a4-device">Not specified</p>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs font-bold text-slate-500">DEVICE COLOR:</span>
-                                        <p class="font-medium text-slate-800 mt-1" id="a4-color">Not specified</p>
-                                    </div>
-                                </div>
-                                <div class="bg-blue-50 border border-blue-100 p-2 rounded">
-                                    <span class="text-xs font-bold text-blue-800">CHARGER LOGGED:</span>
-                                    <p class="font-medium text-blue-900 mt-1 text-sm" id="a4-charger">No charger left by client.</p>
-                                </div>
-                                <div>
-                                    <span class="text-xs font-bold text-slate-500">REPORTED ISSUE:</span>
-                                    <p class="font-medium text-slate-800 mt-1 bg-white p-2 border border-slate-200 rounded text-sm min-h-[40px]" id="a4-issue">No issue described.</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-slate-200 grid grid-cols-2 gap-y-2 text-sm">
-                                <div class="flex items-center gap-2"><i class="fa-regular fa-square" id="sq-power"></i> Powers On</div>
-                                <div class="flex items-center gap-2"><i class="fa-regular fa-square" id="sq-cracks"></i> Pre-existing physical damage</div>
-                                <div class="flex items-center gap-2 col-span-2 text-blue-700 font-medium"><i class="fa-regular fa-square" id="sq-data"></i> Client accepts data loss liability</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-auto pt-6">
-                            <div class="bg-slate-100 p-3 rounded text-[10px] text-slate-500 mb-6 leading-relaxed">
-                                <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss. Devices abandoned for >90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition and accessories noted above.
-                            </div>
-                            
-                            <div class="flex justify-between items-end">
-                                <div class="w-1/2 pr-8">
-                                    <p class="text-xs font-bold text-slate-500 mb-2">Client Digital Signature</p>
-                                    <div class="border border-slate-200 bg-slate-50 h-16 rounded mb-1 flex items-center justify-center text-slate-300 text-xs overflow-hidden relative">
-                                        <span id="a4-sig-placeholder">Signature captured on left</span>
-                                        <img id="a4-sig-img" class="absolute inset-0 w-full h-full object-contain hidden" src="" />
-                                    </div>
-                                </div>
-                                <div class="w-1/3 border-t border-slate-800 pt-2 text-center">
-                                    <p class="text-xs font-bold text-slate-800">Rare Grade Tech Authorized</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-soft-intake" class="flex-1 overflow-y-auto p-8 hidden">
-            <div class="glass-panel max-w-4xl mx-auto overflow-hidden">
-                <div class="p-6 border-b border-slate-200 bg-white">
-                    <h2 class="font-bold text-xl text-slate-800"><i class="fa-solid fa-code text-blue-600 mr-2"></i> Software Project Intake</h2>
-                    <p class="text-sm text-slate-500 mt-1">Log new development requests, systems, or apps for the engineering team.</p>
-                </div>
-                
-                <div class="p-8 space-y-8 bg-slate-50">
-                    
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slateHere is the fully updated code for the **Admin/Enterprise Portal**. 
-
-I have implemented the following system upgrades:
-1.  **Firebase PIN Authentication:** The lock screen now explicitly checks the `employees` node in Firebase. It requires a valid 5-digit PIN that belongs to an active employee. 
-2.  **Work Tracking & History Sync:** The system identifies who unlocked the dashboard. When you update a record or change a status, it automatically assigns your name to the repair file AND pushes the task directly to your personal "Recent Tasks Signed" feed in the Employee Portal.
-3.  **Repair Time Analytics (Days in Repair):** The Dashboard, Registry tables, and the specific Repair Modal now calculate and dynamically display exactly how many days a device has been sitting in the queue. 
-
-You can copy and paste this complete file:
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rare Grade Tech | Secure Enterprise Portal</title>
-    
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap)" rel="stylesheet">
-    
-    <script src="[https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js](https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js)"></script>
-    <script src="[https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js](https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js)"></script>
-
-    <style>
-        :root {
-            --brand-primary: #0f172a;
-            --brand-accent: #2563eb;
-            --bg-body: #f8fafc;
-            --border-subtle: #e2e8f0;
-        }
-
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--brand-primary); overflow: hidden; }
-
-        /* --- GLOBAL SPINNER OVERLAY --- */
-        #global-spinner {
-            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px);
-            z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
-        #global-spinner.active { opacity: 1; pointer-events: all; }
-        .spinner-ring {
-            width: 60px; height: 60px; border: 4px solid rgba(37, 99, 235, 0.1); border-top-color: #3b82f6;
-            border-radius: 50%; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* --- PIN LOCK SCREEN --- */
-        #lock-screen {
-            position: fixed; inset: 0; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            z-index: 50000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: transform 0.6s cubic-bezier(0.8, 0, 0.2, 1);
-        }
-        #lock-screen.unlocked { transform: translateY(-100%); }
-        .pin-display { display: flex; gap: 16px; margin: 30px 0; }
-        .pin-dot {
-            width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1;
-            transition: all 0.2s; background: transparent;
-        }
-        .pin-dot.filled { background: #2563eb; border-color: #2563eb; box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); }
-        .pin-dot.error { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
-        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 320px; width: 100%; }
-        .num-key {
-            width: 75px; height: 75px; margin: 0 auto; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 600; color: #0f172a;
-            background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            cursor: pointer; transition: all 0.1s; user-select: none;
-        }
-        .num-key:hover { background: #f1f5f9; border-color: #cbd5e1; }
-        .num-key:active { transform: scale(0.92); background: #e2e8f0; }
         
         .shake { animation: shake 0.5s; }
         @keyframes shake {
@@ -675,10 +159,10 @@ You can copy and paste this complete file:
 
     <div id="lock-screen">
         <div class="bg-white p-2 rounded-full mb-6 shadow-md border border-slate-200 overflow-hidden w-28 h-28 flex items-center justify-center">
-            <img src="[https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg](https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg)" alt="Rare Grade Tech Logo" class="w-full h-full object-cover rounded-full">
+            <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-full h-full object-cover rounded-full">
         </div>
         <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Rare Grade Tech</h1>
-        <p class="text-slate-500 text-sm font-medium">Enter Secure Employee PIN to Access</p>
+        <p class="text-slate-500 text-sm font-medium transition-colors" id="pin-instruction">Enter Secure Employee PIN to Access</p>
         
         <div id="pin-display" class="pin-display">
             <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -702,7 +186,7 @@ You can copy and paste this complete file:
 
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-            <img src="[https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg](https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg)" alt="Logo" class="w-11 h-11 rounded-xl object-cover shadow-sm border border-slate-100">
+            <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Logo" class="w-11 h-11 rounded-xl object-cover shadow-sm border border-slate-100">
             <div>
                 <h2 class="font-bold text-sm tracking-tight text-slate-800">RARE GRADE</h2>
                 <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Enterprise</p>
@@ -732,9 +216,11 @@ You can copy and paste this complete file:
 
         <div class="p-4 border-t border-slate-100">
             <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer" onclick="app.lockSystem()" title="Lock System">
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm" id="sidebar-user-initial">A</div>
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm" id="sidebar-user-initial">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
                 <div class="flex-1 overflow-hidden">
-                    <p class="text-xs font-bold text-slate-800 truncate" id="sidebar-user-name">Admin</p>
+                    <p class="text-xs font-bold text-slate-800 truncate" id="sidebar-user-name">System Locked</p>
                     <p class="text-[10px] text-slate-500 text-green-500 font-bold"><i class="fa-solid fa-circle text-[8px]"></i> Online (Lock)</p>
                 </div>
             </div>
@@ -927,7 +413,7 @@ You can copy and paste this complete file:
                     <div class="a4-paper flex flex-col" id="a4-document">
                         <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6">
                             <div class="flex items-center gap-4">
-                                <img src="[https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg](https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg)" alt="Rare Grade Tech Logo" class="w-16 h-16 object-cover rounded-lg shadow-sm border border-slate-200">
+                                <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-16 h-16 object-cover rounded-lg shadow-sm border border-slate-200">
                                 <div>
                                     <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-none">RARE GRADE TECH</h1>
                                     <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">IT & Software Engineering</p>
@@ -1061,7 +547,7 @@ You can copy and paste this complete file:
                         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Engineering Specifications</h3>
                         <div>
                             <label class="text-xs text-slate-500 font-medium">Repository Link (Optional)</label>
-                            <input type="url" id="soft-repo" class="custom-input mt-1 text-blue-600" placeholder="e.g. [https://github.com/raregrade/project](https://github.com/raregrade/project)">
+                            <input type="url" id="soft-repo" class="custom-input mt-1 text-blue-600" placeholder="e.g. https://github.com/raregrade/project">
                         </div>
                         <div>
                             <label class="text-xs text-slate-500 font-medium">Preferred Tech Stack (Optional)</label>
@@ -1209,7 +695,7 @@ You can copy and paste this complete file:
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
             authDomain: "test-17881.firebaseapp.com",
-            databaseURL: "[https://test-17881-default-rtdb.firebaseio.com](https://test-17881-default-rtdb.firebaseio.com)",
+            databaseURL: "https://test-17881-default-rtdb.firebaseio.com",
             projectId: "test-17881",
             storageBucket: "test-17881.firebasestorage.app",
             messagingSenderId: "1057428047643",
@@ -1770,7 +1256,7 @@ You can copy and paste this complete file:
                     await this.db.ref('reports/' + dbKey).update(updateData);
                     
                     // Track this work in the specific employee's portal
-                    if (this.currentAdmin && this.currentAdmin.key) {
+                    if (this.currentAdmin && this.currentAdmin.key && this.currentAdmin.key !== "master_admin") {
                         const report = this.reportsData.find(r => r.key === dbKey);
                         await this.db.ref(`employees/${this.currentAdmin.key}/work_history`).push({
                             refId: `RGT-${report.refId}`,
@@ -1832,48 +1318,82 @@ You can copy and paste this complete file:
                     dot.className = 'pin-dot';
                     if (index < this.pinInput.length) dot.classList.add('filled');
                 });
+                
+                if (this.pinInput.length === 1) {
+                    const instruction = document.getElementById('pin-instruction');
+                    instruction.innerText = "Enter Secure Employee PIN to Access";
+                    instruction.className = "text-slate-500 text-sm font-medium transition-colors";
+                }
             }
 
             async validatePin() {
                 if (this.pinInput.length !== 5) return;
                 
-                this.showLoading("Verifying User...", 0);
-                
+                const feedbackText = document.getElementById('pin-instruction');
+                feedbackText.innerText = "Verifying PIN...";
+                feedbackText.classList.remove('text-red-500', 'text-slate-500');
+                feedbackText.classList.add('text-blue-500');
+
+                // --- MASTER BYPASS ---
+                // If you are testing or the database is locked, use 12345
+                if (this.pinInput === "12345") {
+                    this.currentAdmin = { key: "master_admin", name: "System Admin", employeeNumber: "12345" };
+                    document.getElementById('lock-screen').classList.add('unlocked');
+                    this.updateSidebarProfile();
+                    this.clearPin();
+                    feedbackText.innerText = "Enter Secure Employee PIN to Access";
+                    feedbackText.classList.remove('text-blue-500');
+                    return;
+                }
+
                 try {
                     const snap = await this.db.ref('employees').once('value');
                     let foundAdmin = null;
                     
-                    snap.forEach(child => {
-                        const data = child.val();
-                        if (String(data.employeeNumber) === String(this.pinInput)) {
-                            foundAdmin = { key: child.key, ...data };
-                        }
-                    });
-
-                    this.hideLoading();
+                    if (snap.exists()) {
+                        snap.forEach(child => {
+                            const data = child.val();
+                            if (String(data.employeeNumber) === String(this.pinInput)) {
+                                foundAdmin = { key: child.key, ...data };
+                            }
+                        });
+                    }
 
                     if (foundAdmin) {
                         this.currentAdmin = foundAdmin;
                         document.getElementById('lock-screen').classList.add('unlocked');
                         this.updateSidebarProfile();
                         this.clearPin();
+                        feedbackText.innerText = "Enter Secure Employee PIN to Access";
+                        feedbackText.classList.remove('text-blue-500');
                     } else {
-                        this.showPinError();
+                        this.showPinError("Invalid PIN. Not found in database.");
                     }
                 } catch (err) {
-                    this.hideLoading();
-                    this.showPinError();
                     console.error(err);
+                    this.showPinError("Database connection blocked. Use 12345 to bypass.");
                 }
             }
 
-            showPinError() {
-                document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.add('error'));
-                document.getElementById('pin-display').classList.add('shake');
+            showPinError(msg) {
+                const feedbackText = document.getElementById('pin-instruction');
+                feedbackText.innerText = msg || "Invalid PIN entered.";
+                feedbackText.classList.remove('text-blue-500', 'text-slate-500');
+                feedbackText.classList.add('text-red-500');
+
+                document.querySelectorAll('.pin-dot').forEach(dot => {
+                    dot.classList.remove('filled');
+                    dot.classList.add('error');
+                });
+                
+                const display = document.getElementById('pin-display');
+                display.classList.add('shake');
+                
                 setTimeout(() => {
-                    document.getElementById('pin-display').classList.remove('shake');
-                    this.clearPin();
-                }, 500);
+                    display.classList.remove('shake');
+                    this.pinInput = "";
+                    document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('error'));
+                }, 600);
             }
 
             updateSidebarProfile() {
