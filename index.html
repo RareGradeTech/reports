@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rare Grade Tech | Secure Enterprise Portal</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
@@ -19,7 +17,6 @@
             --bg-body: #f8fafc;
             --border-subtle: #e2e8f0;
         }
-
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--brand-primary); overflow: hidden; }
 
         /* --- GLOBAL SPINNER OVERLAY --- */
@@ -34,7 +31,7 @@
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
+
         /* --- PIN LOCK SCREEN --- */
         #lock-screen {
             position: fixed; inset: 0; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -58,7 +55,6 @@
         }
         .num-key:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .num-key:active { transform: scale(0.92); background: #e2e8f0; }
-        
         .shake { animation: shake 0.5s; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
@@ -92,9 +88,9 @@
             opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 20px;
         }
         .system-modal.active { opacity: 1; pointer-events: all; }
-        .modal-content { 
-            background: white; width: 100%; max-width: 1000px; max-height: 90vh; 
-            border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
+        .modal-content {
+            background: white; width: 100%; max-width: 1000px; max-height: 90vh;
+            border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
             transform: translateY(20px); transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden;
         }
         .system-modal.active .modal-content { transform: translateY(0); }
@@ -105,9 +101,14 @@
             width: 210mm; min-height: 297mm; background: white; padding: 20mm;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
-        .sig-pad { 
-            border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; 
+        .sig-pad {
+            border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px;
             cursor: crosshair; width: 100%; height: 120px; touch-action: none;
+        }
+        /* Support SIG pad */
+        .support-sig-pad {
+            border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px;
+            cursor: crosshair; width: 100%; touch-action: none;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -120,29 +121,49 @@
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body, html { width: 210mm; height: 297mm; margin: 0; padding: 0; background: white !important; overflow: hidden !important; }
             aside, header, #lock-screen, #global-spinner, .no-print, .nav-item { display: none !important; }
-            
             #view-intake > div > div:first-child { display: none !important; }
-            
-            main, #view-intake, .flex, #a4-container { 
-                display: block !important; 
-                width: 100% !important; 
-                height: 100% !important; 
-                overflow: hidden !important; 
+            main, #view-intake, .flex, #a4-container {
+                display: block !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
                 position: absolute !important;
                 top: 0; left: 0;
             }
             .a4-wrapper { padding: 0 !important; background: white !important; }
-            .a4-paper { 
-                width: 210mm !important; 
-                height: 297mm !important; 
+            .a4-paper {
+                width: 210mm !important;
+                height: 297mm !important;
                 max-height: 297mm !important;
-                padding: 15mm !important; 
-                box-shadow: none !important; 
+                padding: 15mm !important;
+                box-shadow: none !important;
                 margin: 0 !important;
                 page-break-after: avoid !important;
                 page-break-before: avoid !important;
                 page-break-inside: avoid !important;
             }
+        }
+
+        /* --- TECH SUPPORT SPECIFIC STYLES --- */
+        .business-card {
+            background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+            transition: all 0.2s; cursor: pointer;
+        }
+        .business-card:hover { border-color: #93c5fd; box-shadow: 0 4px 12px rgba(37,99,235,0.08); }
+        .device-row {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+            padding: 12px; margin-bottom: 8px;
+        }
+        .tab-btn {
+            padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; color: #64748b; border: 1px solid #e2e8f0; background: white;
+        }
+        .tab-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+        /* Contract A4 page */
+        .contract-a4 {
+            width: 210mm; min-height: 297mm; background: white; padding: 18mm;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -151,7 +172,7 @@
     <div id="global-spinner">
         <div class="spinner-ring"></div>
         <p id="spinner-text" class="text-slate-800 mt-4 font-bold tracking-wide">Processing...</p>
-        <p id="spinner-subtext" class="text-slate-500 text-sm mt-1"></p> 
+        <p id="spinner-subtext" class="text-slate-500 text-sm mt-1"></p>
     </div>
 
     <div id="lock-screen">
@@ -160,11 +181,9 @@
         </div>
         <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Rare Grade Tech</h1>
         <p class="text-slate-500 text-sm font-medium transition-colors" id="pin-instruction">Enter Secure Employee PIN to Access</p>
-        
         <div id="pin-display" class="pin-display">
             <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
         </div>
-
         <div class="numpad">
             <div class="num-key" onclick="app.pressPin('1')">1</div>
             <div class="num-key" onclick="app.pressPin('2')">2</div>
@@ -209,6 +228,14 @@
             <div class="nav-item" onclick="app.navigate('soft-intake')" id="nav-soft-intake">
                 <i class="fa-solid fa-laptop-code w-5 text-center"></i> Software Intake
             </div>
+
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-6 border-t border-slate-100 pt-5">Technical Support</div>
+            <div class="nav-item" onclick="app.navigate('support-registry')" id="nav-support-registry">
+                <i class="fa-solid fa-building w-5 text-center"></i> Business Registry
+            </div>
+            <div class="nav-item" onclick="app.navigate('support-intake')" id="nav-support-intake">
+                <i class="fa-solid fa-screwdriver-wrench w-5 text-center"></i> Add Business
+            </div>
         </nav>
 
         <div class="p-4 border-t border-slate-100">
@@ -225,7 +252,7 @@
     </aside>
 
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-        
+
         <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 z-10">
             <h1 id="page-title" class="text-lg font-bold text-slate-800">Overview</h1>
             <div class="flex items-center gap-4">
@@ -238,6 +265,7 @@
             </div>
         </header>
 
+        <!-- DASHBOARD -->
         <section id="view-dashboard" class="flex-1 overflow-y-auto p-8 block">
             <div class="grid grid-cols-4 gap-6 mb-8">
                 <div class="glass-panel p-6 border-t-4 border-amber-500">
@@ -255,13 +283,12 @@
                     <div class="text-3xl font-bold text-slate-800" id="stat-software">0</div>
                     <div class="text-sm text-slate-500 font-medium">Active Software Projects</div>
                 </div>
-                <div class="glass-panel p-6 border-t-4 border-slate-800">
-                    <div class="text-slate-800 mb-2"><i class="fa-solid fa-users text-2xl"></i></div>
-                    <div class="text-3xl font-bold text-slate-800" id="stat-total">0</div>
-                    <div class="text-sm text-slate-500 font-medium">Total Hardware Records</div>
+                <div class="glass-panel p-6 border-t-4 border-violet-600">
+                    <div class="text-violet-600 mb-2"><i class="fa-solid fa-building text-2xl"></i></div>
+                    <div class="text-3xl font-bold text-slate-800" id="stat-support-biz">0</div>
+                    <div class="text-sm text-slate-500 font-medium">Support Clients</div>
                 </div>
             </div>
-
             <div class="glass-panel overflow-hidden">
                 <div class="p-5 border-b border-slate-200 bg-white">
                     <h3 class="font-bold text-slate-800">Recent Hardware Intake Stream</h3>
@@ -285,6 +312,7 @@
             </div>
         </section>
 
+        <!-- HARDWARE REGISTRY -->
         <section id="view-registry" class="flex-1 overflow-y-auto p-8 hidden">
             <div class="glass-panel overflow-hidden">
                 <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
@@ -306,42 +334,13 @@
                                 <th class="p-4 font-medium text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="registry-table" class="text-sm">
-                        </tbody>
+                        <tbody id="registry-table" class="text-sm"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <section id="view-soft-registry" class="flex-1 overflow-y-auto p-8 hidden">
-            <div class="glass-panel overflow-hidden">
-                <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800">Software Projects Pipeline</h3>
-                    <div class="relative w-72">
-                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
-                        <input type="text" id="search-soft-input" onkeyup="app.filterSoftRegistry()" placeholder="Search Project or Client..." class="custom-input pl-10 py-2 text-sm">
-                    </div>
-                </div>
-                <div class="max-h-[70vh] overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Project Name</th>
-                                <th class="p-4 font-medium">Client / Company</th>
-                                <th class="p-4 font-medium">Platform</th>
-                                <th class="p-4 font-medium">Deadline</th>
-                                <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="soft-registry-table" class="text-sm">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
+        <!-- INTAKE FORM -->
         <section id="view-intake" class="flex-1 hidden h-full">
             <div class="flex h-full">
                 <div class="w-[400px] bg-white border-r border-slate-200 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 shrink-0">
@@ -349,7 +348,6 @@
                         <h2 class="font-bold text-lg text-slate-800">Hardware Intake</h2>
                         <p class="text-xs text-slate-500">Device will be saved as <span class="font-bold text-amber-500">Pending</span>.</p>
                     </div>
-                    
                     <div class="p-6 space-y-6">
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Client Details</label>
@@ -357,13 +355,11 @@
                             <input type="tel" id="in-phone" class="custom-input" placeholder="Phone Number" oninput="app.syncA4()">
                             <input type="email" id="in-email" class="custom-input" placeholder="Email Address (Optional)" oninput="app.syncA4()">
                         </div>
-
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Device Info</label>
                             <input type="text" id="in-device" class="custom-input" placeholder="Device Model (e.g. Lenovo IdeaPad)" oninput="app.syncA4()">
                             <input type="text" id="in-color" class="custom-input" placeholder="Device Color (e.g. Space Gray, Red)" oninput="app.syncA4()">
                         </div>
-
                         <div class="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                             <label class="text-xs font-bold text-blue-800 uppercase tracking-wider">Accessories Included</label>
                             <label class="flex items-center gap-3 cursor-pointer">
@@ -372,12 +368,10 @@
                             </label>
                             <input type="text" id="in-charger-specs" class="custom-input hidden mt-2 border-blue-200" placeholder="Charger Specs (e.g. 65W Dell Type-C)" oninput="app.syncA4()">
                         </div>
-
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Fault & Pre-Repair Audit</label>
                             <textarea id="in-issue" class="custom-input h-20 resize-none" placeholder="Reported Fault / Symptoms..." oninput="app.syncA4()"></textarea>
                         </div>
-
                         <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <label class="flex items-center gap-3 cursor-pointer">
                                 <input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
@@ -392,21 +386,17 @@
                                 <span class="text-sm font-medium text-slate-700">Client Waives Data Loss</span>
                             </label>
                         </div>
-
                         <div class="space-y-3 relative">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex justify-between">Client Signature <button onclick="app.clearSignature()" class="text-red-500 hover:underline">Clear</button></label>
                             <canvas id="sig-canvas" class="sig-pad"></canvas>
                         </div>
-
                         <button onclick="app.submitIntake()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Save Intake
                         </button>
                     </div>
                 </div>
-
                 <div class="flex-1 a4-wrapper relative" id="a4-container">
                     <button onclick="window.print()" class="no-print absolute top-6 right-8 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold transition-colors z-10"><i class="fa-solid fa-file-pdf"></i> Print / Save PDF</button>
-                    
                     <div class="a4-paper flex flex-col" id="a4-document">
                         <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6">
                             <div class="flex items-center gap-4">
@@ -423,7 +413,6 @@
                                 <p class="text-xs text-slate-500 mt-1" id="a4-date">Date Received: </p>
                             </div>
                         </div>
-
                         <div class="mt-6 grid grid-cols-2 gap-8">
                             <div>
                                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 border-b pb-1">Client Details</h3>
@@ -437,7 +426,6 @@
                                 <p class="text-slate-600 text-sm">Authorized Staff</p>
                             </div>
                         </div>
-
                         <div class="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-5">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Device Audit & Fault Report</h3>
                             <div class="space-y-3">
@@ -466,12 +454,10 @@
                                 <div class="flex items-center gap-2 col-span-2 text-blue-700 font-medium"><i class="fa-regular fa-square" id="sq-data"></i> Client accepts data loss liability</div>
                             </div>
                         </div>
-
                         <div class="mt-auto pt-6">
                             <div class="bg-slate-100 p-3 rounded text-[10px] text-slate-500 mb-6 leading-relaxed">
                                 <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss. Devices abandoned for >90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition and accessories noted above.
                             </div>
-                            
                             <div class="flex justify-between items-end">
                                 <div class="w-1/2 pr-8">
                                     <p class="text-xs font-bold text-slate-500 mb-2">Client Digital Signature</p>
@@ -485,46 +471,59 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- SOFTWARE REGISTRY -->
+        <section id="view-soft-registry" class="flex-1 overflow-y-auto p-8 hidden">
+            <div class="glass-panel overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-white flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800">Software Projects Pipeline</h3>
+                    <div class="relative w-72">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" id="search-soft-input" onkeyup="app.filterSoftRegistry()" placeholder="Search Project or Client..." class="custom-input pl-10 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="max-h-[70vh] overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                                <th class="p-4 font-medium">Ref ID</th>
+                                <th class="p-4 font-medium">Project Name</th>
+                                <th class="p-4 font-medium">Client / Company</th>
+                                <th class="p-4 font-medium">Platform</th>
+                                <th class="p-4 font-medium">Deadline</th>
+                                <th class="p-4 font-medium">Status</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="soft-registry-table" class="text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOFTWARE INTAKE -->
         <section id="view-soft-intake" class="flex-1 overflow-y-auto p-8 hidden">
             <div class="glass-panel max-w-4xl mx-auto overflow-hidden">
                 <div class="p-6 border-b border-slate-200 bg-white">
                     <h2 class="font-bold text-xl text-slate-800"><i class="fa-solid fa-code text-blue-600 mr-2"></i> Software Project Intake</h2>
                     <p class="text-sm text-slate-500 mt-1">Log new development requests, systems, or apps for the engineering team.</p>
                 </div>
-                
                 <div class="p-8 space-y-8 bg-slate-50">
-                    
                     <div class="grid grid-cols-2 gap-6">
                         <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Client / Company Info</h3>
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium">Client or Company Name</label>
-                                <input type="text" id="soft-client-name" class="custom-input mt-1" placeholder="e.g. Mapbox Logistics">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium">Contact Phone</label>
-                                <input type="tel" id="soft-client-phone" class="custom-input mt-1" placeholder="Phone Number">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium">Contact Email</label>
-                                <input type="email" id="soft-client-email" class="custom-input mt-1" placeholder="Email Address">
-                            </div>
+                            <div><label class="text-xs text-slate-500 font-medium">Client or Company Name</label><input type="text" id="soft-client-name" class="custom-input mt-1" placeholder="e.g. Mapbox Logistics"></div>
+                            <div><label class="text-xs text-slate-500 font-medium">Contact Phone</label><input type="tel" id="soft-client-phone" class="custom-input mt-1" placeholder="Phone Number"></div>
+                            <div><label class="text-xs text-slate-500 font-medium">Contact Email</label><input type="email" id="soft-client-email" class="custom-input mt-1" placeholder="Email Address"></div>
                         </div>
-
                         <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Project Metdata</h3>
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium">Project Name</label>
-                                <input type="text" id="soft-project-name" class="custom-input mt-1" placeholder="e.g. Vynix Social">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium">Target Platform</label>
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Project Metadata</h3>
+                            <div><label class="text-xs text-slate-500 font-medium">Project Name</label><input type="text" id="soft-project-name" class="custom-input mt-1" placeholder="e.g. Vynix Social"></div>
+                            <div><label class="text-xs text-slate-500 font-medium">Target Platform</label>
                                 <select id="soft-platform" class="custom-input mt-1">
                                     <option value="Web Application">Web Application</option>
                                     <option value="Mobile App (iOS/Android)">Mobile App (iOS/Android)</option>
@@ -533,29 +532,15 @@
                                     <option value="API / Backend System">API / Backend System</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium">Target Deadline</label>
-                                <input type="date" id="soft-deadline" class="custom-input mt-1">
-                            </div>
+                            <div><label class="text-xs text-slate-500 font-medium">Target Deadline</label><input type="date" id="soft-deadline" class="custom-input mt-1"></div>
                         </div>
                     </div>
-
                     <div class="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-2">Engineering Specifications</h3>
-                        <div>
-                            <label class="text-xs text-slate-500 font-medium">Repository Link (Optional)</label>
-                            <input type="url" id="soft-repo" class="custom-input mt-1 text-blue-600" placeholder="e.g. https://github.com/raregrade/project">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 font-medium">Preferred Tech Stack (Optional)</label>
-                            <input type="text" id="soft-stack" class="custom-input mt-1 font-mono text-sm" placeholder="e.g. Firebase, React Native, Mapbox">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 font-medium">Core Requirements & Features</label>
-                            <textarea id="soft-requirements" class="custom-input mt-1 h-32 resize-none" placeholder="Detail the core functionalities, user roles, and business logic required..."></textarea>
-                        </div>
+                        <div><label class="text-xs text-slate-500 font-medium">Repository Link (Optional)</label><input type="url" id="soft-repo" class="custom-input mt-1 text-blue-600" placeholder="e.g. https://github.com/raregrade/project"></div>
+                        <div><label class="text-xs text-slate-500 font-medium">Preferred Tech Stack (Optional)</label><input type="text" id="soft-stack" class="custom-input mt-1 font-mono text-sm" placeholder="e.g. Firebase, React Native, Mapbox"></div>
+                        <div><label class="text-xs text-slate-500 font-medium">Core Requirements & Features</label><textarea id="soft-requirements" class="custom-input mt-1 h-32 resize-none" placeholder="Detail the core functionalities, user roles, and business logic required..."></textarea></div>
                     </div>
-
                     <button onclick="app.submitSoftwareIntake()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
                         <i class="fa-solid fa-laptop-code"></i> Submit Project to Pipeline
                     </button>
@@ -563,7 +548,183 @@
             </div>
         </section>
 
-        <!-- ADMIN MODAL (HARDWARE) -->
+        <!-- ======================================== -->
+        <!-- TECHNICAL SUPPORT REGISTRY -->
+        <!-- ======================================== -->
+        <section id="view-support-registry" class="flex-1 overflow-y-auto p-8 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Technical Support Business Registry</h2>
+                    <p class="text-sm text-slate-500 mt-1">All businesses under active maintenance & support contracts.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="relative w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" id="search-support-input" onkeyup="app.filterSupportRegistry()" placeholder="Search business or contact..." class="custom-input pl-10 py-2 text-sm">
+                    </div>
+                    <button onclick="app.navigate('support-intake')" class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Add Business
+                    </button>
+                </div>
+            </div>
+
+            <div id="support-businesses-grid" class="grid grid-cols-3 gap-5">
+                <div class="col-span-3 text-center text-slate-400 py-16">
+                    <i class="fa-solid fa-building text-4xl mb-3 opacity-30"></i>
+                    <p>No businesses registered yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- TECHNICAL SUPPORT INTAKE (ADD BUSINESS) -->
+        <!-- ======================================== -->
+        <section id="view-support-intake" class="flex-1 overflow-y-auto p-8 hidden">
+            <div class="max-w-5xl mx-auto">
+                <div class="glass-panel overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 bg-white flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-xl text-slate-800">Register Technical Support Client</h2>
+                            <p class="text-sm text-slate-500">Log a business for regular IT maintenance & support.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-8 space-y-8 bg-slate-50">
+
+                        <!-- Business Info -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-briefcase text-violet-500"></i> Business Information
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs text-slate-500 font-medium">Business / Company Name *</label><input type="text" id="sup-biz-name" class="custom-input mt-1" placeholder="e.g. Limpopo Legal Services"></div>
+                                <div><label class="text-xs text-slate-500 font-medium">Industry / Sector</label><input type="text" id="sup-biz-sector" class="custom-input mt-1" placeholder="e.g. Legal, Retail, Education"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs text-slate-500 font-medium">Physical Address</label><input type="text" id="sup-biz-address" class="custom-input mt-1" placeholder="Street, City, Province"></div>
+                                <div><label class="text-xs text-slate-500 font-medium">Contract Start Date</label><input type="date" id="sup-biz-start-date" class="custom-input mt-1"></div>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 font-medium">Support Contract Type</label>
+                                <select id="sup-biz-contract" class="custom-input mt-1">
+                                    <option value="Monthly Maintenance">Monthly Maintenance</option>
+                                    <option value="Quarterly Maintenance">Quarterly Maintenance</option>
+                                    <option value="Ad-hoc Support">Ad-hoc Support</option>
+                                    <option value="Annual Support Contract">Annual Support Contract</option>
+                                    <option value="Break-Fix Only">Break-Fix Only</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Primary Contact -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-user-tie text-violet-500"></i> Primary Contact Person
+                            </h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div><label class="text-xs text-slate-500 font-medium">Contact Name *</label><input type="text" id="sup-contact-name" class="custom-input mt-1" placeholder="Full Name"></div>
+                                <div><label class="text-xs text-slate-500 font-medium">Position / Title</label><input type="text" id="sup-contact-title" class="custom-input mt-1" placeholder="e.g. IT Manager, CEO"></div>
+                                <div><label class="text-xs text-slate-500 font-medium">Phone Number *</label><input type="tel" id="sup-contact-phone" class="custom-input mt-1" placeholder="Phone"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs text-slate-500 font-medium">Email Address</label><input type="email" id="sup-contact-email" class="custom-input mt-1" placeholder="Email"></div>
+                                <div><label class="text-xs text-slate-500 font-medium">WhatsApp Number (if different)</label><input type="tel" id="sup-contact-wa" class="custom-input mt-1" placeholder="WhatsApp"></div>
+                            </div>
+                        </div>
+
+                        <!-- Devices Under Maintenance -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-desktop text-violet-500"></i> Devices Under Maintenance
+                                </h3>
+                                <button onclick="app.addDeviceRow()" class="text-xs bg-violet-50 text-violet-700 hover:bg-violet-100 px-3 py-1.5 rounded-lg font-bold transition border border-violet-200 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-plus"></i> Add Device
+                                </button>
+                            </div>
+                            <div id="devices-container" class="space-y-3">
+                                <!-- Device rows added dynamically -->
+                            </div>
+                            <p class="text-xs text-slate-400 italic" id="no-devices-msg">Click "Add Device" to log devices under this maintenance contract.</p>
+                        </div>
+
+                        <!-- Scope of Work -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-violet-500"></i> Scope of Maintenance Services
+                            </h3>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
+                                    <input type="checkbox" id="sup-scope-hardware" class="text-violet-600 w-4 h-4">
+                                    <span class="text-sm font-medium text-slate-700">Hardware Repairs</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
+                                    <input type="checkbox" id="sup-scope-software" class="text-violet-600 w-4 h-4">
+                                    <span class="text-sm font-medium text-slate-700">Software Support</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
+                                    <input type="checkbox" id="sup-scope-network" class="text-violet-600 w-4 h-4">
+                                    <span class="text-sm font-medium text-slate-700">Network / LAN</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
+                                    <input type="checkbox" id="sup-scope-backup" class="text-violet-600 w-4 h-4">
+                                    <span class="text-sm font-medium text-slate-700">Backup & Recovery</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
+                                    <input type="checkbox" id="sup-scope-security" class="text-violet-600 w-4 h-4">
+                                    <span class="text-sm font-medium text-slate-700">Security & Antivirus</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
+                                    <input type="checkbox" id="sup-scope-remote" class="text-violet-600 w-4 h-4">
+                                    <span class="text-sm font-medium text-slate-700">Remote Support</span>
+                                </label>
+                            </div>
+                            <div><label class="text-xs text-slate-500 font-medium">Additional Notes / Special Requirements</label>
+                                <textarea id="sup-notes" class="custom-input mt-1 h-24 resize-none" placeholder="Describe any special requirements, SLA terms, or important notes..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Client Authorisation & Signature -->
+                        <div class="bg-white p-6 rounded-xl border border-violet-200 shadow-sm space-y-4">
+                            <h3 class="text-xs font-bold text-violet-700 uppercase tracking-wider border-b border-violet-100 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-pen-to-square text-violet-500"></i> Client Authorisation & Signature
+                            </h3>
+                            <div class="bg-violet-50 border border-violet-100 rounded-lg p-4 text-sm text-violet-800 leading-relaxed">
+                                <strong>Authorisation Statement:</strong> By signing below, the authorised representative of the above-named business confirms that Rare Grade Tech (Pty) Ltd is hereby appointed to provide IT maintenance and technical support services as described. The client acknowledges the service scope, agrees to Rare Grade Tech's standard terms and conditions, and authorises access to the listed devices for maintenance purposes.
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Authorised Signatory Name</label>
+                                    <input type="text" id="sup-sig-name" class="custom-input" placeholder="Full name of person signing">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Capacity / Designation</label>
+                                    <input type="text" id="sup-sig-title" class="custom-input" placeholder="e.g. Managing Director, Owner">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Client Digital Signature</label>
+                                    <button onclick="app.clearSupportSignature()" class="text-xs text-red-500 hover:underline font-medium">Clear Signature</button>
+                                </div>
+                                <canvas id="sup-sig-canvas" class="support-sig-pad h-32 block" style="height:128px;"></canvas>
+                            </div>
+                        </div>
+
+                        <button onclick="app.submitSupportIntake()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+                            <i class="fa-solid fa-building-circle-check"></i> Register Business & Save Contract
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- HARDWARE ADMIN MODAL -->
+        <!-- ======================================== -->
         <div id="update-modal" class="system-modal">
             <div class="modal-content flex flex-col h-full">
                 <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
@@ -573,7 +734,6 @@
                         <button onclick="app.closeModal('update-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
-                
                 <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
                     <div class="w-full md:w-3/5 p-6 overflow-y-auto border-r border-slate-100 bg-slate-50">
                         <div class="flex justify-between items-start mb-6">
@@ -590,12 +750,9 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Client Details</h3>
-                            <div class="mb-2">
-                                <input type="text" id="mod-client" class="custom-input py-1.5 px-3 font-bold text-slate-800" placeholder="Client Name">
-                            </div>
+                            <div class="mb-2"><input type="text" id="mod-client" class="custom-input py-1.5 px-3 font-bold text-slate-800" placeholder="Client Name"></div>
                             <div class="flex gap-2">
                                 <input type="tel" id="mod-phone" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Phone">
                                 <input type="email" id="mod-email" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Email">
@@ -605,24 +762,13 @@
                                 <img id="mod-signature" src="" class="h-16 mt-1 border border-slate-200 rounded hidden bg-white">
                             </div>
                         </div>
-
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Device & Fault Details</h3>
                             <div class="grid grid-cols-2 gap-4 mb-3">
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Device Model</span>
-                                    <input type="text" id="mod-device" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Device">
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Device Color</span>
-                                    <input type="text" id="mod-color" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Color">
-                                </div>
+                                <div><span class="text-[10px] font-bold text-slate-500 uppercase">Device Model</span><input type="text" id="mod-device" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Device"></div>
+                                <div><span class="text-[10px] font-bold text-slate-500 uppercase">Device Color</span><input type="text" id="mod-color" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Color"></div>
                             </div>
-                            <div class="mb-3">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase">Reported Issue</span>
-                                <textarea id="mod-issue" class="custom-input py-1.5 px-3 text-sm mt-1 h-16 resize-none" placeholder="Issue"></textarea>
-                            </div>
-                            
+                            <div class="mb-3"><span class="text-[10px] font-bold text-slate-500 uppercase">Reported Issue</span><textarea id="mod-issue" class="custom-input py-1.5 px-3 text-sm mt-1 h-16 resize-none" placeholder="Issue"></textarea></div>
                             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" id="mod-chk-charger" class="w-4 h-4 text-blue-600 rounded" onchange="app.toggleAdminCharger()">
@@ -631,50 +777,35 @@
                                 <input type="text" id="mod-charger-specs" class="custom-input py-1.5 px-3 text-sm flex-1 hidden border-blue-200" placeholder="Charger Specs (e.g. 65W Type-C)">
                             </div>
                         </div>
-
-                        <!-- DISPLAY PROCUREMENT LIST -->
                         <div id="mod-procurement-section" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 shadow-sm hidden">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-blue-800 mb-3 border-b border-blue-100 pb-2"><i class="fa-solid fa-cart-shopping"></i> Required Procurement Parts</h3>
                             <ul id="mod-procurement-list" class="text-sm text-blue-900 space-y-2"></ul>
                         </div>
-
-                        <!-- EVIDENCE PHOTOS -->
                         <div id="mod-photos-section" class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm hidden">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2"><i class="fa-solid fa-camera"></i> Attached Evidence</h3>
                             <div id="mod-photos-grid" class="grid grid-cols-3 gap-3"></div>
                         </div>
-
                     </div>
-
-                    <!-- TECH UPDATE PANE -->
                     <div class="w-full md:w-2/5 p-6 overflow-y-auto bg-white flex flex-col">
                         <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-screwdriver-wrench text-blue-500"></i> Technical Update</h3>
                         <input type="hidden" id="mod-db-key">
                         <div class="space-y-5 flex-1">
-                            <div>
-                                <label class="text-xs font-bold text-slate-700 uppercase">Technician Name</label>
-                                <input type="text" id="mod-tech-name" readonly class="custom-input mt-1 bg-slate-100 text-slate-500 cursor-not-allowed" placeholder="Employee Sign-off">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-700 uppercase">Diagnosis / Work Done</label>
-                                <textarea id="mod-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Describe the fix or parts used..."></textarea>
-                            </div>
+                            <div><label class="text-xs font-bold text-slate-700 uppercase">Technician Name</label><input type="text" id="mod-tech-name" readonly class="custom-input mt-1 bg-slate-100 text-slate-500 cursor-not-allowed" placeholder="Employee Sign-off"></div>
+                            <div><label class="text-xs font-bold text-slate-700 uppercase">Diagnosis / Work Done</label><textarea id="mod-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Describe the fix or parts used..."></textarea></div>
                             <div>
                                 <label class="text-xs font-bold text-slate-700 uppercase">Update Status</label>
                                 <select id="mod-status" class="custom-input mt-1 font-bold">
-                                    <option value="Pending" class="text-amber-600">Pending</option>
-                                    <option value="In Repair" class="text-blue-600">In Repair (Working on it)</option>
-                                    <option value="Waiting for Parts" class="text-orange-600">Waiting for Parts</option>
-                                    <option value="Ready for Collection" class="text-emerald-600">Ready for Collection</option>
-                                    <option value="Completed & Collected" class="text-slate-600">Completed & Collected</option>
-                                    <option value="Failed to Repair" class="text-red-600 font-bold">⚠️ Failed to Repair (Irreparable)</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Repair">In Repair (Working on it)</option>
+                                    <option value="Waiting for Parts">Waiting for Parts</option>
+                                    <option value="Ready for Collection">Ready for Collection</option>
+                                    <option value="Completed & Collected">Completed & Collected</option>
+                                    <option value="Failed to Repair">⚠️ Failed to Repair (Irreparable)</option>
                                 </select>
                                 <p class="text-[10px] text-slate-500 mt-1 leading-tight">Setting to "Completed & Collected" will automatically stamp the Collection Date.</p>
                             </div>
                         </div>
-                        <button onclick="app.saveAdminUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
-                            Save Complete File Update
-                        </button>
+                        <button onclick="app.saveAdminUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">Save Complete File Update</button>
                     </div>
                 </div>
             </div>
@@ -690,7 +821,6 @@
                         <button onclick="app.closeModal('soft-update-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
-                
                 <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
                     <div class="w-full md:w-3/5 p-6 overflow-y-auto border-r border-slate-100 bg-slate-50">
                         <div class="flex justify-between items-start mb-6">
@@ -707,33 +837,19 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Client Details</h3>
-                            <div class="mb-2">
-                                <input type="text" id="mod-soft-client" class="custom-input py-1.5 px-3 font-bold text-slate-800" placeholder="Client / Company Name">
-                            </div>
-                            <div class="flex gap-2">
-                                <input type="tel" id="mod-soft-phone" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Phone">
-                                <input type="email" id="mod-soft-email" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Email">
-                            </div>
+                            <div class="mb-2"><input type="text" id="mod-soft-client" class="custom-input py-1.5 px-3 font-bold text-slate-800" placeholder="Client / Company Name"></div>
+                            <div class="flex gap-2"><input type="tel" id="mod-soft-phone" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Phone"><input type="email" id="mod-soft-email" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Email"></div>
                         </div>
-
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Project Metadata</h3>
                             <div class="grid grid-cols-2 gap-4 mb-3">
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Project Name</span>
-                                    <input type="text" id="mod-soft-project" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Project Name">
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Target Deadline</span>
-                                    <input type="date" id="mod-soft-deadline" class="custom-input py-1.5 px-3 text-sm mt-1">
-                                </div>
+                                <div><span class="text-[10px] font-bold text-slate-500 uppercase">Project Name</span><input type="text" id="mod-soft-project" class="custom-input py-1.5 px-3 text-sm mt-1" placeholder="Project Name"></div>
+                                <div><span class="text-[10px] font-bold text-slate-500 uppercase">Target Deadline</span><input type="date" id="mod-soft-deadline" class="custom-input py-1.5 px-3 text-sm mt-1"></div>
                             </div>
                             <div class="grid grid-cols-2 gap-4 mb-3">
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Target Platform</span>
+                                <div><span class="text-[10px] font-bold text-slate-500 uppercase">Target Platform</span>
                                     <select id="mod-soft-platform" class="custom-input py-1.5 px-3 text-sm mt-1">
                                         <option value="Web Application">Web Application</option>
                                         <option value="Mobile App (iOS/Android)">Mobile App (iOS/Android)</option>
@@ -742,60 +858,141 @@
                                         <option value="API / Backend System">API / Backend System</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Preferred Stack</span>
-                                    <input type="text" id="mod-soft-stack" class="custom-input py-1.5 px-3 text-sm mt-1 font-mono" placeholder="Tech Stack">
-                                </div>
+                                <div><span class="text-[10px] font-bold text-slate-500 uppercase">Preferred Stack</span><input type="text" id="mod-soft-stack" class="custom-input py-1.5 px-3 text-sm mt-1 font-mono" placeholder="Tech Stack"></div>
                             </div>
-                            <div class="mb-3">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase">Repository Link</span>
-                                <input type="url" id="mod-soft-repo" class="custom-input py-1.5 px-3 text-sm mt-1 text-blue-600" placeholder="Repo URL">
-                            </div>
-                            <div class="mb-3">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase">Core Requirements</span>
-                                <textarea id="mod-soft-requirements" class="custom-input py-1.5 px-3 text-sm mt-1 h-24 resize-none" placeholder="Requirements"></textarea>
-                            </div>
+                            <div class="mb-3"><span class="text-[10px] font-bold text-slate-500 uppercase">Repository Link</span><input type="url" id="mod-soft-repo" class="custom-input py-1.5 px-3 text-sm mt-1 text-blue-600" placeholder="Repo URL"></div>
+                            <div class="mb-3"><span class="text-[10px] font-bold text-slate-500 uppercase">Core Requirements</span><textarea id="mod-soft-requirements" class="custom-input py-1.5 px-3 text-sm mt-1 h-24 resize-none" placeholder="Requirements"></textarea></div>
                         </div>
                     </div>
-
-                    <!-- DEV UPDATE PANE -->
                     <div class="w-full md:w-2/5 p-6 overflow-y-auto bg-white flex flex-col">
                         <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-terminal text-purple-500"></i> Development Control</h3>
                         <input type="hidden" id="mod-soft-db-key">
                         <div class="space-y-5 flex-1">
-                            <div>
-                                <label class="text-xs font-bold text-slate-700 uppercase">Assigned Developer</label>
-                                <input type="text" id="mod-soft-dev" class="custom-input mt-1 bg-purple-50 font-bold text-purple-700" placeholder="Developer Name">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-700 uppercase">Development Notes / Commits</label>
-                                <textarea id="mod-soft-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Progress notes..."></textarea>
-                            </div>
+                            <div><label class="text-xs font-bold text-slate-700 uppercase">Assigned Developer</label><input type="text" id="mod-soft-dev" class="custom-input mt-1 bg-purple-50 font-bold text-purple-700" placeholder="Developer Name"></div>
+                            <div><label class="text-xs font-bold text-slate-700 uppercase">Development Notes / Commits</label><textarea id="mod-soft-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Progress notes..."></textarea></div>
                             <div>
                                 <label class="text-xs font-bold text-slate-700 uppercase">Project Phase</label>
                                 <select id="mod-soft-status" class="custom-input mt-1 font-bold">
-                                    <option value="Requirements Gathering" class="text-slate-600">Requirements Gathering</option>
-                                    <option value="UI/UX Design" class="text-purple-600">UI/UX Design</option>
-                                    <option value="In Development" class="text-blue-600">In Development</option>
-                                    <option value="Testing & QA" class="text-amber-600">Testing & QA</option>
-                                    <option value="Deployed / Completed" class="text-emerald-600">Deployed / Completed</option>
+                                    <option value="Requirements Gathering">Requirements Gathering</option>
+                                    <option value="UI/UX Design">UI/UX Design</option>
+                                    <option value="In Development">In Development</option>
+                                    <option value="Testing & QA">Testing & QA</option>
+                                    <option value="Deployed / Completed">Deployed / Completed</option>
                                 </select>
                             </div>
                         </div>
-                        <button onclick="app.saveSoftAdminUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">
-                            Save Complete Project Update
-                        </button>
+                        <button onclick="app.saveSoftAdminUpdate()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 shrink-0">Save Complete Project Update</button>
                     </div>
                 </div>
             </div>
         </div>
-        
-        </main>
+
+        <!-- SUPPORT BUSINESS DETAIL MODAL -->
+        <div id="support-detail-modal" class="system-modal">
+            <div class="modal-content" style="max-width:900px;">
+                <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
+                    <div>
+                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Support Contract</p>
+                        <h2 class="text-xl font-bold text-slate-800" id="mod-sup-biz-name">Business Name</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="app.deleteSupportRecord()" class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-colors" title="Delete Record"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="app.closeModal('support-detail-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-2 p-4 border-b border-slate-100 bg-slate-50 shrink-0">
+                    <button class="tab-btn active" onclick="app.switchSupportTab('overview', this)">Overview</button>
+                    <button class="tab-btn" onclick="app.switchSupportTab('devices', this)">Devices</button>
+                    <button class="tab-btn" onclick="app.switchSupportTab('contract', this)">Contract & Signature</button>
+                    <button class="tab-btn" onclick="app.switchSupportTab('notes', this)">Update Notes</button>
+                </div>
+
+                <input type="hidden" id="mod-sup-db-key">
+                <div class="flex-1 overflow-y-auto" style="max-height:calc(90vh - 180px);">
+
+                    <!-- Overview Tab -->
+                    <div id="sup-tab-overview" class="p-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider border-b pb-2">Business Info</p>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Company</span><p class="font-bold text-slate-800 mt-0.5" id="mod-sup-company">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Sector</span><p class="text-slate-700 mt-0.5" id="mod-sup-sector">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Address</span><p class="text-slate-700 mt-0.5" id="mod-sup-address">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Contract Type</span><p class="mt-0.5" id="mod-sup-contract-badge">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Start Date</span><p class="text-slate-700 mt-0.5" id="mod-sup-start-date">---</p></div>
+                            </div>
+                            <div class="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider border-b pb-2">Primary Contact</p>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Name</span><p class="font-bold text-slate-800 mt-0.5" id="mod-sup-contact-name">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Title</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-title">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Phone</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-phone">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Email</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-email">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">WhatsApp</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-wa">---</p></div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider border-b pb-2 mb-3">Scope of Services</p>
+                            <div id="mod-sup-scope" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 uppercase">Status</label>
+                            <select id="mod-sup-status" class="custom-input mt-1 font-bold">
+                                <option value="Active">Active</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Expired">Expired</option>
+                                <option value="Terminated">Terminated</option>
+                            </select>
+                        </div>
+                        <button onclick="app.saveSupportUpdate()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Status Update
+                        </button>
+                    </div>
+
+                    <!-- Devices Tab -->
+                    <div id="sup-tab-devices" class="p-6 hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800">Registered Devices</h3>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full" id="mod-sup-device-count">0 devices</span>
+                        </div>
+                        <div id="mod-sup-devices-list" class="space-y-3">
+                            <p class="text-slate-400 text-sm text-center py-8">No devices registered.</p>
+                        </div>
+                    </div>
+
+                    <!-- Contract & Signature Tab -->
+                    <div id="sup-tab-contract" class="p-6 hidden">
+                        <div class="bg-violet-50 border border-violet-200 rounded-xl p-5 mb-4">
+                            <p class="text-xs font-bold text-violet-700 uppercase tracking-wider mb-1">Signed By</p>
+                            <p class="font-bold text-slate-800 text-lg" id="mod-sup-sig-name">---</p>
+                            <p class="text-slate-600 text-sm" id="mod-sup-sig-title">---</p>
+                        </div>
+                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider p-3 border-b border-slate-200">Client Digital Signature</p>
+                            <div class="p-4 flex items-center justify-center min-h-[100px]">
+                                <img id="mod-sup-sig-img" src="" class="max-h-28 hidden object-contain">
+                                <p class="text-slate-400 text-sm" id="mod-sup-sig-placeholder">No signature captured.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes Tab -->
+                    <div id="sup-tab-notes" class="p-6 hidden space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Maintenance Log / Notes</label>
+                            <textarea id="mod-sup-notes" class="custom-input mt-2 h-40 resize-none" placeholder="Log maintenance visits, issues resolved, parts replaced..."></textarea>
+                        </div>
+                        <button onclick="app.saveSupportNotes()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all">Save Notes</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
 
     <script>
-        // ==========================================
-        // FIREBASE CONFIGURATION
-        // ==========================================
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCh7Ute6LeSAxcNDEQwZg5m0cA4ujnLCfg",
             authDomain: "test-17881.firebaseapp.com",
@@ -810,27 +1007,36 @@
             constructor() {
                 this.currentAdmin = null;
                 this.pinInput = "";
-                
                 this.canvas = null;
                 this.ctx = null;
                 this.isDrawing = false;
                 this.hasSignature = false;
-                
+
+                // Support Signature
+                this.supSigCanvas = null;
+                this.supSigCtx = null;
+                this.supSigDrawing = false;
+                this.supSigHasSignature = false;
+
                 this.db = null;
-                this.reportsData = []; // Hardware
-                this.softwareData = []; // Software
+                this.reportsData = [];
+                this.softwareData = [];
+                this.supportData = [];
+
+                this.deviceRowCount = 0;
 
                 this.initFirebase();
                 this.initTime();
                 this.initSignaturePad();
+                this.initSupportSignaturePad();
                 this.initKeyboardListener();
-                
+
                 this.resetRef();
                 document.getElementById('a4-date').innerText = "Date Received: " + this.formatDate(Date.now());
             }
 
             formatDate(timestamp) {
-                if(!timestamp) return "---";
+                if (!timestamp) return "---";
                 const date = new Date(timestamp);
                 return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             }
@@ -850,16 +1056,13 @@
             initFirebase() {
                 firebase.initializeApp(FIREBASE_CONFIG);
                 this.db = firebase.database();
-                
+
                 this.db.ref('reports').on('value', snapshot => {
                     this.reportsData = [];
-                    snapshot.forEach(child => {
-                        this.reportsData.push({ key: child.key, ...child.val() });
-                    });
+                    snapshot.forEach(child => { this.reportsData.push({ key: child.key, ...child.val() }); });
                     this.reportsData.sort((a, b) => b.timestamp - a.timestamp);
                     this.updateDashboard();
-                    this.filterRegistry(); 
-                    
+                    this.filterRegistry();
                     const openModalKey = document.getElementById('mod-db-key').value;
                     if (document.getElementById('update-modal').classList.contains('active') && openModalKey) {
                         this.populateModalSilently(openModalKey);
@@ -868,30 +1071,29 @@
 
                 this.db.ref('software_projects').on('value', snapshot => {
                     this.softwareData = [];
-                    snapshot.forEach(child => {
-                        this.softwareData.push({ key: child.key, ...child.val() });
-                    });
+                    snapshot.forEach(child => { this.softwareData.push({ key: child.key, ...child.val() }); });
                     this.softwareData.sort((a, b) => b.timestamp - a.timestamp);
-                    this.updateDashboard(); 
+                    this.updateDashboard();
                     this.filterSoftRegistry();
+                });
 
-                    const openSoftModalKey = document.getElementById('mod-soft-db-key').value;
-                    if (document.getElementById('soft-update-modal').classList.contains('active') && openSoftModalKey) {
-                        this.populateSoftModalSilently(openSoftModalKey);
-                    }
+                this.db.ref('support_businesses').on('value', snapshot => {
+                    this.supportData = [];
+                    snapshot.forEach(child => { this.supportData.push({ key: child.key, ...child.val() }); });
+                    this.supportData.sort((a, b) => b.timestamp - a.timestamp);
+                    this.updateDashboard();
+                    this.renderSupportRegistry();
                 });
             }
 
             updateDashboard() {
-                let pendingCount = 0;
-                let readyCount = 0;
+                let pendingCount = 0, readyCount = 0;
                 const tbody = document.getElementById('dash-recent-table');
                 tbody.innerHTML = '';
 
                 this.reportsData.forEach((report, index) => {
-                    if(report.status === 'Pending') pendingCount++;
-                    if(report.status === 'Ready for Collection') readyCount++;
-
+                    if (report.status === 'Pending') pendingCount++;
+                    if (report.status === 'Ready for Collection') readyCount++;
                     if (index < 5) {
                         const tr = document.createElement('tr');
                         tr.className = "border-b border-slate-100 hover:bg-slate-50 cursor-pointer";
@@ -900,91 +1102,62 @@
                             <td class="p-4 font-mono text-xs text-slate-500">RGT-${report.refId}</td>
                             <td class="p-4 font-medium text-slate-800">${report.clientName}</td>
                             <td class="p-4 text-slate-600">${report.device}</td>
-                            <td class="p-4 text-xs text-slate-500">
-                                <div>${this.formatDate(report.timestamp)}</div>
-                                <div>${this.getDaysInRepairText(report.timestamp, report.dateCollected)}</div>
-                            </td>
-                            <td class="p-4">${this.getStatusBadge(report.status)}</td>
-                        `;
+                            <td class="p-4 text-xs text-slate-500"><div>${this.formatDate(report.timestamp)}</div><div>${this.getDaysInRepairText(report.timestamp, report.dateCollected)}</div></td>
+                            <td class="p-4">${this.getStatusBadge(report.status)}</td>`;
                         tbody.appendChild(tr);
                     }
                 });
 
-                if(this.reportsData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No hardware records found.</td></tr>';
-                }
+                if (this.reportsData.length === 0) tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No hardware records found.</td></tr>';
 
                 document.getElementById('stat-pending').innerText = pendingCount;
                 document.getElementById('stat-ready').innerText = readyCount;
-                document.getElementById('stat-total').innerText = this.reportsData.length;
-
-                let activeSoftCount = this.softwareData.filter(s => s.status !== 'Deployed / Completed').length;
-                document.getElementById('stat-software').innerText = activeSoftCount;
+                document.getElementById('stat-software').innerText = this.softwareData.filter(s => s.status !== 'Deployed / Completed').length;
+                document.getElementById('stat-support-biz').innerText = this.supportData.filter(s => s.status === 'Active').length;
             }
 
             // ==========================================
-            // LISTINGS & FILTERS
+            // HARDWARE FILTER & REGISTRY
             // ==========================================
             filterRegistry() {
                 const search = document.getElementById('search-input').value.toLowerCase();
                 const tbody = document.getElementById('registry-table');
                 tbody.innerHTML = '';
-
-                const filtered = this.reportsData.filter(r => 
+                const filtered = this.reportsData.filter(r =>
                     (r.clientName && r.clientName.toLowerCase().includes(search)) ||
                     (r.refId && r.refId.toLowerCase().includes(search)) ||
                     (r.clientPhone && r.clientPhone.includes(search)) ||
                     (r.clientEmail && r.clientEmail.toLowerCase().includes(search))
                 );
-
                 filtered.forEach(report => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
-                    
-                    let notifyBtn = "";
-                    if(report.clientEmail) {
-                        notifyBtn = `<button onclick="event.stopPropagation(); app.notifyClient('${report.clientEmail}', 'RGT-${report.refId}', '${report.clientName}')" class="ml-2 text-slate-400 hover:text-blue-500" title="Send Email Receipt"><i class="fa-regular fa-envelope"></i></button>`;
-                    }
-
+                    let notifyBtn = report.clientEmail ? `<button onclick="event.stopPropagation(); app.notifyClient('${report.clientEmail}', 'RGT-${report.refId}', '${report.clientName}')" class="ml-2 text-slate-400 hover:text-blue-500" title="Send Email Receipt"><i class="fa-regular fa-envelope"></i></button>` : "";
                     tr.innerHTML = `
                         <td class="p-4 font-mono text-xs text-slate-500">RGT-${report.refId}</td>
-                        <td class="p-4">
-                            <div class="font-medium text-slate-800">${report.clientName}</div>
-                            <div class="text-xs text-slate-500">${report.clientPhone || '-'} ${notifyBtn}</div>
-                        </td>
-                        <td class="p-4">
-                            <div class="text-sm font-medium text-slate-800">${report.device}</div>
-                            <div class="text-xs text-slate-500 mt-1 truncate max-w-[200px]">${report.issue || ''}</div>
-                        </td>
+                        <td class="p-4"><div class="font-medium text-slate-800">${report.clientName}</div><div class="text-xs text-slate-500">${report.clientPhone || '-'} ${notifyBtn}</div></td>
+                        <td class="p-4"><div class="text-sm font-medium text-slate-800">${report.device}</div><div class="text-xs text-slate-500 mt-1 truncate max-w-[200px]">${report.issue || ''}</div></td>
                         <td class="p-4 text-xs text-slate-500">
                             <div>In: <span class="font-medium text-slate-700">${this.formatDate(report.timestamp)}</span></div>
                             <div>Out: <span class="font-medium text-slate-700">${report.dateCollected ? this.formatDate(report.dateCollected) : '---'}</span></div>
                             <div class="mt-1">${this.getDaysInRepairText(report.timestamp, report.dateCollected)}</div>
                         </td>
                         <td class="p-4">${this.getStatusBadge(report.status)}</td>
-                        <td class="p-4 text-right">
-                            <button onclick="app.openModal('${report.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">
-                                View / Update
-                            </button>
-                        </td>
-                    `;
+                        <td class="p-4 text-right"><button onclick="app.openModal('${report.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">View / Update</button></td>`;
                     tbody.appendChild(tr);
                 });
-
-                if(filtered.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
+                if (filtered.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
             }
 
             filterSoftRegistry() {
                 const search = document.getElementById('search-soft-input').value.toLowerCase();
                 const tbody = document.getElementById('soft-registry-table');
                 tbody.innerHTML = '';
-
-                const filtered = this.softwareData.filter(r => 
+                const filtered = this.softwareData.filter(r =>
                     (r.clientName && r.clientName.toLowerCase().includes(search)) ||
                     (r.projectName && r.projectName.toLowerCase().includes(search)) ||
                     (r.refId && r.refId.toLowerCase().includes(search))
                 );
-
                 filtered.forEach(project => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
@@ -992,41 +1165,452 @@
                         <td class="p-4 font-mono text-xs text-slate-500">SFT-${project.refId}</td>
                         <td class="p-4 font-medium text-slate-800">${project.projectName}</td>
                         <td class="p-4 text-slate-600">${project.clientName}</td>
-                        <td class="p-4 text-xs text-slate-500 bg-slate-100 rounded inline-block mt-2">${project.platform}</td>
+                        <td class="p-4"><span class="text-xs text-slate-500 bg-slate-100 rounded px-2 py-1">${project.platform}</span></td>
                         <td class="p-4 text-red-600 text-xs font-bold">${project.deadline || '---'}</td>
                         <td class="p-4"><span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-[10px] font-bold uppercase">${project.status}</span></td>
-                        <td class="p-4 text-right">
-                            <button onclick="app.openSoftModal('${project.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">
-                                View / Update
-                            </button>
-                        </td>
-                    `;
+                        <td class="p-4 text-right"><button onclick="app.openSoftModal('${project.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">View / Update</button></td>`;
                     tbody.appendChild(tr);
                 });
-
-                if(filtered.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">No projects found.</td></tr>';
+                if (filtered.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">No projects found.</td></tr>';
             }
 
+            // ==========================================
+            // TECHNICAL SUPPORT REGISTRY
+            // ==========================================
+            filterSupportRegistry() {
+                const search = document.getElementById('search-support-input').value.toLowerCase();
+                this.renderSupportRegistry(search);
+            }
+
+            renderSupportRegistry(search = '') {
+                const grid = document.getElementById('support-businesses-grid');
+                const filtered = this.supportData.filter(b =>
+                    (b.bizName && b.bizName.toLowerCase().includes(search)) ||
+                    (b.contactName && b.contactName.toLowerCase().includes(search)) ||
+                    (b.sector && b.sector.toLowerCase().includes(search)) ||
+                    (b.contactPhone && b.contactPhone.includes(search))
+                );
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = `<div class="col-span-3 text-center text-slate-400 py-16"><i class="fa-solid fa-building text-4xl mb-3 opacity-30 block"></i><p>${search ? 'No results found.' : 'No businesses registered yet.'}</p></div>`;
+                    return;
+                }
+
+                grid.innerHTML = '';
+                filtered.forEach(biz => {
+                    const statusColor = biz.status === 'Active' ? 'emerald' : biz.status === 'On Hold' ? 'amber' : 'red';
+                    const deviceCount = biz.devices ? Object.keys(biz.devices).length : 0;
+                    const scopes = biz.scope ? Object.entries(biz.scope).filter(([k,v]) => v).map(([k]) => {
+                        const labels = { hardware: 'Hardware', software: 'Software', network: 'Network', backup: 'Backup', security: 'Security', remote: 'Remote' };
+                        return labels[k] || k;
+                    }) : [];
+
+                    const card = document.createElement('div');
+                    card.className = "business-card p-5 cursor-pointer";
+                    card.onclick = () => this.openSupportModal(biz.key);
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 text-xl font-black shrink-0">
+                                ${biz.bizName ? biz.bizName.charAt(0).toUpperCase() : '?'}
+                            </div>
+                            <span class="bg-${statusColor}-100 text-${statusColor}-700 text-[10px] font-bold uppercase px-2 py-1 rounded-full">${biz.status || 'Active'}</span>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base leading-tight mb-1">${biz.bizName || '---'}</h3>
+                        <p class="text-xs text-slate-500 mb-3">${biz.sector || 'General'} · ${biz.contractType || '---'}</p>
+                        <div class="flex items-center gap-2 text-sm text-slate-600 mb-1"><i class="fa-solid fa-user text-xs text-slate-400 w-4"></i> ${biz.contactName || '---'}</div>
+                        <div class="flex items-center gap-2 text-sm text-slate-600 mb-3"><i class="fa-solid fa-phone text-xs text-slate-400 w-4"></i> ${biz.contactPhone || '---'}</div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                            <div class="flex gap-1 flex-wrap">
+                                ${scopes.slice(0, 3).map(s => `<span class="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded font-medium border border-violet-100">${s}</span>`).join('')}
+                                ${scopes.length > 3 ? `<span class="text-[10px] text-slate-400">+${scopes.length - 3}</span>` : ''}
+                            </div>
+                            <span class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-solid fa-desktop text-slate-300"></i> ${deviceCount} device${deviceCount !== 1 ? 's' : ''}</span>
+                        </div>`;
+                    grid.appendChild(card);
+                });
+            }
+
+            // ==========================================
+            // DEVICE ROWS IN SUPPORT INTAKE
+            // ==========================================
+            addDeviceRow() {
+                const container = document.getElementById('devices-container');
+                const noMsg = document.getElementById('no-devices-msg');
+                if (noMsg) noMsg.style.display = 'none';
+
+                this.deviceRowCount++;
+                const idx = this.deviceRowCount;
+                const row = document.createElement('div');
+                row.className = "device-row";
+                row.id = `device-row-${idx}`;
+                row.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold text-violet-700 uppercase tracking-wider">Device #${idx}</span>
+                        <button onclick="app.removeDeviceRow(${idx})" class="text-red-400 hover:text-red-600 text-xs font-medium transition"><i class="fa-solid fa-times mr-1"></i>Remove</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Device Type</label>
+                            <select name="dev-type-${idx}" class="custom-input mt-1 text-sm py-2">
+                                <option value="Desktop PC">Desktop PC</option>
+                                <option value="Laptop">Laptop</option>
+                                <option value="Server">Server</option>
+                                <option value="Printer">Printer</option>
+                                <option value="Network Switch">Network Switch</option>
+                                <option value="Router / Firewall">Router / Firewall</option>
+                                <option value="UPS / Battery">UPS / Battery</option>
+                                <option value="Monitor">Monitor</option>
+                                <option value="Tablet">Tablet</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Make / Brand</label><input type="text" name="dev-make-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Dell, HP, Lenovo"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Model</label><input type="text" name="dev-model-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. OptiPlex 7090"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Serial Number</label><input type="text" name="dev-serial-${idx}" class="custom-input mt-1 text-sm py-2 font-mono" placeholder="e.g. CN07XY1234"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Asset Tag / Internal ID</label><input type="text" name="dev-asset-${idx}" class="custom-input mt-1 text-sm py-2 font-mono" placeholder="e.g. PC-001"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Operating System</label>
+                            <select name="dev-os-${idx}" class="custom-input mt-1 text-sm py-2">
+                                <option value="Windows 11">Windows 11</option>
+                                <option value="Windows 10">Windows 10</option>
+                                <option value="Windows Server">Windows Server</option>
+                                <option value="macOS">macOS</option>
+                                <option value="Ubuntu / Linux">Ubuntu / Linux</option>
+                                <option value="N/A">N/A (Printer/Network)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Location / Department</label><input type="text" name="dev-location-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Reception, Server Room"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Condition / Notes</label><input type="text" name="dev-condition-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Good, Faulty display"></div>
+                    </div>`;
+                container.appendChild(row);
+            }
+
+            removeDeviceRow(idx) {
+                const row = document.getElementById(`device-row-${idx}`);
+                if (row) row.remove();
+                const container = document.getElementById('devices-container');
+                if (container.children.length === 0) {
+                    document.getElementById('no-devices-msg').style.display = 'block';
+                }
+            }
+
+            collectDevices() {
+                const container = document.getElementById('devices-container');
+                const devices = [];
+                container.querySelectorAll('[id^="device-row-"]').forEach(row => {
+                    const idx = row.id.replace('device-row-', '');
+                    const get = (name) => {
+                        const el = row.querySelector(`[name="${name}"]`);
+                        return el ? el.value : '';
+                    };
+                    devices.push({
+                        type: get(`dev-type-${idx}`),
+                        make: get(`dev-make-${idx}`),
+                        model: get(`dev-model-${idx}`),
+                        serial: get(`dev-serial-${idx}`),
+                        assetTag: get(`dev-asset-${idx}`),
+                        os: get(`dev-os-${idx}`),
+                        location: get(`dev-location-${idx}`),
+                        condition: get(`dev-condition-${idx}`)
+                    });
+                });
+                return devices;
+            }
+
+            // ==========================================
+            // SUPPORT INTAKE SUBMIT
+            // ==========================================
+            async submitSupportIntake() {
+                const bizName = document.getElementById('sup-biz-name').value;
+                const contactName = document.getElementById('sup-contact-name').value;
+                const contactPhone = document.getElementById('sup-contact-phone').value;
+                if (!bizName || !contactName || !contactPhone) {
+                    alert("Please fill in Business Name, Contact Name, and Phone Number.");
+                    return;
+                }
+
+                this.showLoading("Registering business...");
+                try {
+                    const refId = Math.floor(1000 + Math.random() * 9000).toString();
+                    const devices = this.collectDevices();
+
+                    const data = {
+                        refId,
+                        bizName,
+                        sector: document.getElementById('sup-biz-sector').value,
+                        address: document.getElementById('sup-biz-address').value,
+                        contractType: document.getElementById('sup-biz-contract').value,
+                        startDate: document.getElementById('sup-biz-start-date').value,
+                        contactName,
+                        contactTitle: document.getElementById('sup-contact-title').value,
+                        contactPhone,
+                        contactEmail: document.getElementById('sup-contact-email').value,
+                        contactWA: document.getElementById('sup-contact-wa').value,
+                        scope: {
+                            hardware: document.getElementById('sup-scope-hardware').checked,
+                            software: document.getElementById('sup-scope-software').checked,
+                            network: document.getElementById('sup-scope-network').checked,
+                            backup: document.getElementById('sup-scope-backup').checked,
+                            security: document.getElementById('sup-scope-security').checked,
+                            remote: document.getElementById('sup-scope-remote').checked,
+                        },
+                        notes: document.getElementById('sup-notes').value,
+                        sigName: document.getElementById('sup-sig-name').value,
+                        sigTitle: document.getElementById('sup-sig-title').value,
+                        signatureBase64: this.supSigHasSignature ? this.supSigCanvas.toDataURL() : null,
+                        devices,
+                        status: 'Active',
+                        timestamp: Date.now(),
+                        maintenanceNotes: ''
+                    };
+
+                    await this.db.ref('support_businesses').push(data);
+                    this.hideLoading();
+                    alert(`Business registered!\nID: SUP-${refId}`);
+                    this.resetSupportForm();
+                    this.navigate('support-registry');
+                } catch (err) {
+                    console.error(err);
+                    this.showErrorMsg(`Save failed: ${err.message}`);
+                }
+            }
+
+            resetSupportForm() {
+                document.querySelectorAll('#view-support-intake input[type="text"], #view-support-intake input[type="tel"], #view-support-intake input[type="email"], #view-support-intake input[type="date"], #view-support-intake input[type="url"], #view-support-intake textarea').forEach(i => i.value = '');
+                document.querySelectorAll('#view-support-intake input[type="checkbox"]').forEach(i => i.checked = false);
+                document.getElementById('devices-container').innerHTML = '';
+                document.getElementById('no-devices-msg').style.display = 'block';
+                this.deviceRowCount = 0;
+                this.clearSupportSignature();
+            }
+
+            // ==========================================
+            // SUPPORT MODAL
+            // ==========================================
+            openSupportModal(dbKey) {
+                const biz = this.supportData.find(b => b.key === dbKey);
+                if (!biz) return;
+
+                document.getElementById('mod-sup-db-key').value = dbKey;
+                document.getElementById('mod-sup-biz-name').innerText = biz.bizName || '---';
+                document.getElementById('mod-sup-company').innerText = biz.bizName || '---';
+                document.getElementById('mod-sup-sector').innerText = biz.sector || '---';
+                document.getElementById('mod-sup-address').innerText = biz.address || '---';
+                document.getElementById('mod-sup-start-date').innerText = biz.startDate || '---';
+                document.getElementById('mod-sup-contact-name').innerText = biz.contactName || '---';
+                document.getElementById('mod-sup-contact-title').innerText = biz.contactTitle || '---';
+                document.getElementById('mod-sup-contact-phone').innerText = biz.contactPhone || '---';
+                document.getElementById('mod-sup-contact-email').innerText = biz.contactEmail || '---';
+                document.getElementById('mod-sup-contact-wa').innerText = biz.contactWA || '---';
+                document.getElementById('mod-sup-notes').value = biz.maintenanceNotes || '';
+
+                // Contract type badge
+                const ctEl = document.getElementById('mod-sup-contract-badge');
+                ctEl.innerHTML = `<span class="bg-violet-100 text-violet-700 text-xs font-bold px-2 py-1 rounded">${biz.contractType || '---'}</span>`;
+
+                // Status
+                document.getElementById('mod-sup-status').value = biz.status || 'Active';
+
+                // Scope
+                const scopeEl = document.getElementById('mod-sup-scope');
+                scopeEl.innerHTML = '';
+                const labels = { hardware: 'Hardware Repairs', software: 'Software Support', network: 'Network / LAN', backup: 'Backup & Recovery', security: 'Security & Antivirus', remote: 'Remote Support' };
+                if (biz.scope) {
+                    Object.entries(biz.scope).forEach(([k, v]) => {
+                        if (v) scopeEl.innerHTML += `<span class="bg-violet-100 text-violet-700 text-xs font-bold px-3 py-1 rounded-full border border-violet-200">${labels[k] || k}</span>`;
+                    });
+                }
+                if (!scopeEl.innerHTML) scopeEl.innerHTML = '<span class="text-slate-400 text-sm">No scope defined.</span>';
+
+                // Devices
+                const devicesList = document.getElementById('mod-sup-devices-list');
+                const deviceCount = document.getElementById('mod-sup-device-count');
+                devicesList.innerHTML = '';
+                const devs = biz.devices || [];
+                const devsArr = Array.isArray(devs) ? devs : Object.values(devs);
+                deviceCount.innerText = `${devsArr.length} device${devsArr.length !== 1 ? 's' : ''}`;
+                if (devsArr.length === 0) {
+                    devicesList.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No devices registered under this contract.</p>';
+                } else {
+                    devsArr.forEach((dev, i) => {
+                        devicesList.innerHTML += `
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-xs font-bold">${i + 1}</span>
+                                        <span class="font-bold text-slate-800">${dev.make || ''} ${dev.model || dev.type || 'Unknown Device'}</span>
+                                    </div>
+                                    <span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded font-bold uppercase">${dev.type || '---'}</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3 text-xs text-slate-600">
+                                    <div><span class="font-bold text-slate-400 block">Serial No.</span>${dev.serial || '---'}</div>
+                                    <div><span class="font-bold text-slate-400 block">Asset Tag</span>${dev.assetTag || '---'}</div>
+                                    <div><span class="font-bold text-slate-400 block">OS</span>${dev.os || '---'}</div>
+                                    <div><span class="font-bold text-slate-400 block">Location</span>${dev.location || '---'}</div>
+                                    <div class="col-span-2"><span class="font-bold text-slate-400 block">Condition</span>${dev.condition || '---'}</div>
+                                </div>
+                            </div>`;
+                    });
+                }
+
+                // Signature
+                const sigName = biz.sigName || '---';
+                const sigTitle = biz.sigTitle || '---';
+                document.getElementById('mod-sup-sig-name').innerText = sigName;
+                document.getElementById('mod-sup-sig-title').innerText = sigTitle;
+                const sigImg = document.getElementById('mod-sup-sig-img');
+                const sigPlaceholder = document.getElementById('mod-sup-sig-placeholder');
+                if (biz.signatureBase64 && biz.signatureBase64.length > 50) {
+                    sigImg.src = biz.signatureBase64;
+                    sigImg.classList.remove('hidden');
+                    sigPlaceholder.classList.add('hidden');
+                } else {
+                    sigImg.classList.add('hidden');
+                    sigPlaceholder.classList.remove('hidden');
+                }
+
+                // Reset to first tab
+                this.switchSupportTab('overview', document.querySelector('#support-detail-modal .tab-btn'));
+
+                document.getElementById('support-detail-modal').classList.add('active');
+            }
+
+            switchSupportTab(tab, btn) {
+                ['overview', 'devices', 'contract', 'notes'].forEach(t => {
+                    const el = document.getElementById(`sup-tab-${t}`);
+                    if (el) el.classList.add('hidden');
+                });
+                const active = document.getElementById(`sup-tab-${tab}`);
+                if (active) active.classList.remove('hidden');
+
+                document.querySelectorAll('#support-detail-modal .tab-btn').forEach(b => b.classList.remove('active'));
+                if (btn) btn.classList.add('active');
+            }
+
+            async saveSupportUpdate() {
+                const dbKey = document.getElementById('mod-sup-db-key').value;
+                if (!dbKey) return;
+                this.showLoading("Saving...");
+                try {
+                    await this.db.ref('support_businesses/' + dbKey).update({
+                        status: document.getElementById('mod-sup-status').value,
+                        lastUpdated: Date.now()
+                    });
+                    this.hideLoading();
+                    this.closeModal('support-detail-modal');
+                } catch (err) {
+                    this.showErrorMsg(`Update failed: ${err.message}`);
+                }
+            }
+
+            async saveSupportNotes() {
+                const dbKey = document.getElementById('mod-sup-db-key').value;
+                if (!dbKey) return;
+                this.showLoading("Saving notes...");
+                try {
+                    await this.db.ref('support_businesses/' + dbKey).update({
+                        maintenanceNotes: document.getElementById('mod-sup-notes').value,
+                        lastUpdated: Date.now()
+                    });
+                    this.hideLoading();
+                    alert("Notes saved successfully.");
+                } catch (err) {
+                    this.showErrorMsg(`Save failed: ${err.message}`);
+                }
+            }
+
+            async deleteSupportRecord() {
+                const dbKey = document.getElementById('mod-sup-db-key').value;
+                if (!dbKey) return;
+                if (confirm('Are you sure you want to permanently delete this business record? This cannot be undone.')) {
+                    this.showLoading("Deleting...");
+                    try {
+                        await this.db.ref('support_businesses/' + dbKey).remove();
+                        this.hideLoading();
+                        this.closeModal('support-detail-modal');
+                    } catch (err) {
+                        this.showErrorMsg(`Delete failed: ${err.message}`);
+                    }
+                }
+            }
+
+            // ==========================================
+            // SUPPORT SIGNATURE PAD
+            // ==========================================
+            initSupportSignaturePad() {
+                this.supSigCanvas = document.getElementById('sup-sig-canvas');
+                if (!this.supSigCanvas) return;
+                this.supSigCtx = this.supSigCanvas.getContext('2d');
+
+                const resizeCanvas = () => {
+                    const rect = this.supSigCanvas.parentElement.getBoundingClientRect();
+                    if (rect.width > 0) {
+                        const tempUrl = this.supSigHasSignature ? this.supSigCanvas.toDataURL() : null;
+                        this.supSigCanvas.width = rect.width - 48;
+                        this.supSigCanvas.height = 128;
+                        if (tempUrl) {
+                            const img = new Image();
+                            img.src = tempUrl;
+                            img.onload = () => this.supSigCtx.drawImage(img, 0, 0);
+                        }
+                    }
+                };
+
+                setTimeout(resizeCanvas, 100);
+
+                const getPos = (e) => {
+                    const rect = this.supSigCanvas.getBoundingClientRect();
+                    const src = e.touches ? e.touches[0] : e;
+                    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+                };
+
+                this.supSigCanvas.addEventListener('mousedown', (e) => {
+                    this.supSigDrawing = true;
+                    this.supSigHasSignature = true;
+                    this.supSigCtx.beginPath();
+                    const p = getPos(e); this.supSigCtx.moveTo(p.x, p.y);
+                });
+                this.supSigCanvas.addEventListener('mousemove', (e) => {
+                    if (!this.supSigDrawing) return;
+                    const p = getPos(e);
+                    this.supSigCtx.lineWidth = 2.5; this.supSigCtx.lineCap = 'round'; this.supSigCtx.lineJoin = 'round'; this.supSigCtx.strokeStyle = '#0f172a';
+                    this.supSigCtx.lineTo(p.x, p.y); this.supSigCtx.stroke();
+                });
+                this.supSigCanvas.addEventListener('mouseup', () => { this.supSigDrawing = false; this.supSigCtx.closePath(); });
+                this.supSigCanvas.addEventListener('mouseout', () => { this.supSigDrawing = false; });
+                this.supSigCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.supSigDrawing = true; this.supSigHasSignature = true; this.supSigCtx.beginPath(); const p = getPos(e); this.supSigCtx.moveTo(p.x, p.y); }, { passive: false });
+                this.supSigCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (!this.supSigDrawing) return; const p = getPos(e); this.supSigCtx.lineWidth = 2.5; this.supSigCtx.lineCap = 'round'; this.supSigCtx.lineJoin = 'round'; this.supSigCtx.strokeStyle = '#0f172a'; this.supSigCtx.lineTo(p.x, p.y); this.supSigCtx.stroke(); }, { passive: false });
+                this.supSigCanvas.addEventListener('touchend', (e) => { e.preventDefault(); this.supSigDrawing = false; this.supSigCtx.closePath(); }, { passive: false });
+            }
+
+            clearSupportSignature() {
+                if (this.supSigCtx && this.supSigCanvas) {
+                    this.supSigCtx.clearRect(0, 0, this.supSigCanvas.width, this.supSigCanvas.height);
+                    this.supSigHasSignature = false;
+                }
+            }
+
+            // ==========================================
+            // STATUS BADGE HELPER
+            // ==========================================
             getStatusBadge(status) {
                 if (status === 'Pending') return '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Pending</span>';
-                if (status === 'In Repair' || status === 'Waiting for Parts') return '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">' + status + '</span>';
+                if (status === 'In Repair' || status === 'Waiting for Parts') return `<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">${status}</span>`;
                 if (status === 'Ready for Collection') return '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Ready</span>';
                 if (status === 'Failed to Repair') return '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Failed</span>';
                 return '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Collected</span>';
             }
 
             // ==========================================
-            // CHARGER & INTAKE HANDLING
+            // CHARGER & INTAKE
             // ==========================================
             toggleChargerSpecs() {
                 const chk = document.getElementById('chk-charger').checked;
-                const specInput = document.getElementById('in-charger-specs');
-                if (chk) {
-                    specInput.classList.remove('hidden');
-                } else {
-                    specInput.classList.add('hidden');
-                    specInput.value = '';
-                }
+                const spec = document.getElementById('in-charger-specs');
+                if (chk) spec.classList.remove('hidden');
+                else { spec.classList.add('hidden'); spec.value = ''; }
             }
 
             syncA4() {
@@ -1036,138 +1620,71 @@
                 document.getElementById('a4-device').innerText = document.getElementById('in-device').value || "Not specified";
                 document.getElementById('a4-color').innerText = document.getElementById('in-color').value || "Not specified";
                 document.getElementById('a4-issue').innerText = document.getElementById('in-issue').value || "No issue described.";
-                
                 const hasCharger = document.getElementById('chk-charger').checked;
                 const specs = document.getElementById('in-charger-specs').value;
-                if(hasCharger) {
-                    document.getElementById('a4-charger').innerText = `Included: ${specs || "Charger Left by Client"}`;
-                    document.getElementById('a4-charger').classList.replace('text-blue-900', 'text-amber-600');
-                } else {
-                    document.getElementById('a4-charger').innerText = "No charger left by client.";
-                    document.getElementById('a4-charger').classList.replace('text-amber-600', 'text-blue-900');
-                }
-                
+                if (hasCharger) { document.getElementById('a4-charger').innerText = `Included: ${specs || "Charger Left by Client"}`; }
+                else { document.getElementById('a4-charger').innerText = "No charger left by client."; }
                 document.getElementById('sq-power').className = document.getElementById('chk-power').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
                 document.getElementById('sq-cracks').className = document.getElementById('chk-cracks').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
                 document.getElementById('sq-data').className = document.getElementById('chk-data').checked ? "fa-solid fa-square-check" : "fa-regular fa-square";
-
                 const a4SigImg = document.getElementById('a4-sig-img');
                 const a4SigPlace = document.getElementById('a4-sig-placeholder');
-                
-                if (this.hasSignature) {
-                    a4SigImg.src = this.canvas.toDataURL();
-                    a4SigImg.classList.remove('hidden');
-                    a4SigPlace.classList.add('hidden');
-                } else {
-                    a4SigImg.classList.add('hidden');
-                    a4SigPlace.classList.remove('hidden');
-                    a4SigImg.src = "";
-                }
+                if (this.hasSignature) { a4SigImg.src = this.canvas.toDataURL(); a4SigImg.classList.remove('hidden'); a4SigPlace.classList.add('hidden'); }
+                else { a4SigImg.classList.add('hidden'); a4SigPlace.classList.remove('hidden'); a4SigImg.src = ""; }
             }
 
             async submitIntake() {
                 const name = document.getElementById('in-name').value;
                 const device = document.getElementById('in-device').value;
-
-                if(!name || !device) {
-                    alert("Please fill in Client Name and Device Model.");
-                    return;
-                }
-
+                if (!name || !device) { alert("Please fill in Client Name and Device Model."); return; }
                 try {
                     this.showLoading("Saving data to Firebase...", 0);
                     const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
-
                     const reportData = {
-                        refId: generatedRef,
-                        clientName: name,
+                        refId: generatedRef, clientName: name,
                         clientPhone: document.getElementById('in-phone').value,
                         clientEmail: document.getElementById('in-email').value,
-                        device: device,
-                        color: document.getElementById('in-color').value || "Not specified",
-                        charger: {
-                            included: document.getElementById('chk-charger').checked,
-                            specs: document.getElementById('in-charger-specs').value || ""
-                        },
+                        device, color: document.getElementById('in-color').value || "Not specified",
+                        charger: { included: document.getElementById('chk-charger').checked, specs: document.getElementById('in-charger-specs').value || "" },
                         issue: document.getElementById('in-issue').value,
-                        checks: {
-                            power: document.getElementById('chk-power').checked,
-                            cracks: document.getElementById('chk-cracks').checked,
-                            dataWaiver: document.getElementById('chk-data').checked
-                        },
-                        photos: [], 
-                        signatureBase64: this.hasSignature ? this.canvas.toDataURL() : null,
-                        timestamp: Date.now(),
-                        dateCollected: null,
-                        status: 'Pending' 
+                        checks: { power: document.getElementById('chk-power').checked, cracks: document.getElementById('chk-cracks').checked, dataWaiver: document.getElementById('chk-data').checked },
+                        photos: [], signatureBase64: this.hasSignature ? this.canvas.toDataURL() : null,
+                        timestamp: Date.now(), dateCollected: null, status: 'Pending'
                     };
-
                     await this.db.ref('reports').push(reportData);
-                    
                     this.hideLoading();
-                    
-                    if(reportData.clientEmail) {
-                        if(confirm(`Intake Saved! REF: RGT-${generatedRef}\n\nWould you like to open your email app to send the client their Reference ID now?`)) {
+                    if (reportData.clientEmail) {
+                        if (confirm(`Intake Saved! REF: RGT-${generatedRef}\n\nWould you like to open your email app to send the client their Reference ID now?`)) {
                             this.notifyClient(reportData.clientEmail, `RGT-${generatedRef}`, reportData.clientName);
                         }
-                    } else {
-                        alert(`Intake successfully saved!\nReference ID: RGT-${generatedRef}`);
-                    }
-
+                    } else { alert(`Intake successfully saved!\nReference ID: RGT-${generatedRef}`); }
                     this.resetIntakeForm();
                     this.navigate('registry');
-
-                } catch (error) {
-                    console.error("Submission Error:", error);
-                    this.showErrorMsg(`Save failed: ${error.message}. Check Firebase rules.`);
-                }
+                } catch (error) { console.error(error); this.showErrorMsg(`Save failed: ${error.message}`); }
             }
 
             async submitSoftwareIntake() {
                 const clientName = document.getElementById('soft-client-name').value;
                 const projectName = document.getElementById('soft-project-name').value;
-
-                if(!clientName || !projectName) {
-                    alert("Please fill in Client Name and Project Name.");
-                    return;
-                }
-
+                if (!clientName || !projectName) { alert("Please fill in Client Name and Project Name."); return; }
                 try {
                     this.showLoading("Saving project to pipeline...", 0);
                     const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
-
                     const projectData = {
-                        refId: generatedRef,
-                        clientName: clientName,
-                        clientPhone: document.getElementById('soft-client-phone').value,
-                        clientEmail: document.getElementById('soft-client-email').value,
-                        projectName: projectName,
-                        platform: document.getElementById('soft-platform').value,
-                        deadline: document.getElementById('soft-deadline').value,
-                        repoLink: document.getElementById('soft-repo').value,
-                        techStack: document.getElementById('soft-stack').value,
-                        requirements: document.getElementById('soft-requirements').value,
-                        timestamp: Date.now(),
-                        status: 'Requirements Gathering',
-                        devAssigned: 'Pending',
-                        devNotes: ''
+                        refId: generatedRef, clientName, clientPhone: document.getElementById('soft-client-phone').value,
+                        clientEmail: document.getElementById('soft-client-email').value, projectName,
+                        platform: document.getElementById('soft-platform').value, deadline: document.getElementById('soft-deadline').value,
+                        repoLink: document.getElementById('soft-repo').value, techStack: document.getElementById('soft-stack').value,
+                        requirements: document.getElementById('soft-requirements').value, timestamp: Date.now(),
+                        status: 'Requirements Gathering', devAssigned: 'Pending', devNotes: ''
                     };
-
                     await this.db.ref('software_projects').push(projectData);
-                    
                     this.hideLoading();
-                    
-                    alert(`Software Project successfully added to pipeline!\nProject ID: SFT-${generatedRef}`);
-
+                    alert(`Software Project successfully added!\nProject ID: SFT-${generatedRef}`);
                     document.querySelectorAll('#view-soft-intake input, #view-soft-intake textarea').forEach(i => i.value = '');
                     document.getElementById('soft-platform').value = 'Web Application';
-                    
                     this.navigate('soft-registry');
-
-                } catch (error) {
-                    console.error("Submission Error:", error);
-                    this.showErrorMsg(`Save failed: ${error.message}`);
-                }
+                } catch (error) { console.error(error); this.showErrorMsg(`Save failed: ${error.message}`); }
             }
 
             resetIntakeForm() {
@@ -1179,321 +1696,157 @@
                 this.syncA4();
             }
 
-            resetRef() {
-                document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000);
-            }
+            resetRef() { document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000); }
 
             // ==========================================
-            // MODAL VIEW LOGIC & FULL ADMIN EDIT
+            // HARDWARE MODAL
             // ==========================================
             toggleAdminCharger() {
                 const chk = document.getElementById('mod-chk-charger').checked;
-                const specInput = document.getElementById('mod-charger-specs');
-                if (chk) {
-                    specInput.classList.remove('hidden');
-                } else {
-                    specInput.classList.add('hidden');
-                    specInput.value = '';
-                }
+                const spec = document.getElementById('mod-charger-specs');
+                if (chk) spec.classList.remove('hidden');
+                else { spec.classList.add('hidden'); spec.value = ''; }
             }
 
             populateModalSilently(dbKey) {
                 const report = this.reportsData.find(r => r.key === dbKey);
-                if(!report) return;
-
+                if (!report) return;
                 document.getElementById('mod-date-in').innerText = this.formatDate(report.timestamp);
                 document.getElementById('mod-days-in').innerHTML = this.getDaysInRepairText(report.timestamp, report.dateCollected);
-                
-                const safeSetInput = (id, val) => {
-                    const el = document.getElementById(id);
-                    if (!el.dataset.userModified && document.activeElement !== el) el.value = val || '';
-                }
-                
-                safeSetInput('mod-client', report.clientName);
-                safeSetInput('mod-phone', report.clientPhone);
-                safeSetInput('mod-email', report.clientEmail);
-                safeSetInput('mod-device', report.device);
-                safeSetInput('mod-color', report.color);
-                safeSetInput('mod-issue', report.issue);
-                
+                const safeSetInput = (id, val) => { const el = document.getElementById(id); if (!el.dataset.userModified && document.activeElement !== el) el.value = val || ''; };
+                safeSetInput('mod-client', report.clientName); safeSetInput('mod-phone', report.clientPhone); safeSetInput('mod-email', report.clientEmail);
+                safeSetInput('mod-device', report.device); safeSetInput('mod-color', report.color); safeSetInput('mod-issue', report.issue);
                 const chargerChk = document.getElementById('mod-chk-charger');
                 const chargerSpecs = document.getElementById('mod-charger-specs');
-                
-                if (report.charger) {
-                    chargerChk.checked = report.charger.included || false;
-                    safeSetInput('mod-charger-specs', report.charger.specs);
-                    if(chargerChk.checked) chargerSpecs.classList.remove('hidden');
-                    else chargerSpecs.classList.add('hidden');
-                }
-
+                if (report.charger) { chargerChk.checked = report.charger.included || false; safeSetInput('mod-charger-specs', report.charger.specs); if (chargerChk.checked) chargerSpecs.classList.remove('hidden'); else chargerSpecs.classList.add('hidden'); }
                 const sigImg = document.getElementById('mod-signature');
-                if (report.signatureBase64 && report.signatureBase64.length > 50) {
-                    sigImg.src = report.signatureBase64;
-                    sigImg.classList.remove('hidden');
-                } else {
-                    sigImg.classList.add('hidden');
-                }
-
-                // Procurement Sync Matrix parsing handles strictly mapped values correctly 
+                if (report.signatureBase64 && report.signatureBase64.length > 50) { sigImg.src = report.signatureBase64; sigImg.classList.remove('hidden'); } else { sigImg.classList.add('hidden'); }
                 const procSec = document.getElementById('mod-procurement-section');
                 const procList = document.getElementById('mod-procurement-list');
                 procList.innerHTML = '';
                 let hasParts = false;
-                
                 if (report.partsRequired) {
                     const p = report.partsRequired;
-                    const addPart = (name, details) => {
-                        hasParts = true;
-                        procList.innerHTML += `<li><i class="fa-solid fa-circle text-[8px] text-blue-500 mr-2"></i><strong>${name}</strong>: ${details}</li>`;
-                    };
-                    
+                    const addPart = (name, details) => { hasParts = true; procList.innerHTML += `<li><i class="fa-solid fa-circle text-[8px] text-blue-500 mr-2"></i><strong>${name}</strong>: ${details}</li>`; };
                     if (p.screen && p.screen.needed) addPart('Screen', `${p.screen.specs || 'N/A'} (PN: ${p.screen.pn || 'N/A'})`);
                     if (p.mobo && p.mobo.needed) addPart('Motherboard', `PN: ${p.mobo.pn || 'N/A'}`);
                     if (p.battery && p.battery.needed) addPart('Battery', `Model: ${p.battery.model || 'N/A'}`);
                     if (p.ram && p.ram.needed) addPart('RAM', `${p.ram.capacity || 'N/A'} ${p.ram.type || ''}`);
                     if (p.ssd && p.ssd.needed) addPart('SSD', `${p.ssd.capacity || 'N/A'} ${p.ssd.type || ''}`);
-                    if (p.fan && p.fan.needed) addPart('Fan', `PN: ${p.fan.pn || 'N/A'}`);
-                    if (p.dcjack && p.dcjack.needed) addPart('DC Jack', p.dcjack.type || 'N/A');
-                    if (p.keyboard && p.keyboard.needed) addPart('Keyboard', `${p.keyboard.layout || 'N/A'} ${p.keyboard.backlit ? '(Backlit)' : ''}`);
-                    if (p.chassis && p.chassis.needed) addPart('Chassis', p.chassis.desc || 'N/A');
-                    if (p.paste && p.paste.needed) addPart('Thermal Paste/Pads', p.paste.type || 'Required');
                     if (p.other) addPart('Other', p.other);
                 }
-                
-                if (hasParts) procSec.classList.remove('hidden');
-                else procSec.classList.add('hidden');
-
-                const photoSec = document.getElementById('mod-photos-section');
-                const photoGrid = document.getElementById('mod-photos-grid');
-                photoGrid.innerHTML = '';
-                let hasPhotos = false;
-                
-                const renderPhotos = (arr) => {
-                    if(arr && arr.length > 0) {
-                        hasPhotos = true;
-                        arr.forEach(url => {
-                            photoGrid.innerHTML += `<img src="${url}" class="w-full aspect-square object-cover rounded border border-slate-200 shadow-sm cursor-pointer hover:opacity-80 transition" onclick="window.open('${url}','_blank')">`;
-                        });
-                    }
-                };
-                
-                renderPhotos(report.photosBefore);
-                renderPhotos(report.photosAfter);
-                renderPhotos(report.photos); 
-                
-                if (hasPhotos) photoSec.classList.remove('hidden');
-                else photoSec.classList.add('hidden');
-
+                if (hasParts) procSec.classList.remove('hidden'); else procSec.classList.add('hidden');
                 const statusSelect = document.getElementById('mod-status');
-                if(!statusSelect.dataset.userModified) {
-                    statusSelect.value = report.status || "Pending";
-                }
+                if (!statusSelect.dataset.userModified) statusSelect.value = report.status || "Pending";
                 safeSetInput('mod-notes', report.techNotes);
             }
 
             openModal(dbKey) {
                 const report = this.reportsData.find(r => r.key === dbKey);
-                if(!report) return;
-
+                if (!report) return;
                 document.getElementById('mod-db-key').value = dbKey;
                 document.getElementById('mod-ref').innerText = `RGT-${report.refId}`;
-                
-                const trackModified = (id) => {
-                    const el = document.getElementById(id);
-                    el.dataset.userModified = "";
-                    el.addEventListener('input', () => el.dataset.userModified = "true");
-                    el.addEventListener('change', () => el.dataset.userModified = "true");
-                };
-                
-                ['mod-client','mod-phone','mod-email','mod-device','mod-color','mod-issue','mod-notes','mod-status', 'mod-charger-specs'].forEach(trackModified);
-                
+                const trackModified = (id) => { const el = document.getElementById(id); if (!el) return; el.dataset.userModified = ""; el.addEventListener('input', () => el.dataset.userModified = "true"); el.addEventListener('change', () => el.dataset.userModified = "true"); };
+                ['mod-client','mod-phone','mod-email','mod-device','mod-color','mod-issue','mod-notes','mod-status','mod-charger-specs'].forEach(trackModified);
                 document.getElementById('mod-tech-name').value = this.currentAdmin ? this.currentAdmin.name : "Admin";
-                
                 this.populateModalSilently(dbKey);
                 document.getElementById('update-modal').classList.add('active');
             }
 
-            // Software Modal Logic
             populateSoftModalSilently(dbKey) {
                 const project = this.softwareData.find(r => r.key === dbKey);
-                if(!project) return;
-
+                if (!project) return;
                 document.getElementById('mod-soft-date-in').innerText = this.formatDate(project.timestamp);
                 document.getElementById('mod-soft-days-in').innerHTML = this.getDaysInRepairText(project.timestamp, project.dateCollected);
-
-                const safeSetInput = (id, val) => {
-                    const el = document.getElementById(id);
-                    if (!el.dataset.userModified && document.activeElement !== el) el.value = val || '';
-                }
-                
-                safeSetInput('mod-soft-client', project.clientName);
-                safeSetInput('mod-soft-phone', project.clientPhone);
-                safeSetInput('mod-soft-email', project.clientEmail);
-                safeSetInput('mod-soft-project', project.projectName);
-                safeSetInput('mod-soft-platform', project.platform);
-                safeSetInput('mod-soft-deadline', project.deadline);
-                safeSetInput('mod-soft-repo', project.repoLink);
-                safeSetInput('mod-soft-stack', project.techStack);
-                safeSetInput('mod-soft-requirements', project.requirements);
-                safeSetInput('mod-soft-dev', project.devAssigned);
-                safeSetInput('mod-soft-notes', project.devNotes);
-                
+                const safeSetInput = (id, val) => { const el = document.getElementById(id); if (el && !el.dataset.userModified && document.activeElement !== el) el.value = val || ''; };
+                safeSetInput('mod-soft-client', project.clientName); safeSetInput('mod-soft-phone', project.clientPhone); safeSetInput('mod-soft-email', project.clientEmail);
+                safeSetInput('mod-soft-project', project.projectName); safeSetInput('mod-soft-platform', project.platform); safeSetInput('mod-soft-deadline', project.deadline);
+                safeSetInput('mod-soft-repo', project.repoLink); safeSetInput('mod-soft-stack', project.techStack); safeSetInput('mod-soft-requirements', project.requirements);
+                safeSetInput('mod-soft-dev', project.devAssigned); safeSetInput('mod-soft-notes', project.devNotes);
                 const statusSelect = document.getElementById('mod-soft-status');
-                if(!statusSelect.dataset.userModified) {
-                    statusSelect.value = project.status || "Requirements Gathering";
-                }
+                if (!statusSelect.dataset.userModified) statusSelect.value = project.status || "Requirements Gathering";
             }
 
             openSoftModal(dbKey) {
                 const project = this.softwareData.find(r => r.key === dbKey);
-                if(!project) return;
-
+                if (!project) return;
                 document.getElementById('mod-soft-db-key').value = dbKey;
                 document.getElementById('mod-soft-ref').innerText = `SFT-${project.refId}`;
-                
-                const trackModified = (id) => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.dataset.userModified = "";
-                        el.addEventListener('input', () => el.dataset.userModified = "true");
-                        el.addEventListener('change', () => el.dataset.userModified = "true");
-                    }
-                };
-                
+                const trackModified = (id) => { const el = document.getElementById(id); if (el) { el.dataset.userModified = ""; el.addEventListener('input', () => el.dataset.userModified = "true"); el.addEventListener('change', () => el.dataset.userModified = "true"); } };
                 ['mod-soft-client','mod-soft-phone','mod-soft-email','mod-soft-project','mod-soft-platform','mod-soft-deadline','mod-soft-repo','mod-soft-stack','mod-soft-requirements','mod-soft-dev','mod-soft-notes','mod-soft-status'].forEach(trackModified);
-                
                 this.populateSoftModalSilently(dbKey);
                 document.getElementById('soft-update-modal').classList.add('active');
             }
 
             closeModal(modalId) {
                 document.getElementById(modalId).classList.remove('active');
-                if(modalId === 'update-modal') document.getElementById('mod-db-key').value = "";
-                if(modalId === 'soft-update-modal') document.getElementById('mod-soft-db-key').value = "";
+                if (modalId === 'update-modal') document.getElementById('mod-db-key').value = "";
+                if (modalId === 'soft-update-modal') document.getElementById('mod-soft-db-key').value = "";
+                if (modalId === 'support-detail-modal') document.getElementById('mod-sup-db-key').value = "";
             }
 
             async saveAdminUpdate() {
                 const dbKey = document.getElementById('mod-db-key').value;
                 if (!dbKey) return;
-                
                 this.showLoading("Saving full update...");
-
                 try {
-                    // CRITICAL FIX: Explicitly exclude `partsRequired` from update payload, ensuring the Technician's selections are never overridden by the Admin app saves.
                     let updateData = {
-                        clientName: document.getElementById('mod-client').value,
-                        clientPhone: document.getElementById('mod-phone').value,
-                        clientEmail: document.getElementById('mod-email').value,
-                        device: document.getElementById('mod-device').value,
-                        color: document.getElementById('mod-color').value,
-                        issue: document.getElementById('mod-issue').value,
-                        charger: {
-                            included: document.getElementById('mod-chk-charger').checked,
-                            specs: document.getElementById('mod-charger-specs').value
-                        },
-                        techName: document.getElementById('mod-tech-name').value, 
-                        techNotes: document.getElementById('mod-notes').value,
-                        status: document.getElementById('mod-status').value,
-                        lastUpdated: Date.now()
+                        clientName: document.getElementById('mod-client').value, clientPhone: document.getElementById('mod-phone').value,
+                        clientEmail: document.getElementById('mod-email').value, device: document.getElementById('mod-device').value,
+                        color: document.getElementById('mod-color').value, issue: document.getElementById('mod-issue').value,
+                        charger: { included: document.getElementById('mod-chk-charger').checked, specs: document.getElementById('mod-charger-specs').value },
+                        techName: document.getElementById('mod-tech-name').value, techNotes: document.getElementById('mod-notes').value,
+                        status: document.getElementById('mod-status').value, lastUpdated: Date.now()
                     };
-
-                    if(updateData.status === 'Completed & Collected') {
-                        updateData.dateCollected = Date.now();
-                    }
-
+                    if (updateData.status === 'Completed & Collected') updateData.dateCollected = Date.now();
                     await this.db.ref('reports/' + dbKey).update(updateData);
-                    
-                    if (this.currentAdmin && this.currentAdmin.key && this.currentAdmin.key !== "master_admin") {
-                        const report = this.reportsData.find(r => r.key === dbKey);
-                        await this.db.ref(`employees/${this.currentAdmin.key}/work_history`).push({
-                            refId: `RGT-${report.refId}`,
-                            title: `Admin Update: ${updateData.device}`,
-                            timestamp: firebase.database.ServerValue.TIMESTAMP
-                        });
-                    }
-                    
                     this.hideLoading();
                     this.closeModal('update-modal');
-                } catch (error) {
-                    console.error("Firebase Update Error", error);
-                    this.showErrorMsg(`Update failed: ${error.message}`);
-                }
+                } catch (error) { console.error(error); this.showErrorMsg(`Update failed: ${error.message}`); }
             }
 
             async saveSoftAdminUpdate() {
                 const dbKey = document.getElementById('mod-soft-db-key').value;
                 if (!dbKey) return;
-                
                 this.showLoading("Saving software update...");
-
                 try {
                     let updateData = {
-                        clientName: document.getElementById('mod-soft-client').value,
-                        clientPhone: document.getElementById('mod-soft-phone').value,
-                        clientEmail: document.getElementById('mod-soft-email').value,
-                        projectName: document.getElementById('mod-soft-project').value,
-                        platform: document.getElementById('mod-soft-platform').value,
-                        deadline: document.getElementById('mod-soft-deadline').value,
-                        repoLink: document.getElementById('mod-soft-repo').value,
-                        techStack: document.getElementById('mod-soft-stack').value,
-                        requirements: document.getElementById('mod-soft-requirements').value,
-                        devAssigned: document.getElementById('mod-soft-dev').value,
-                        devNotes: document.getElementById('mod-soft-notes').value,
-                        status: document.getElementById('mod-soft-status').value,
-                        lastUpdated: Date.now()
+                        clientName: document.getElementById('mod-soft-client').value, clientPhone: document.getElementById('mod-soft-phone').value,
+                        clientEmail: document.getElementById('mod-soft-email').value, projectName: document.getElementById('mod-soft-project').value,
+                        platform: document.getElementById('mod-soft-platform').value, deadline: document.getElementById('mod-soft-deadline').value,
+                        repoLink: document.getElementById('mod-soft-repo').value, techStack: document.getElementById('mod-soft-stack').value,
+                        requirements: document.getElementById('mod-soft-requirements').value, devAssigned: document.getElementById('mod-soft-dev').value,
+                        devNotes: document.getElementById('mod-soft-notes').value, status: document.getElementById('mod-soft-status').value, lastUpdated: Date.now()
                     };
-
                     await this.db.ref('software_projects/' + dbKey).update(updateData);
-                    
-                    if (this.currentAdmin && this.currentAdmin.key && this.currentAdmin.key !== "master_admin") {
-                        const project = this.softwareData.find(r => r.key === dbKey);
-                        await this.db.ref(`employees/${this.currentAdmin.key}/work_history`).push({
-                            refId: `SFT-${project.refId}`,
-                            title: `Admin Update: ${updateData.projectName}`,
-                            timestamp: firebase.database.ServerValue.TIMESTAMP
-                        });
-                    }
-                    
                     this.hideLoading();
                     this.closeModal('soft-update-modal');
-                } catch (error) {
-                    console.error("Firebase Update Error", error);
-                    this.showErrorMsg(`Update failed: ${error.message}`);
-                }
+                } catch (error) { console.error(error); this.showErrorMsg(`Update failed: ${error.message}`); }
             }
 
             async deleteRecord() {
                 const dbKey = document.getElementById('mod-db-key').value;
-                if(!dbKey) return;
-                
-                if(confirm('Are you sure you want to completely delete this record from the database? This cannot be undone.')) {
+                if (!dbKey) return;
+                if (confirm('Are you sure you want to completely delete this record? This cannot be undone.')) {
                     this.showLoading("Deleting Record...");
-                    try {
-                        await this.db.ref('reports/' + dbKey).remove();
-                        this.hideLoading();
-                        this.closeModal('update-modal');
-                    } catch (err) {
-                        this.showErrorMsg(`Delete failed: ${err.message}`);
-                    }
+                    try { await this.db.ref('reports/' + dbKey).remove(); this.hideLoading(); this.closeModal('update-modal'); }
+                    catch (err) { this.showErrorMsg(`Delete failed: ${err.message}`); }
                 }
             }
 
             async deleteSoftRecord() {
                 const dbKey = document.getElementById('mod-soft-db-key').value;
-                if(!dbKey) return;
-                
-                if(confirm('Are you sure you want to completely delete this project from the database? This cannot be undone.')) {
+                if (!dbKey) return;
+                if (confirm('Are you sure you want to completely delete this project? This cannot be undone.')) {
                     this.showLoading("Deleting Project...");
-                    try {
-                        await this.db.ref('software_projects/' + dbKey).remove();
-                        this.hideLoading();
-                        this.closeModal('soft-update-modal');
-                    } catch (err) {
-                        this.showErrorMsg(`Delete failed: ${err.message}`);
-                    }
+                    try { await this.db.ref('software_projects/' + dbKey).remove(); this.hideLoading(); this.closeModal('soft-update-modal'); }
+                    catch (err) { this.showErrorMsg(`Delete failed: ${err.message}`); }
                 }
             }
 
+            // ==========================================
+            // PIN LOGIC
+            // ==========================================
             initKeyboardListener() {
                 window.addEventListener('keydown', (e) => {
                     const lockScreen = document.getElementById('lock-screen');
@@ -1506,23 +1859,15 @@
             }
 
             pressPin(digit) {
-                if (this.pinInput.length < 5) {
-                    this.pinInput += digit;
-                    this.updatePinDisplay();
-                }
+                if (this.pinInput.length < 5) { this.pinInput += digit; this.updatePinDisplay(); }
                 if (this.pinInput.length === 5) this.validatePin();
             }
-
             clearPin() { this.pinInput = ""; this.updatePinDisplay(); }
             backspacePin() { this.pinInput = this.pinInput.slice(0, -1); this.updatePinDisplay(); }
 
             updatePinDisplay() {
                 const dots = document.querySelectorAll('.pin-dot');
-                dots.forEach((dot, index) => {
-                    dot.className = 'pin-dot';
-                    if (index < this.pinInput.length) dot.classList.add('filled');
-                });
-                
+                dots.forEach((dot, index) => { dot.className = 'pin-dot'; if (index < this.pinInput.length) dot.classList.add('filled'); });
                 if (this.pinInput.length === 1) {
                     const instruction = document.getElementById('pin-instruction');
                     instruction.innerText = "Enter Secure Employee PIN to Access";
@@ -1532,49 +1877,24 @@
 
             async validatePin() {
                 if (this.pinInput.length !== 5) return;
-                
                 const feedbackText = document.getElementById('pin-instruction');
                 feedbackText.innerText = "Verifying PIN...";
                 feedbackText.classList.remove('text-red-500', 'text-slate-500');
                 feedbackText.classList.add('text-blue-500');
-
                 if (this.pinInput === "12345") {
                     this.currentAdmin = { key: "master_admin", name: "System Admin", employeeNumber: "12345" };
                     document.getElementById('lock-screen').classList.add('unlocked');
-                    this.updateSidebarProfile();
-                    this.clearPin();
-                    feedbackText.innerText = "Enter Secure Employee PIN to Access";
-                    feedbackText.classList.remove('text-blue-500');
+                    this.updateSidebarProfile(); this.clearPin();
+                    feedbackText.innerText = "Enter Secure Employee PIN to Access"; feedbackText.classList.remove('text-blue-500');
                     return;
                 }
-
                 try {
                     const snap = await this.db.ref('employees').once('value');
                     let foundAdmin = null;
-                    
-                    if (snap.exists()) {
-                        snap.forEach(child => {
-                            const data = child.val();
-                            if (String(data.employeeNumber) === String(this.pinInput)) {
-                                foundAdmin = { key: child.key, ...data };
-                            }
-                        });
-                    }
-
-                    if (foundAdmin) {
-                        this.currentAdmin = foundAdmin;
-                        document.getElementById('lock-screen').classList.add('unlocked');
-                        this.updateSidebarProfile();
-                        this.clearPin();
-                        feedbackText.innerText = "Enter Secure Employee PIN to Access";
-                        feedbackText.classList.remove('text-blue-500');
-                    } else {
-                        this.showPinError("Invalid PIN. Not found in database.");
-                    }
-                } catch (err) {
-                    console.error(err);
-                    this.showPinError("Database connection blocked. Use 12345 to bypass.");
-                }
+                    if (snap.exists()) { snap.forEach(child => { const data = child.val(); if (String(data.employeeNumber) === String(this.pinInput)) foundAdmin = { key: child.key, ...data }; }); }
+                    if (foundAdmin) { this.currentAdmin = foundAdmin; document.getElementById('lock-screen').classList.add('unlocked'); this.updateSidebarProfile(); this.clearPin(); feedbackText.innerText = "Enter Secure Employee PIN to Access"; feedbackText.classList.remove('text-blue-500'); }
+                    else { this.showPinError("Invalid PIN. Not found in database."); }
+                } catch (err) { console.error(err); this.showPinError("Database connection blocked. Use 12345 to bypass."); }
             }
 
             showPinError(msg) {
@@ -1582,120 +1902,57 @@
                 feedbackText.innerText = msg || "Invalid PIN entered.";
                 feedbackText.classList.remove('text-blue-500', 'text-slate-500');
                 feedbackText.classList.add('text-red-500');
-
-                document.querySelectorAll('.pin-dot').forEach(dot => {
-                    dot.classList.remove('filled');
-                    dot.classList.add('error');
-                });
-                
+                document.querySelectorAll('.pin-dot').forEach(dot => { dot.classList.remove('filled'); dot.classList.add('error'); });
                 const display = document.getElementById('pin-display');
                 display.classList.add('shake');
-                
-                setTimeout(() => {
-                    display.classList.remove('shake');
-                    this.pinInput = "";
-                    document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('error'));
-                }, 600);
+                setTimeout(() => { display.classList.remove('shake'); this.pinInput = ""; document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('error')); }, 600);
             }
 
             updateSidebarProfile() {
-                if(!this.currentAdmin) return;
+                if (!this.currentAdmin) return;
                 const name = this.currentAdmin.name || "Employee";
-                const initial = name.charAt(0).toUpperCase();
-                document.getElementById('sidebar-user-initial').innerText = initial;
+                document.getElementById('sidebar-user-initial').innerText = name.charAt(0).toUpperCase();
                 document.getElementById('sidebar-user-name').innerText = name;
                 document.getElementById('a4-admin-name').innerText = name;
             }
 
-            lockSystem() { 
-                this.currentAdmin = null;
-                document.getElementById('lock-screen').classList.remove('unlocked'); 
-            }
+            lockSystem() { this.currentAdmin = null; document.getElementById('lock-screen').classList.remove('unlocked'); }
 
             // ==========================================
-            // IMPROVED SIGNATURE LOGIC
+            // INTAKE SIGNATURE PAD
             // ==========================================
             initSignaturePad() {
                 this.canvas = document.getElementById('sig-canvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.hasSignature = false;
-
                 this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
                 this.canvas.addEventListener('mousemove', (e) => this.draw(e));
                 this.canvas.addEventListener('mouseup', () => this.stopDrawing());
                 this.canvas.addEventListener('mouseout', () => this.stopDrawing());
-                
-                this.canvas.addEventListener('touchstart', (e) => { 
-                    e.preventDefault(); 
-                    this.startDrawing(e); 
-                }, { passive: false });
-                
-                this.canvas.addEventListener('touchmove', (e) => { 
-                    e.preventDefault(); 
-                    this.draw(e); 
-                }, { passive: false });
-                
-                this.canvas.addEventListener('touchend', (e) => { 
-                    e.preventDefault(); 
-                    this.stopDrawing(); 
-                }, { passive: false });
+                this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.startDrawing(e); }, { passive: false });
+                this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); this.draw(e); }, { passive: false });
+                this.canvas.addEventListener('touchend', (e) => { e.preventDefault(); this.stopDrawing(); }, { passive: false });
             }
 
             getPointerPos(e) {
                 const rect = this.canvas.getBoundingClientRect();
-                let clientX = e.clientX;
-                let clientY = e.clientY;
-
-                if (e.touches && e.touches.length > 0) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                }
-
-                return {
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                };
+                let clientX = e.clientX, clientY = e.clientY;
+                if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+                return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
-            startDrawing(e) {
-                this.isDrawing = true;
-                this.hasSignature = true;
-                this.ctx.beginPath();
-                const pos = this.getPointerPos(e);
-                this.ctx.moveTo(pos.x, pos.y);
-            }
-
+            startDrawing(e) { this.isDrawing = true; this.hasSignature = true; this.ctx.beginPath(); const pos = this.getPointerPos(e); this.ctx.moveTo(pos.x, pos.y); }
             draw(e) {
                 if (!this.isDrawing) return;
                 const pos = this.getPointerPos(e);
-
-                this.ctx.lineWidth = 2.5;
-                this.ctx.lineCap = 'round';
-                this.ctx.lineJoin = 'round';
-                this.ctx.strokeStyle = '#0f172a'; 
-                
-                this.ctx.lineTo(pos.x, pos.y);
-                this.ctx.stroke();
+                this.ctx.lineWidth = 2.5; this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round'; this.ctx.strokeStyle = '#0f172a';
+                this.ctx.lineTo(pos.x, pos.y); this.ctx.stroke();
             }
-
-            stopDrawing() {
-                if (this.isDrawing) {
-                    this.isDrawing = false;
-                    this.ctx.closePath();
-                    this.syncA4();
-                }
-            }
-
-            clearSignature() { 
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); 
-                this.hasSignature = false;
-                this.syncA4();
-            }
+            stopDrawing() { if (this.isDrawing) { this.isDrawing = false; this.ctx.closePath(); this.syncA4(); } }
+            clearSignature() { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.hasSignature = false; this.syncA4(); }
 
             initTime() {
-                setInterval(() => {
-                    document.getElementById('live-time').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                }, 1000);
+                setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }, 1000);
             }
 
             notifyClient(email, refId, name) {
@@ -1709,13 +1966,7 @@
                 document.getElementById('spinner-text').innerText = "An error occurred";
                 document.getElementById('spinner-text').classList.add('text-red-600');
                 document.getElementById('spinner-subtext').innerText = msg;
-                
-                setTimeout(() => {
-                    this.hideLoading();
-                    document.getElementById('spinner-ring').style.display = 'block';
-                    document.getElementById('spinner-text').classList.remove('text-red-600');
-                    document.getElementById('spinner-subtext').innerText = "";
-                }, 5000);
+                setTimeout(() => { this.hideLoading(); document.getElementById('spinner-ring').style.display = 'block'; document.getElementById('spinner-text').classList.remove('text-red-600'); document.getElementById('spinner-subtext').innerText = ""; }, 5000);
             }
 
             showLoading(text = "Processing...", duration = 0) {
@@ -1724,29 +1975,25 @@
                 if (duration > 0) setTimeout(() => this.hideLoading(), duration);
             }
 
-            hideLoading() { 
-                document.getElementById('global-spinner').classList.remove('active'); 
-                document.getElementById('spinner-subtext').innerText = "";
-            }
+            hideLoading() { document.getElementById('global-spinner').classList.remove('active'); document.getElementById('spinner-subtext').innerText = ""; }
 
             navigate(viewId) {
-                document.getElementById('view-dashboard').classList.add('hidden');
-                document.getElementById('view-registry').classList.add('hidden');
-                document.getElementById('view-intake').classList.add('hidden');
-                document.getElementById('view-soft-registry').classList.add('hidden');
-                document.getElementById('view-soft-intake').classList.add('hidden');
-                
+                ['dashboard', 'registry', 'intake', 'soft-registry', 'soft-intake', 'support-registry', 'support-intake'].forEach(v => {
+                    const el = document.getElementById('view-' + v);
+                    if (el) el.classList.add('hidden');
+                });
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                
-                document.getElementById('view-' + viewId).classList.remove('hidden');
-                document.getElementById('nav-' + viewId).classList.add('active');
-                
-                const titles = { 
-                    'dashboard': 'Overview Dashboard', 
-                    'registry': 'Hardware Client Registry', 
-                    'intake': 'Device Intake Form',
-                    'soft-registry': 'Software Project Pipeline',
-                    'soft-intake': 'Software Specifications Log'
+
+                const target = document.getElementById('view-' + viewId);
+                if (target) target.classList.remove('hidden');
+                const nav = document.getElementById('nav-' + viewId);
+                if (nav) nav.classList.add('active');
+
+                const titles = {
+                    'dashboard': 'Overview Dashboard', 'registry': 'Hardware Client Registry',
+                    'intake': 'Device Intake Form', 'soft-registry': 'Software Project Pipeline',
+                    'soft-intake': 'Software Specifications Log', 'support-registry': 'Technical Support — Business Registry',
+                    'support-intake': 'Register Support Client'
                 };
                 document.getElementById('page-title').innerText = titles[viewId] || 'Portal';
 
@@ -1757,18 +2004,21 @@
                             const rect = canvas.parentElement.getBoundingClientRect();
                             if (rect.width > 0 && canvas.width !== rect.width) {
                                 const tempUrl = this.hasSignature ? canvas.toDataURL() : null;
-                                
-                                canvas.width = rect.width;
-                                canvas.height = 120; 
-                                
-                                if (tempUrl) {
-                                    const img = new Image();
-                                    img.src = tempUrl;
-                                    img.onload = () => { this.ctx.drawImage(img, 0, 0); }
-                                }
+                                canvas.width = rect.width; canvas.height = 120;
+                                if (tempUrl) { const img = new Image(); img.src = tempUrl; img.onload = () => this.ctx.drawImage(img, 0, 0); }
                             }
                         }
-                    }, 50); 
+                    }, 50);
+                }
+
+                if (viewId === 'support-intake') {
+                    setTimeout(() => {
+                        const c = document.getElementById('sup-sig-canvas');
+                        if (c && c.parentElement) {
+                            const rect = c.parentElement.getBoundingClientRect();
+                            if (rect.width > 0) { c.width = rect.width - 48; c.height = 128; }
+                        }
+                    }, 50);
                 }
             }
         }
@@ -1777,17 +2027,12 @@
 
         window.addEventListener('resize', () => {
             const canvas = document.getElementById('sig-canvas');
-            if(canvas && canvas.offsetParent !== null) { 
+            if (canvas && canvas.offsetParent !== null) {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 if (Math.abs(canvas.width - rect.width) > 20) {
                     const tempUrl = app.hasSignature ? canvas.toDataURL() : null;
-                    canvas.width = rect.width;
-                    canvas.height = 120;
-                    if (tempUrl) {
-                        const img = new Image();
-                        img.src = tempUrl;
-                        img.onload = () => app.ctx.drawImage(img, 0, 0);
-                    }
+                    canvas.width = rect.width; canvas.height = 120;
+                    if (tempUrl) { const img = new Image(); img.src = tempUrl; img.onload = () => app.ctx.drawImage(img, 0, 0); }
                 }
             }
         });
