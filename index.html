@@ -95,61 +95,50 @@
         }
         .system-modal.active .modal-content { transform: translateY(0); }
 
-        /* --- A4 PREVIEW CANVAS (UPDATED FOR NO HOLLOW SPACE) --- */
+        /* --- A4 PREVIEW CANVAS & PRINT --- */
         .a4-wrapper { background: #e2e8f0; padding: 40px; display: flex; justify-content: center; overflow-y: auto; height: 100%; }
         
         /* Exact A4 Dimensions & Flex Fill Layout */
         .a4-paper {
-            width: 210mm; height: 297mm; background: white; padding: 20mm;
+            width: 210mm; height: 297mm; background: white; padding: 15mm;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            display: flex; flex-direction: column; justify-content: space-between;
+            display: flex; flex-direction: column;
             position: relative; overflow: hidden;
         }
         
         .contract-preview {
             transform: scale(0.72);
             transform-origin: top center;
-            margin-bottom: -83mm; /* Remove the empty space caused by scaling */
+            margin-bottom: -83mm; /* Fixes empty space on screen caused by scaling */
         }
 
-        .sig-pad {
-            border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px;
-            cursor: crosshair; width: 100%; height: 120px; touch-action: none;
-        }
-        .support-sig-pad {
-            border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px;
-            cursor: crosshair; width: 100%; touch-action: none;
-        }
+        .sig-pad { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: crosshair; width: 100%; height: 120px; touch-action: none; }
+        .support-sig-pad { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: crosshair; width: 100%; touch-action: none; }
 
-        /* --- PRINT CSS --- */
+        /* --- STRICT NO-OVERLAP PRINT CSS --- */
         @media print {
             body * { visibility: hidden; }
             .print-section, .print-section * { visibility: visible; }
             .print-section { 
-                position: absolute; left: 0; top: 0; width: 210mm; height: 297mm; 
-                margin: 0; padding: 15mm; background: white !important; 
-                transform: scale(1) !important; box-shadow: none !important; 
+                position: absolute !important; left: 0 !important; top: 0 !important; 
+                width: 210mm !important; height: 297mm !important; 
+                margin: 0 !important; padding: 15mm !important; 
+                background: white !important; 
+                transform: none !important; /* CRITICAL: Removes scale to prevent overlap/spacing bugs */
+                box-shadow: none !important; 
+                display: flex !important; flex-direction: column !important;
+                overflow: hidden !important; page-break-after: avoid !important;
             }
-            .contract-preview { margin-bottom: 0 !important; }
             .no-print { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             @page { size: A4 portrait; margin: 0; }
         }
 
         /* --- TECH SUPPORT SPECIFIC STYLES --- */
-        .business-card {
-            background: white; border: 1px solid #e2e8f0; border-radius: 12px;
-            transition: all 0.2s; cursor: pointer;
-        }
+        .business-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; cursor: pointer; }
         .business-card:hover { border-color: #93c5fd; box-shadow: 0 4px 12px rgba(37,99,235,0.08); }
-        .device-row {
-            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
-            padding: 12px; margin-bottom: 8px;
-        }
-        .tab-btn {
-            padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; color: #64748b; border: 1px solid #e2e8f0; background: white;
-        }
+        .device-row { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+        .tab-btn { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #64748b; border: 1px solid #e2e8f0; background: white; }
         .tab-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
 
         /* Image lightbox */
@@ -162,25 +151,16 @@
         #lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
 
         /* Visit Log Styling */
-        .visit-log-card {
-            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-size: 12px; transition: all 0.2s;
-        }
+        .visit-log-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-size: 12px; transition: all 0.2s; }
         .visit-log-card:hover { border-color: #10b981; box-shadow: 0 4px 10px rgba(16,185,129,0.05); }
-        .log-badge {
-            background: #ecfdf5; color: #065f46; font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; border: 1px solid #d1fae5;
-        }
+        .log-badge { background: #ecfdf5; color: #065f46; font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; border: 1px solid #d1fae5; }
         .log-field { display: flex; flex-direction: column; margin-bottom: 6px; }
         .log-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 2px; }
         .log-value { color: #334155; font-weight: 500; line-height: 1.4; }
         .checklist-item { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: #475569; }
         .sig-link { color: #2563eb; text-decoration: underline; font-size: 10px; font-weight: 600; cursor: pointer; }
 
-        .sup-gallery-img {
-            width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px;
-            border: 2px solid #d1fae5; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
+        .sup-gallery-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 2px solid #d1fae5; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .sup-gallery-img:hover { transform: scale(1.04); box-shadow: 0 8px 20px rgba(16,185,129,0.2); border-color: #10b981; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -430,7 +410,7 @@
                     <div id="a4-document" class="a4-paper contract-preview relative">
                         <!-- TOP SECTION (Header + Client) -->
                         <div class="shrink-0">
-                            <div class="flex justify-between items-start border-b-4 border-slate-800 pb-8">
+                            <div class="flex justify-between items-start border-b-4 border-slate-800 pb-6">
                                 <div class="flex items-center gap-5">
                                     <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-20 h-20 object-cover rounded-xl shadow-sm border border-slate-200">
                                     <div>
@@ -446,15 +426,15 @@
                                 </div>
                             </div>
                             
-                            <div class="mt-8 grid grid-cols-2 gap-8">
+                            <div class="mt-6 grid grid-cols-2 gap-8">
                                 <div>
-                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 border-b-2 border-slate-100 pb-2">Client Details</h3>
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Client Details</h3>
                                     <p class="font-black text-slate-800 text-xl mb-1" id="a4-name">Not specified</p>
                                     <p class="text-slate-600 text-base mb-1" id="a4-phone">---</p>
                                     <p class="text-slate-500 text-sm" id="a4-email">---</p>
                                 </div>
                                 <div>
-                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 border-b-2 border-slate-100 pb-2">Technician Details</h3>
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Technician Details</h3>
                                     <p class="font-black text-slate-800 text-xl mb-1" id="a4-admin-name">Admin</p>
                                     <p class="text-slate-600 text-base">Authorized Staff</p>
                                 </div>
@@ -462,8 +442,8 @@
                         </div>
 
                         <!-- MIDDLE SECTION (Expands to fill vertical gap) -->
-                        <div class="mt-8 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-hidden">
-                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2">Device Audit & Fault Report</h3>
+                        <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-hidden">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2 shrink-0">Device Audit & Fault Report</h3>
                             <div class="grid grid-cols-2 gap-6 mb-5 shrink-0">
                                 <div>
                                     <span class="text-xs font-bold text-slate-500 block mb-1">DEVICE / MODEL:</span>
@@ -482,7 +462,7 @@
                                 <span class="text-xs font-bold text-slate-500 block mb-2 shrink-0">REPORTED ISSUE:</span>
                                 <p class="font-medium text-slate-800 bg-white p-4 border-2 border-slate-200 rounded-lg text-base flex-1 overflow-y-auto" id="a4-issue">No issue described.</p>
                             </div>
-                            <div class="mt-6 pt-5 border-t-2 border-slate-200 grid grid-cols-2 gap-y-4 text-base font-medium text-slate-700 shrink-0">
+                            <div class="mt-5 pt-4 border-t-2 border-slate-200 grid grid-cols-2 gap-y-4 text-base font-medium text-slate-700 shrink-0">
                                 <div class="flex items-center gap-3"><i class="fa-regular fa-square text-xl text-slate-400" id="sq-power"></i> Powers On</div>
                                 <div class="flex items-center gap-3"><i class="fa-regular fa-square text-xl text-slate-400" id="sq-cracks"></i> Pre-existing physical damage</div>
                                 <div class="flex items-center gap-3 col-span-2 text-blue-700 font-bold"><i class="fa-regular fa-square text-xl text-blue-400" id="sq-data"></i> Client accepts data loss liability</div>
@@ -490,13 +470,13 @@
                         </div>
 
                         <!-- BOTTOM SECTION -->
-                        <div class="mt-8 pt-6 border-t-2 border-slate-800 shrink-0">
-                            <div class="bg-slate-100 p-4 rounded-lg text-xs text-slate-600 mb-8 leading-relaxed text-justify">
+                        <div class="mt-6 pt-5 border-t-2 border-slate-800 shrink-0">
+                            <div class="bg-slate-100 p-4 rounded-lg text-xs text-slate-600 mb-6 leading-relaxed text-justify">
                                 <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss. Devices abandoned for >90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition and accessories noted above.
                             </div>
-                            <div class="flex justify-between items-end pb-4">
+                            <div class="flex justify-between items-end pb-2">
                                 <div class="w-1/2 pr-10">
-                                    <p class="text-sm font-bold text-slate-500 mb-3">Client Digital Signature</p>
+                                    <p class="text-sm font-bold text-slate-500 mb-2">Client Digital Signature</p>
                                     <div class="border-2 border-dashed border-slate-300 bg-slate-50 h-20 rounded-lg mb-2 flex items-center justify-center text-slate-400 text-sm overflow-hidden relative">
                                         <span id="a4-sig-placeholder">Signature captured on left</span>
                                         <img id="a4-sig-img" class="absolute inset-0 w-full h-full object-contain hidden p-2" src="" />
@@ -983,7 +963,7 @@
                             </select>
                         </div>
                         <button onclick="app.saveSupportUpdate()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Save Status Update
+                            <i class="fa-solid fa-floppy-disk"></i> Save Details & Status
                         </button>
                     </div>
 
@@ -1006,7 +986,7 @@
                         <div id="support-a4-document" class="a4-paper contract-preview relative">
                             <!-- TOP SECTION -->
                             <div class="shrink-0">
-                                <div class="flex justify-between items-start border-b-4 border-slate-800 pb-8">
+                                <div class="flex justify-between items-start border-b-4 border-slate-800 pb-6">
                                     <div class="flex items-center gap-5">
                                         <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-20 h-20 object-cover rounded-xl shadow-sm border border-slate-200">
                                         <div>
@@ -1022,28 +1002,28 @@
                                     </div>
                                 </div>
                                 
-                                <div class="mt-8">
-                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 border-b-2 border-slate-100 pb-2">Client Details</h3>
+                                <div class="mt-6">
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Client Details</h3>
                                     <div class="grid grid-cols-2 gap-6">
-                                        <div><span class="text-xs text-slate-500 block mb-1">Business Name</span><span class="text-xl font-black text-slate-800" id="print-sup-biz">---</span></div>
-                                        <div><span class="text-xs text-slate-500 block mb-1">Industry</span><span class="text-base font-bold text-slate-800" id="print-sup-sector">---</span></div>
-                                        <div class="col-span-2"><span class="text-xs text-slate-500 block mb-1">Physical Address</span><span class="text-base font-medium text-slate-800" id="print-sup-address">---</span></div>
+                                        <div><span class="text-xs font-bold text-slate-500 block mb-1">Business Name</span><span class="text-xl font-black text-slate-800" id="print-sup-biz">---</span></div>
+                                        <div><span class="text-xs font-bold text-slate-500 block mb-1">Industry</span><span class="text-base font-bold text-slate-800" id="print-sup-sector">---</span></div>
+                                        <div class="col-span-2"><span class="text-xs font-bold text-slate-500 block mb-1">Physical Address</span><span class="text-base font-medium text-slate-800" id="print-sup-address">---</span></div>
                                     </div>
                                 </div>
 
-                                <div class="mt-8">
-                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 border-b-2 border-slate-100 pb-2">Primary Contact</h3>
+                                <div class="mt-5">
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Primary Contact</h3>
                                     <div class="grid grid-cols-2 gap-6">
-                                        <div><span class="text-xs text-slate-500 block mb-1">Contact Person</span><span class="text-lg font-bold text-slate-800" id="print-sup-contact">---</span></div>
-                                        <div><span class="text-xs text-slate-500 block mb-1">Email / Phone</span><span class="text-base font-medium text-slate-800" id="print-sup-contact-details">---</span></div>
+                                        <div><span class="text-xs font-bold text-slate-500 block mb-1">Contact Person</span><span class="text-lg font-bold text-slate-800" id="print-sup-contact">---</span></div>
+                                        <div><span class="text-xs font-bold text-slate-500 block mb-1">Email / Phone</span><span class="text-base font-medium text-slate-800" id="print-sup-contact-details">---</span></div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- MIDDLE SECTION (Expands) -->
-                            <div class="mt-8 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-hidden">
+                            <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-hidden">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2 shrink-0">Service Level Agreement</h3>
-                                <div class="grid grid-cols-2 gap-8 mb-6 shrink-0">
+                                <div class="grid grid-cols-2 gap-8 mb-5 shrink-0">
                                     <div>
                                         <span class="text-xs font-bold text-slate-500 block mb-1">CONTRACT TYPE:</span>
                                         <p class="text-lg font-black text-slate-800" id="print-sup-contract">---</p>
@@ -1060,13 +1040,13 @@
                             </div>
 
                             <!-- BOTTOM SECTION -->
-                            <div class="mt-8 pt-6 border-t-2 border-slate-800 shrink-0">
-                                <div class="bg-slate-100 p-4 rounded-lg text-xs text-slate-600 mb-8 leading-relaxed text-justify">
+                            <div class="mt-6 pt-5 border-t-2 border-slate-800 shrink-0">
+                                <div class="bg-slate-100 p-4 rounded-lg text-xs text-slate-600 mb-6 leading-relaxed text-justify">
                                     <strong>TERMS & CONDITIONS:</strong> Rare Grade Tech (Pty) Ltd agrees to provide maintenance and support services for the hardware and software defined in this agreement. Response times are subject to the active SLA tier. The client authorizes Rare Grade Tech personnel to access listed devices and systems. Data backup remains the primary responsibility of the client unless explicitly selected in the scope of services. This contract represents the entire agreement between both parties.
                                 </div>
-                                <div class="flex justify-between items-end pb-4">
+                                <div class="flex justify-between items-end pb-2">
                                     <div class="w-1/2 pr-10">
-                                        <p class="text-sm font-bold text-slate-500 mb-3">Authorised Client Signature</p>
+                                        <p class="text-sm font-bold text-slate-500 mb-2">Authorised Client Signature</p>
                                         <div class="border-2 border-dashed border-slate-300 bg-slate-50 h-20 rounded-lg mb-2 flex items-center justify-center text-slate-400 text-sm overflow-hidden relative">
                                             <span id="print-sup-sig-placeholder">No signature on file</span>
                                             <img id="print-sup-sig-img" class="absolute inset-0 w-full h-full object-contain hidden p-2" src="" />
