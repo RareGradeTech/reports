@@ -105,43 +105,23 @@
             border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px;
             cursor: crosshair; width: 100%; height: 120px; touch-action: none;
         }
-        /* Support SIG pad */
         .support-sig-pad {
             border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px;
             cursor: crosshair; width: 100%; touch-action: none;
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        /* --- STRICT ONE-PAGE PRINT CSS --- */
-        @page { size: A4 portrait; margin: 0; }
+        /* --- PRINT CSS --- */
         @media print {
+            body * { visibility: hidden; }
+            .print-section, .print-section * { visibility: visible; }
+            .print-section { 
+                position: absolute; left: 0; top: 0; width: 210mm; min-height: 297mm; 
+                margin: 0; padding: 15mm; background: white !important; 
+                transform: scale(1) !important; box-shadow: none !important; 
+            }
+            .no-print { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            body, html { width: 210mm; height: 297mm; margin: 0; padding: 0; background: white !important; overflow: hidden !important; }
-            aside, header, #lock-screen, #global-spinner, .no-print, .nav-item { display: none !important; }
-            #view-intake > div > div:first-child { display: none !important; }
-            main, #view-intake, .flex, #a4-container {
-                display: block !important;
-                width: 100% !important;
-                height: 100% !important;
-                overflow: hidden !important;
-                position: absolute !important;
-                top: 0; left: 0;
-            }
-            .a4-wrapper { padding: 0 !important; background: white !important; }
-            .a4-paper {
-                width: 210mm !important;
-                height: 297mm !important;
-                max-height: 297mm !important;
-                padding: 15mm !important;
-                box-shadow: none !important;
-                margin: 0 !important;
-                page-break-after: avoid !important;
-                page-break-before: avoid !important;
-                page-break-inside: avoid !important;
-            }
+            @page { size: A4 portrait; margin: 0; }
         }
 
         /* --- TECH SUPPORT SPECIFIC STYLES --- */
@@ -160,11 +140,29 @@
         }
         .tab-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
 
-        /* Contract A4 page */
-        .contract-a4 {
-            width: 210mm; min-height: 297mm; background: white; padding: 18mm;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        /* Image lightbox */
+        #lightbox {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(10px);
+            z-index: 999999; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
+        #lightbox.active { opacity: 1; pointer-events: all; }
+        #lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+
+        /* Visit Log Styling */
+        .visit-log-card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-size: 12px; transition: all 0.2s;
+        }
+        .visit-log-card:hover { border-color: #10b981; box-shadow: 0 4px 10px rgba(16,185,129,0.05); }
+        .log-badge {
+            background: #ecfdf5; color: #065f46; font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; border: 1px solid #d1fae5;
+        }
+
+        .contract-preview { transform: scale(0.7); transform-origin: top center; margin-bottom: -30%; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="flex h-screen">
@@ -173,6 +171,12 @@
         <div class="spinner-ring"></div>
         <p id="spinner-text" class="text-slate-800 mt-4 font-bold tracking-wide">Processing...</p>
         <p id="spinner-subtext" class="text-slate-500 text-sm mt-1"></p>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" onclick="app.closeLightbox()">
+        <button onclick="app.closeLightbox()" class="absolute top-6 right-6 text-white/70 hover:text-white text-3xl transition-colors z-10"><i class="fa-solid fa-xmark"></i></button>
+        <img id="lightbox-img" src="" alt="Evidence">
     </div>
 
     <div id="lock-screen">
@@ -395,8 +399,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="flex-1 a4-wrapper relative" id="a4-container">
-                    <button onclick="window.print()" class="no-print absolute top-6 right-8 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold transition-colors z-10"><i class="fa-solid fa-file-pdf"></i> Print / Save PDF</button>
+                <div class="flex-1 a4-wrapper relative">
+                    <button onclick="app.printDocument('a4-document')" class="no-print absolute top-6 right-8 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold transition-colors z-10"><i class="fa-solid fa-file-pdf"></i> Print / Save PDF</button>
                     <div class="a4-paper flex flex-col" id="a4-document">
                         <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6">
                             <div class="flex items-center gap-4">
@@ -593,7 +597,6 @@
                     </div>
 
                     <div class="p-8 space-y-8 bg-slate-50">
-
                         <!-- Business Info -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
@@ -645,9 +648,7 @@
                                     <i class="fa-solid fa-plus"></i> Add Device
                                 </button>
                             </div>
-                            <div id="devices-container" class="space-y-3">
-                                <!-- Device rows added dynamically -->
-                            </div>
+                            <div id="devices-container" class="space-y-3"></div>
                             <p class="text-xs text-slate-400 italic" id="no-devices-msg">Click "Add Device" to log devices under this maintenance contract.</p>
                         </div>
 
@@ -696,14 +697,10 @@
                                 <strong>Authorisation Statement:</strong> By signing below, the authorised representative of the above-named business confirms that Rare Grade Tech (Pty) Ltd is hereby appointed to provide IT maintenance and technical support services as described. The client acknowledges the service scope, agrees to Rare Grade Tech's standard terms and conditions, and authorises access to the listed devices for maintenance purposes.
                             </div>
                             <div class="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Authorised Signatory Name</label>
-                                    <input type="text" id="sup-sig-name" class="custom-input" placeholder="Full name of person signing">
-                                </div>
-                                <div>
-                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Capacity / Designation</label>
-                                    <input type="text" id="sup-sig-title" class="custom-input" placeholder="e.g. Managing Director, Owner">
-                                </div>
+                                <div><label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Authorised Signatory Name</label>
+                                    <input type="text" id="sup-sig-name" class="custom-input" placeholder="Full name of person signing"></div>
+                                <div><label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Capacity / Designation</label>
+                                    <input type="text" id="sup-sig-title" class="custom-input" placeholder="e.g. Managing Director, Owner"></div>
                             </div>
                             <div>
                                 <div class="flex justify-between items-center mb-2">
@@ -902,11 +899,11 @@
                 </div>
 
                 <!-- Tabs -->
-                <div class="flex gap-2 p-4 border-b border-slate-100 bg-slate-50 shrink-0">
+                <div class="flex gap-2 p-4 border-b border-slate-100 bg-slate-50 shrink-0 overflow-x-auto">
                     <button class="tab-btn active" onclick="app.switchSupportTab('overview', this)">Overview</button>
                     <button class="tab-btn" onclick="app.switchSupportTab('devices', this)">Devices</button>
                     <button class="tab-btn" onclick="app.switchSupportTab('contract', this)">Contract & Signature</button>
-                    <button class="tab-btn" onclick="app.switchSupportTab('notes', this)">Update Notes</button>
+                    <button class="tab-btn" onclick="app.switchSupportTab('history', this)">History & Evidence</button>
                 </div>
 
                 <input type="hidden" id="mod-sup-db-key">
@@ -917,19 +914,27 @@
                         <div class="grid grid-cols-2 gap-6">
                             <div class="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
                                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider border-b pb-2">Business Info</p>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Company</span><p class="font-bold text-slate-800 mt-0.5" id="mod-sup-company">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Sector</span><p class="text-slate-700 mt-0.5" id="mod-sup-sector">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Address</span><p class="text-slate-700 mt-0.5" id="mod-sup-address">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Contract Type</span><p class="mt-0.5" id="mod-sup-contract-badge">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Start Date</span><p class="text-slate-700 mt-0.5" id="mod-sup-start-date">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Company</span><input type="text" id="mod-sup-company" class="custom-input py-1.5 px-2 text-sm font-bold text-slate-800 mt-1 w-full" oninput="app.syncSupportA4()"></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Sector</span><input type="text" id="mod-sup-sector" class="custom-input py-1.5 px-2 text-sm mt-1 w-full" oninput="app.syncSupportA4()"></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Address</span><input type="text" id="mod-sup-address" class="custom-input py-1.5 px-2 text-sm mt-1 w-full" oninput="app.syncSupportA4()"></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Contract Type</span>
+                                    <select id="mod-sup-contract-type" class="custom-input py-1.5 px-2 text-sm mt-1 w-full" onchange="app.syncSupportA4()">
+                                        <option value="Monthly Maintenance">Monthly Maintenance</option>
+                                        <option value="Quarterly Maintenance">Quarterly Maintenance</option>
+                                        <option value="Ad-hoc Support">Ad-hoc Support</option>
+                                        <option value="Annual Support Contract">Annual Support Contract</option>
+                                        <option value="Break-Fix Only">Break-Fix Only</option>
+                                    </select>
+                                </div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Start Date</span><input type="date" id="mod-sup-start-date" class="custom-input py-1.5 px-2 text-sm mt-1 w-full"></div>
                             </div>
                             <div class="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
                                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider border-b pb-2">Primary Contact</p>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Name</span><p class="font-bold text-slate-800 mt-0.5" id="mod-sup-contact-name">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Title</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-title">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Phone</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-phone">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Email</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-email">---</p></div>
-                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">WhatsApp</span><p class="text-slate-700 mt-0.5" id="mod-sup-contact-wa">---</p></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Name</span><input type="text" id="mod-sup-contact-name" class="custom-input py-1.5 px-2 text-sm font-bold text-slate-800 mt-1 w-full" oninput="app.syncSupportA4()"></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Title</span><input type="text" id="mod-sup-contact-title" class="custom-input py-1.5 px-2 text-sm mt-1 w-full"></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Phone</span><input type="tel" id="mod-sup-contact-phone" class="custom-input py-1.5 px-2 text-sm mt-1 w-full" oninput="app.syncSupportA4()"></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">Email</span><input type="email" id="mod-sup-contact-email" class="custom-input py-1.5 px-2 text-sm mt-1 w-full" oninput="app.syncSupportA4()"></div>
+                                <div><span class="text-[10px] font-bold text-slate-400 uppercase">WhatsApp</span><input type="tel" id="mod-sup-contact-wa" class="custom-input py-1.5 px-2 text-sm mt-1 w-full"></div>
                             </div>
                         </div>
                         <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
@@ -946,7 +951,7 @@
                             </select>
                         </div>
                         <button onclick="app.saveSupportUpdate()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Save Status Update
+                            <i class="fa-solid fa-floppy-disk"></i> Save Details & Status
                         </button>
                     </div>
 
@@ -961,29 +966,103 @@
                         </div>
                     </div>
 
-                    <!-- Contract & Signature Tab -->
-                    <div id="sup-tab-contract" class="p-6 hidden">
-                        <div class="bg-violet-50 border border-violet-200 rounded-xl p-5 mb-4">
-                            <p class="text-xs font-bold text-violet-700 uppercase tracking-wider mb-1">Signed By</p>
-                            <p class="font-bold text-slate-800 text-lg" id="mod-sup-sig-name">---</p>
-                            <p class="text-slate-600 text-sm" id="mod-sup-sig-title">---</p>
-                        </div>
-                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider p-3 border-b border-slate-200">Client Digital Signature</p>
-                            <div class="p-4 flex items-center justify-center min-h-[100px]">
-                                <img id="mod-sup-sig-img" src="" class="max-h-28 hidden object-contain">
-                                <p class="text-slate-400 text-sm" id="mod-sup-sig-placeholder">No signature captured.</p>
+                    <!-- Contract & Signature Tab (A4 Printable) -->
+                    <div id="sup-tab-contract" class="p-6 hidden bg-slate-100 flex flex-col items-center">
+                        <button onclick="app.printDocument('support-a4-document')" class="mb-4 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold transition-colors no-print"><i class="fa-solid fa-file-pdf"></i> Print / Save PDF Contract</button>
+                        
+                        <!-- A4 Printable Area for Support Contract -->
+                        <div id="support-a4-document" class="contract-a4 contract-preview relative">
+                            <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6">
+                                <div class="flex items-center gap-4">
+                                    <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-16 h-16 object-cover rounded-lg shadow-sm border border-slate-200">
+                                    <div>
+                                        <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-none">RARE GRADE TECH</h1>
+                                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">IT & Software Engineering</p>
+                                        <p class="text-xs text-slate-600 mt-2">info@raregradetech.co.za<br>015 065 0979 / 061 527 0749</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <h2 class="text-xl font-bold text-slate-300 uppercase tracking-widest">Support SLA</h2>
+                                    <p class="text-sm font-bold text-slate-800 mt-2 font-mono" id="print-sup-ref">REF: SUP-0000</p>
+                                    <p class="text-xs text-slate-500 mt-1" id="print-sup-date">Effective: </p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Client Details</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><span class="text-[10px] text-slate-500 block">Business Name</span><span class="font-bold text-slate-800" id="print-sup-biz">---</span></div>
+                                    <div><span class="text-[10px] text-slate-500 block">Industry</span><span class="text-sm text-slate-800" id="print-sup-sector">---</span></div>
+                                    <div class="col-span-2"><span class="text-[10px] text-slate-500 block">Address</span><span class="text-sm text-slate-800" id="print-sup-address">---</span></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-b pb-1">Primary Contact</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><span class="text-[10px] text-slate-500 block">Contact</span><span class="font-bold text-slate-800" id="print-sup-contact">---</span></div>
+                                    <div><span class="text-[10px] text-slate-500 block">Email/Phone</span><span class="text-sm text-slate-800" id="print-sup-contact-details">---</span></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-5">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Service Level Agreement</h3>
+                                <div class="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <span class="text-xs font-bold text-slate-500">CONTRACT TYPE:</span>
+                                        <p class="font-medium text-slate-800 mt-1" id="print-sup-contract">---</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-bold text-slate-500">COVERED DEVICES:</span>
+                                        <p class="font-medium text-slate-800 mt-1" id="print-sup-devices">0 Devices</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <span class="text-xs font-bold text-slate-500 block mb-1">SCOPE OF SERVICES:</span>
+                                    <div id="print-sup-scope" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto pt-6">
+                                <div class="bg-slate-100 p-3 rounded text-[10px] text-slate-500 mb-6 leading-relaxed">
+                                    <strong>TERMS & CONDITIONS:</strong> Rare Grade Tech (Pty) Ltd agrees to provide maintenance and support services for the hardware and software defined in this agreement. Response times are subject to the active SLA tier. The client authorizes Rare Grade Tech personnel to access listed devices and systems. Data backup remains the primary responsibility of the client unless explicitly selected in the scope of services. This contract represents the entire agreement between both parties.
+                                </div>
+                                <div class="flex justify-between items-end">
+                                    <div class="w-1/2 pr-8">
+                                        <p class="text-xs font-bold text-slate-500 mb-2">Authorised Client Signature</p>
+                                        <div class="border border-slate-200 bg-slate-50 h-16 rounded mb-1 flex items-center justify-center text-slate-300 text-xs overflow-hidden relative">
+                                            <span id="print-sup-sig-placeholder">No signature on file</span>
+                                            <img id="print-sup-sig-img" class="absolute inset-0 w-full h-full object-contain hidden" src="" />
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-800" id="print-sup-sig-name">---</p>
+                                        <p class="text-[10px] text-slate-500" id="print-sup-sig-title">---</p>
+                                    </div>
+                                    <div class="w-1/3 border-t border-slate-800 pt-2 text-center">
+                                        <p class="text-xs font-bold text-slate-800">Rare Grade Tech Authorized</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Notes Tab -->
-                    <div id="sup-tab-notes" class="p-6 hidden space-y-4">
-                        <div>
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Maintenance Log / Notes</label>
-                            <textarea id="mod-sup-notes" class="custom-input mt-2 h-40 resize-none" placeholder="Log maintenance visits, issues resolved, parts replaced..."></textarea>
+                    <!-- History & Evidence Tab -->
+                    <div id="sup-tab-history" class="p-6 hidden bg-slate-50/50">
+                        <div class="mb-6">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3"><i class="fa-solid fa-camera"></i> Attached Evidence</h3>
+                            <div id="mod-sup-photos" class="grid grid-cols-4 gap-3"></div>
+                            <p id="mod-sup-photos-empty" class="text-xs text-slate-400 italic">No photos attached.</p>
                         </div>
-                        <button onclick="app.saveSupportNotes()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all">Save Notes</button>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b border-slate-200 pb-2"><i class="fa-solid fa-clock-rotate-left"></i> Visit History</h3>
+                            <div id="mod-sup-logs" class="space-y-3"></div>
+                        </div>
+                        
+                        <div class="border-t border-slate-200 pt-5 bg-white p-5 rounded-xl shadow-sm border">
+                            <label class="text-xs font-bold text-slate-700 uppercase">Append Admin Note</label>
+                            <textarea id="mod-sup-manual-note" class="custom-input mt-2 h-24 resize-none" placeholder="Add a manual log entry or admin note..."></textarea>
+                            <button onclick="app.saveSupportNotes()" class="mt-3 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all shadow-sm">Append Note to Log</button>
+                        </div>
                     </div>
 
                 </div>
@@ -1012,7 +1091,6 @@
                 this.isDrawing = false;
                 this.hasSignature = false;
 
-                // Support Signature
                 this.supSigCanvas = null;
                 this.supSigCtx = null;
                 this.supSigDrawing = false;
@@ -1063,8 +1141,8 @@
                     this.reportsData.sort((a, b) => b.timestamp - a.timestamp);
                     this.updateDashboard();
                     this.filterRegistry();
-                    const openModalKey = document.getElementById('mod-db-key').value;
-                    if (document.getElementById('update-modal').classList.contains('active') && openModalKey) {
+                    const openModalKey = document.getElementById('mod-db-key')?.value;
+                    if (document.getElementById('update-modal')?.classList.contains('active') && openModalKey) {
                         this.populateModalSilently(openModalKey);
                     }
                 });
@@ -1083,6 +1161,10 @@
                     this.supportData.sort((a, b) => b.timestamp - a.timestamp);
                     this.updateDashboard();
                     this.renderSupportRegistry();
+                    const openModalKey = document.getElementById('mod-sup-db-key')?.value;
+                    if (document.getElementById('support-detail-modal')?.classList.contains('active') && openModalKey) {
+                        this.openSupportModal(openModalKey, true);
+                    }
                 });
             }
 
@@ -1115,6 +1197,96 @@
                 document.getElementById('stat-software').innerText = this.softwareData.filter(s => s.status !== 'Deployed / Completed').length;
                 document.getElementById('stat-support-biz').innerText = this.supportData.filter(s => s.status === 'Active').length;
             }
+
+            // ==========================================
+            // LOG & PARSER HELPERS
+            // ==========================================
+            parseVisitLogs(rawNotes) {
+                if (!rawNotes || !rawNotes.trim()) return [];
+                const entries = [];
+                const blocks = rawNotes.split(/={4,}\n?/g).map(b => b.trim()).filter(b => b.length > 0);
+
+                blocks.forEach((block) => {
+                    const isStructured = block.includes('VISIT LOG:') || block.includes('TECHNICIAN:') || block.includes('TASKS COMPLETED:');
+                    if (isStructured) {
+                        const entry = { type: 'structured', raw: block };
+                        const dateMatch = block.match(/VISIT LOG:\s*(.+)/); if (dateMatch) entry.date = dateMatch[1].trim();
+                        const typeMatch = block.match(/TYPE:\s*(.+)/); if (typeMatch) entry.visitType = typeMatch[1].trim();
+                        const techMatch = block.match(/TECHNICIAN:\s*(.+)/); if (techMatch) entry.technician = techMatch[1].trim();
+                        const tasksSection = block.match(/TASKS COMPLETED:\n([\s\S]*?)(?:\n[A-Z]|\n====|$)/);
+                        if (tasksSection) {
+                            entry.tasks = tasksSection[1].split('\n').map(t => t.replace(/^\s*-\s*/, '').trim()).filter(t => t && t !== 'No standard checklist items selected.');
+                        }
+                        const partsMatch = block.match(/PARTS USED:\s*(.+)/); if (partsMatch) entry.parts = partsMatch[1].trim();
+                        const nextMatch = block.match(/NEXT STEPS:\s*(.+)/); if (nextMatch) entry.nextSteps = nextMatch[1].trim();
+                        const notesSection = block.match(/NOTES:\s*\n([\s\S]*?)(?:\nCLIENT SIG|\n====|$)/); if (notesSection) entry.notes = notesSection[1].trim();
+                        const sigSection = block.match(/CLIENT SIG \(([^)]+)\):\s*\n(.+)/);
+                        if (sigSection) { entry.sigName = sigSection[1].trim(); entry.sigUrl = sigSection[2].trim(); }
+                        entries.push(entry);
+                    } else {
+                        entries.push({ type: 'raw', raw: block });
+                    }
+                });
+                return entries;
+            }
+
+            renderVisitLogs(entries, containerId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                container.innerHTML = '';
+                if (!entries || entries.length === 0) {
+                    container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 italic flex flex-col items-center gap-2"><i class="fa-regular fa-clock-rotate-left text-2xl text-slate-300"></i> No visit logs yet.</div>`;
+                    return;
+                }
+
+                entries.forEach((entry, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'visit-log-card shadow-sm mb-3';
+
+                    if (entry.type === 'structured') {
+                        const hasTasks = entry.tasks && entry.tasks.length > 0;
+                        const hasSig = entry.sigUrl && !entry.sigUrl.includes('[Image Upload Failed');
+                        const isCloudUrl = hasSig && (entry.sigUrl.startsWith('https://res.cloudinary') || entry.sigUrl.startsWith('http'));
+
+                        div.innerHTML = `
+                            <div class="log-header">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-clipboard-check text-emerald-500 text-sm"></i>
+                                    <span class="font-black text-slate-700 text-xs">${entry.date || 'Unknown Date'}</span>
+                                </div>
+                                <span class="log-badge">${entry.visitType || 'Site Visit'}</span>
+                            </div>
+                            ${entry.technician ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-user-helmet-safety mr-1"></i>Technician</span><span class="log-value font-bold text-emerald-700">${entry.technician}</span></div>` : ''}
+                            ${hasTasks ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-list-check mr-1"></i>Tasks Completed</span><div class="mt-1 space-y-1">${entry.tasks.map(t => `<div class="checklist-item"><i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0"></i><span>${t}</span></div>`).join('')}</div></div>` : ''}
+                            ${entry.parts && entry.parts !== 'None' ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-box-open mr-1"></i>Parts / Consumables</span><span class="log-value">${entry.parts}</span></div>` : ''}
+                            ${entry.nextSteps && entry.nextSteps !== 'None' ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-forward mr-1"></i>Recommendations</span><span class="log-value">${entry.nextSteps}</span></div>` : ''}
+                            ${entry.notes ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-note-sticky mr-1"></i>Notes</span><span class="log-value whitespace-pre-line">${entry.notes}</span></div>` : ''}
+                            ${entry.sigName ? `<div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between"><div class="flex items-center gap-2"><i class="fa-solid fa-signature text-emerald-400 text-xs"></i><span class="text-[10px] font-bold text-slate-500">Signed: ${entry.sigName}</span></div>${isCloudUrl ? `<a href="${entry.sigUrl}" target="_blank" class="sig-link">View Sig →</a>` : (entry.sigUrl ? `<span class="text-[9px] text-red-400 font-semibold">Upload failed</span>` : '')}</div>` : ''}
+                        `;
+                    } else {
+                        div.innerHTML = `
+                            <div class="log-header">
+                                <div class="flex items-center gap-2"><i class="fa-solid fa-file-lines text-slate-400 text-sm"></i><span class="font-black text-slate-600 text-xs">Note / Legacy Entry</span></div>
+                                <span class="log-badge" style="background:#f1f5f9;color:#475569;border-color:#e2e8f0">raw</span>
+                            </div>
+                            <p class="log-value whitespace-pre-line text-slate-600 leading-relaxed">${entry.raw}</p>
+                        `;
+                    }
+                    container.appendChild(div);
+                });
+            }
+
+            openLightbox(src) {
+                const lb = document.getElementById('lightbox');
+                const img = document.getElementById('lightbox-img');
+                if (src) {
+                    img.src = src;
+                    lb.classList.add('active');
+                } else {
+                    lb.classList.remove('active');
+                }
+            }
+            closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
 
             // ==========================================
             // HARDWARE FILTER & REGISTRY
@@ -1386,51 +1558,66 @@
                 this.clearSupportSignature();
             }
 
+            syncSupportA4() {
+                document.getElementById('print-sup-biz').innerText = document.getElementById('mod-sup-company').value || "---";
+                document.getElementById('print-sup-sector').innerText = document.getElementById('mod-sup-sector').value || "---";
+                document.getElementById('print-sup-address').innerText = document.getElementById('mod-sup-address').value || "---";
+                document.getElementById('print-sup-contract').innerText = document.getElementById('mod-sup-contract-type').value || "---";
+                document.getElementById('print-sup-contact').innerText = document.getElementById('mod-sup-contact-name').value || "---";
+                document.getElementById('print-sup-contact-details').innerText = document.getElementById('mod-sup-contact-email').value + " / " + document.getElementById('mod-sup-contact-phone').value;
+            }
+
             // ==========================================
             // SUPPORT MODAL
             // ==========================================
-            openSupportModal(dbKey) {
+            openSupportModal(dbKey, silent = false) {
                 const biz = this.supportData.find(b => b.key === dbKey);
                 if (!biz) return;
 
                 document.getElementById('mod-sup-db-key').value = dbKey;
                 document.getElementById('mod-sup-biz-name').innerText = biz.bizName || '---';
-                document.getElementById('mod-sup-company').innerText = biz.bizName || '---';
-                document.getElementById('mod-sup-sector').innerText = biz.sector || '---';
-                document.getElementById('mod-sup-address').innerText = biz.address || '---';
-                document.getElementById('mod-sup-start-date').innerText = biz.startDate || '---';
-                document.getElementById('mod-sup-contact-name').innerText = biz.contactName || '---';
-                document.getElementById('mod-sup-contact-title').innerText = biz.contactTitle || '---';
-                document.getElementById('mod-sup-contact-phone').innerText = biz.contactPhone || '---';
-                document.getElementById('mod-sup-contact-email').innerText = biz.contactEmail || '---';
-                document.getElementById('mod-sup-contact-wa').innerText = biz.contactWA || '---';
-                document.getElementById('mod-sup-notes').value = biz.maintenanceNotes || '';
-
-                // Contract type badge
-                const ctEl = document.getElementById('mod-sup-contract-badge');
-                ctEl.innerHTML = `<span class="bg-violet-100 text-violet-700 text-xs font-bold px-2 py-1 rounded">${biz.contractType || '---'}</span>`;
-
-                // Status
+                
+                // Editable Fields
+                document.getElementById('mod-sup-company').value = biz.bizName || '';
+                document.getElementById('mod-sup-sector').value = biz.sector || '';
+                document.getElementById('mod-sup-address').value = biz.address || '';
+                document.getElementById('mod-sup-contract-type').value = biz.contractType || 'Monthly Maintenance';
+                document.getElementById('mod-sup-start-date').value = biz.startDate || '';
+                document.getElementById('mod-sup-contact-name').value = biz.contactName || '';
+                document.getElementById('mod-sup-contact-title').value = biz.contactTitle || '';
+                document.getElementById('mod-sup-contact-phone').value = biz.contactPhone || '';
+                document.getElementById('mod-sup-contact-email').value = biz.contactEmail || '';
+                document.getElementById('mod-sup-contact-wa').value = biz.contactWA || '';
                 document.getElementById('mod-sup-status').value = biz.status || 'Active';
 
-                // Scope
+                // Scope display in Overview & Contract
                 const scopeEl = document.getElementById('mod-sup-scope');
-                scopeEl.innerHTML = '';
+                const printScopeEl = document.getElementById('print-sup-scope');
+                scopeEl.innerHTML = ''; printScopeEl.innerHTML = '';
                 const labels = { hardware: 'Hardware Repairs', software: 'Software Support', network: 'Network / LAN', backup: 'Backup & Recovery', security: 'Security & Antivirus', remote: 'Remote Support' };
                 if (biz.scope) {
                     Object.entries(biz.scope).forEach(([k, v]) => {
-                        if (v) scopeEl.innerHTML += `<span class="bg-violet-100 text-violet-700 text-xs font-bold px-3 py-1 rounded-full border border-violet-200">${labels[k] || k}</span>`;
+                        if (v) {
+                            scopeEl.innerHTML += `<span class="bg-violet-100 text-violet-700 text-xs font-bold px-3 py-1 rounded-full border border-violet-200">${labels[k] || k}</span>`;
+                            printScopeEl.innerHTML += `<span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1 rounded border border-slate-200">${labels[k] || k}</span>`;
+                        }
                     });
                 }
-                if (!scopeEl.innerHTML) scopeEl.innerHTML = '<span class="text-slate-400 text-sm">No scope defined.</span>';
+                if (!scopeEl.innerHTML) {
+                    scopeEl.innerHTML = '<span class="text-slate-400 text-sm">No scope defined.</span>';
+                    printScopeEl.innerHTML = '<span class="text-slate-400 text-xs">No scope defined.</span>';
+                }
 
                 // Devices
                 const devicesList = document.getElementById('mod-sup-devices-list');
                 const deviceCount = document.getElementById('mod-sup-device-count');
+                const printDevCount = document.getElementById('print-sup-devices');
                 devicesList.innerHTML = '';
                 const devs = biz.devices || [];
                 const devsArr = Array.isArray(devs) ? devs : Object.values(devs);
                 deviceCount.innerText = `${devsArr.length} device${devsArr.length !== 1 ? 's' : ''}`;
+                printDevCount.innerText = `${devsArr.length} Device${devsArr.length !== 1 ? 's' : ''} Covered`;
+                
                 if (devsArr.length === 0) {
                     devicesList.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No devices registered under this contract.</p>';
                 } else {
@@ -1455,30 +1642,60 @@
                     });
                 }
 
-                // Signature
+                // Contract Print Variables
+                document.getElementById('print-sup-ref').innerText = `REF: SUP-${biz.refId}`;
+                document.getElementById('print-sup-date').innerText = `Effective: ${biz.startDate || this.formatDate(biz.timestamp)}`;
+                this.syncSupportA4();
+
+                // Signature handling
                 const sigName = biz.sigName || '---';
                 const sigTitle = biz.sigTitle || '---';
-                document.getElementById('mod-sup-sig-name').innerText = sigName;
-                document.getElementById('mod-sup-sig-title').innerText = sigTitle;
-                const sigImg = document.getElementById('mod-sup-sig-img');
-                const sigPlaceholder = document.getElementById('mod-sup-sig-placeholder');
+                
+                document.getElementById('print-sup-sig-name').innerText = sigName;
+                document.getElementById('print-sup-sig-title').innerText = sigTitle;
+
+                const printSigImg = document.getElementById('print-sup-sig-img');
+                const printSigPlaceholder = document.getElementById('print-sup-sig-placeholder');
+
                 if (biz.signatureBase64 && biz.signatureBase64.length > 50) {
-                    sigImg.src = biz.signatureBase64;
-                    sigImg.classList.remove('hidden');
-                    sigPlaceholder.classList.add('hidden');
+                    printSigImg.src = biz.signatureBase64;
+                    printSigImg.classList.remove('hidden');
+                    printSigPlaceholder.classList.add('hidden');
                 } else {
-                    sigImg.classList.add('hidden');
-                    sigPlaceholder.classList.remove('hidden');
+                    printSigImg.classList.add('hidden');
+                    printSigPlaceholder.classList.remove('hidden');
                 }
 
-                // Reset to first tab
-                this.switchSupportTab('overview', document.querySelector('#support-detail-modal .tab-btn'));
+                // History & Evidence Tab (Photos & Logs)
+                const photosGrid = document.getElementById('mod-sup-photos');
+                const photosEmpty = document.getElementById('mod-sup-photos-empty');
+                photosGrid.innerHTML = '';
+                const photosArr = Array.isArray(biz.photos) ? biz.photos : [];
+                if(photosArr.length > 0) {
+                    photosEmpty.classList.add('hidden');
+                    photosArr.forEach((url) => {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.className = "sup-gallery-img";
+                        img.onclick = () => this.openLightbox(url);
+                        photosGrid.appendChild(img);
+                    });
+                } else {
+                    photosEmpty.classList.remove('hidden');
+                }
 
-                document.getElementById('support-detail-modal').classList.add('active');
+                const parsedLogs = this.parseVisitLogs(biz.maintenanceNotes);
+                this.renderVisitLogs(parsedLogs, 'mod-sup-logs');
+                document.getElementById('mod-sup-manual-note').value = '';
+
+                if(!silent) {
+                    this.switchSupportTab('overview', document.querySelector('#support-detail-modal .tab-btn'));
+                    document.getElementById('support-detail-modal').classList.add('active');
+                }
             }
 
             switchSupportTab(tab, btn) {
-                ['overview', 'devices', 'contract', 'notes'].forEach(t => {
+                ['overview', 'devices', 'contract', 'history'].forEach(t => {
                     const el = document.getElementById(`sup-tab-${t}`);
                     if (el) el.classList.add('hidden');
                 });
@@ -1495,11 +1712,21 @@
                 this.showLoading("Saving...");
                 try {
                     await this.db.ref('support_businesses/' + dbKey).update({
+                        bizName: document.getElementById('mod-sup-company').value,
+                        sector: document.getElementById('mod-sup-sector').value,
+                        address: document.getElementById('mod-sup-address').value,
+                        contractType: document.getElementById('mod-sup-contract-type').value,
+                        startDate: document.getElementById('mod-sup-start-date').value,
+                        contactName: document.getElementById('mod-sup-contact-name').value,
+                        contactTitle: document.getElementById('mod-sup-contact-title').value,
+                        contactPhone: document.getElementById('mod-sup-contact-phone').value,
+                        contactEmail: document.getElementById('mod-sup-contact-email').value,
+                        contactWA: document.getElementById('mod-sup-contact-wa').value,
                         status: document.getElementById('mod-sup-status').value,
                         lastUpdated: Date.now()
                     });
                     this.hideLoading();
-                    this.closeModal('support-detail-modal');
+                    this.showToast("Details updated successfully");
                 } catch (err) {
                     this.showErrorMsg(`Update failed: ${err.message}`);
                 }
@@ -1508,14 +1735,45 @@
             async saveSupportNotes() {
                 const dbKey = document.getElementById('mod-sup-db-key').value;
                 if (!dbKey) return;
-                this.showLoading("Saving notes...");
+                
+                const newNote = document.getElementById('mod-sup-manual-note').value.trim();
+                if (!newNote) return this.showToast("Please enter a note", "error");
+
+                this.showLoading("Saving note...");
                 try {
+                    const biz = this.supportData.find(b => b.key === dbKey);
+                    let existingNotes = biz.maintenanceNotes || '';
+                    
+                    const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                    const techName = this.currentAdmin ? this.currentAdmin.name : "Admin";
+
+                    const newEntry = `
+====================================
+VISIT LOG: ${dateStr}
+TYPE: Manual Admin Note
+TECHNICIAN: ${techName}
+------------------------------------
+TASKS COMPLETED:
+  - No standard checklist items selected.
+
+PARTS USED: None
+NEXT STEPS: None
+
+NOTES: 
+${newNote}
+
+====================================
+`;
+                    const updatedNotes = newEntry + existingNotes;
+
                     await this.db.ref('support_businesses/' + dbKey).update({
-                        maintenanceNotes: document.getElementById('mod-sup-notes').value,
+                        maintenanceNotes: updatedNotes,
                         lastUpdated: Date.now()
                     });
+                    
+                    document.getElementById('mod-sup-manual-note').value = '';
                     this.hideLoading();
-                    alert("Notes saved successfully.");
+                    this.showToast("Note appended to log.");
                 } catch (err) {
                     this.showErrorMsg(`Save failed: ${err.message}`);
                 }
@@ -1534,6 +1792,15 @@
                         this.showErrorMsg(`Delete failed: ${err.message}`);
                     }
                 }
+            }
+
+            // ==========================================
+            // PRINT / EXPORT LOGIC
+            // ==========================================
+            printDocument(elementId) {
+                document.querySelectorAll('.a4-paper').forEach(el => el.classList.remove('print-section'));
+                document.getElementById(elementId).classList.add('print-section');
+                window.print();
             }
 
             // ==========================================
