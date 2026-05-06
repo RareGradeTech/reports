@@ -987,7 +987,7 @@
                         
                         <!-- A4 Printable Area for Support Contract -->
                         <div id="support-a4-document" class="a4-paper contract-preview relative">
-                            <!-- TOP SECTION -->
+                            <!-- TOP SECTION (Header + Client) -->
                             <div class="shrink-0">
                                 <div class="flex justify-between items-start border-b-4 border-slate-800 pb-6">
                                     <div class="flex items-center gap-5">
@@ -999,34 +999,32 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <h2 class="text-2xl font-black text-slate-300 uppercase tracking-widest">Support SLA</h2>
+                                        <h2 class="text-2xl font-black text-slate-300 uppercase tracking-widest">SUPPORT SLA</h2>
                                         <p class="text-base font-bold text-slate-800 mt-2 font-mono" id="print-sup-ref">REF: SUP-0000</p>
                                         <p class="text-sm text-slate-500 mt-1" id="print-sup-date">Effective: </p>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-6">
-                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Client Details</h3>
-                                    <div class="grid grid-cols-2 gap-6">
-                                        <div><span class="text-xs text-slate-500 block mb-1">Business Name</span><span class="text-xl font-black text-slate-800" id="print-sup-biz">---</span></div>
-                                        <div><span class="text-xs text-slate-500 block mb-1">Industry</span><span class="text-base font-bold text-slate-800" id="print-sup-sector">---</span></div>
-                                        <div class="col-span-2"><span class="text-xs text-slate-500 block mb-1">Physical Address</span><span class="text-base font-medium text-slate-800" id="print-sup-address">---</span></div>
+                                <div class="mt-6 grid grid-cols-2 gap-8">
+                                    <div>
+                                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Business Details</h3>
+                                        <p class="font-black text-slate-800 text-xl mb-1" id="print-sup-biz">---</p>
+                                        <p class="text-slate-600 text-base mb-1" id="print-sup-sector">---</p>
+                                        <p class="text-slate-500 text-sm" id="print-sup-address">---</p>
                                     </div>
-                                </div>
-
-                                <div class="mt-5">
-                                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Primary Contact</h3>
-                                    <div class="grid grid-cols-2 gap-6">
-                                        <div><span class="text-xs text-slate-500 block mb-1">Contact Person</span><span class="text-lg font-bold text-slate-800" id="print-sup-contact">---</span></div>
-                                        <div><span class="text-xs text-slate-500 block mb-1">Email / Phone</span><span class="text-base font-medium text-slate-800" id="print-sup-contact-details">---</span></div>
+                                    <div>
+                                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Primary Contact & Auth</h3>
+                                        <p class="font-black text-slate-800 text-xl mb-1" id="print-sup-contact">---</p>
+                                        <p class="text-slate-600 text-base mb-1" id="print-sup-contact-details">---</p>
+                                        <p class="text-slate-500 text-sm font-bold mt-1">Authorized Admin</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- MIDDLE SECTION (Expands) -->
+                            <!-- MIDDLE SECTION (Expands to fill vertical gap) -->
                             <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-hidden">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2 shrink-0">Service Level Agreement</h3>
-                                <div class="grid grid-cols-2 gap-8 mb-5 shrink-0">
+                                <div class="grid grid-cols-2 gap-6 mb-5 shrink-0">
                                     <div>
                                         <span class="text-xs font-bold text-slate-500 block mb-1">CONTRACT TYPE:</span>
                                         <p class="text-lg font-black text-slate-800" id="print-sup-contract">---</p>
@@ -1036,9 +1034,18 @@
                                         <p class="text-lg font-black text-slate-800" id="print-sup-devices">0 Devices</p>
                                     </div>
                                 </div>
+                                <div class="bg-blue-50 border-2 border-blue-100 p-4 rounded-lg mb-5 shrink-0">
+                                    <span class="text-xs font-bold text-blue-800 block mb-1">SCOPE OF SERVICES:</span>
+                                    <div id="print-sup-scope" class="flex flex-wrap gap-2 mt-2"></div>
+                                </div>
                                 <div class="flex-1 flex flex-col min-h-0">
-                                    <span class="text-xs font-bold text-slate-500 block mb-3 shrink-0">SCOPE OF SERVICES:</span>
-                                    <div id="print-sup-scope" class="flex flex-wrap gap-3 overflow-hidden"></div>
+                                    <span class="text-xs font-bold text-slate-500 block mb-2 shrink-0">CONTRACT NOTES:</span>
+                                    <p class="font-medium text-slate-800 bg-white p-4 border-2 border-slate-200 rounded-lg text-base flex-1 overflow-hidden" id="print-sup-notes">No additional notes.</p>
+                                </div>
+                                <div class="mt-5 pt-4 border-t-2 border-slate-200 grid grid-cols-2 gap-y-4 text-base font-medium text-slate-700 shrink-0">
+                                    <div class="flex items-center gap-3"><i class="fa-solid fa-square-check text-xl text-blue-500"></i> Active SLA Monitored</div>
+                                    <div class="flex items-center gap-3"><i class="fa-solid fa-square-check text-xl text-blue-500"></i> Tech Assigned</div>
+                                    <div class="flex items-center gap-3 col-span-2 text-blue-700 font-bold"><i class="fa-solid fa-square-check text-xl text-blue-500"></i> Client agrees to Standard Terms & Conditions</div>
                                 </div>
                             </div>
 
@@ -1130,7 +1137,8 @@
                 this.initKeyboardListener();
 
                 this.resetRef();
-                document.getElementById('a4-date').innerText = "Date Received: " + this.formatDate(Date.now());
+                this.documentA4Date = document.getElementById('a4-date');
+                if (this.documentA4Date) this.documentA4Date.innerText = "Date Received: " + this.formatDate(Date.now());
             }
 
             formatDate(timestamp) {
@@ -1665,6 +1673,12 @@
                 // Contract Print Variables
                 document.getElementById('print-sup-ref').innerText = `REF: SUP-${biz.refId}`;
                 document.getElementById('print-sup-date').innerText = `Effective: ${biz.startDate || this.formatDate(biz.timestamp)}`;
+                
+                const printNotesEl = document.getElementById('print-sup-notes');
+                if (printNotesEl) {
+                    printNotesEl.innerText = biz.notes || "No additional notes specified.";
+                }
+
                 this.syncSupportA4();
 
                 // Signature handling
