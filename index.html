@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <!-- ADDED HTML2PDF LIBRARY FOR DIRECT PDF DOWNLOADS -->
+    <!-- HTML2PDF LIBRARY FOR DIRECT SINGLE-PAGE PDF DOWNLOADS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -1836,17 +1836,25 @@ ${newNote}
             }
 
             // ==========================================
-            // DIRECT PDF DOWNLOAD LOGIC
+            // DIRECT PDF DOWNLOAD LOGIC (FORCED ONE PAGE)
             // ==========================================
             async printDocument(elementId) {
                 this.showLoading("Generating PDF...", 0);
                 const element = document.getElementById(elementId);
-                
+
                 // Temporarily remove preview scaling so html2pdf renders full quality A4 without whitespace
                 const isPreview = element.classList.contains('contract-preview');
                 if (isPreview) {
                     element.classList.remove('contract-preview');
                 }
+
+                // Force layout recalculation to get accurate full height
+                element.style.height = 'max-content';
+                
+                // Yield to browser to let styles apply
+                await new Promise(r => setTimeout(r, 50));
+                
+                const currentHeight = element.scrollHeight;
 
                 let filename = 'Contract.pdf';
                 if(elementId === 'support-a4-document') {
@@ -1857,16 +1865,26 @@ ${newNote}
                     filename = `Intake_${clientName.replace(/\s+/g, '_')}.pdf`;
                 }
 
+                // Setting unit to 'px' seamlessly locks the PDF size to the actual HTML element size
+                // 210mm in pixels at 96 DPI is roughly 794. 297mm is roughly 1123.
+                const pdfWidth = 794; 
+                const pdfHeight = Math.max(1123, currentHeight + 20); // Ensures it spans exactly ONE continuous page
+
                 const opt = {
                     margin:       0,
                     filename:     filename,
                     image:        { type: 'jpeg', quality: 1.0 },
-                    html2canvas:  { 
-                        scale: 2, 
-                        useCORS: true, 
-                        logging: false 
+                    html2canvas:  {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        scrollY: 0
                     },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    jsPDF: {
+                        unit: 'px',
+                        format: [pdfWidth, pdfHeight],
+                        orientation: 'portrait'
+                    }
                 };
 
                 try {
@@ -1876,6 +1894,7 @@ ${newNote}
                     this.showErrorMsg("Failed to generate PDF");
                 } finally {
                     // Restore scaling so the UI preview goes back to normal
+                    element.style.height = '';
                     if (isPreview) {
                         element.classList.add('contract-preview');
                     }
