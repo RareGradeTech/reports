@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <!-- ADDED HTML2PDF LIBRARY FOR DIRECT PDF DOWNLOADS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -100,10 +102,15 @@
         
         /* Exact A4 Dimensions & Flex Fill Layout */
         .a4-paper {
-            width: 210mm; height: 297mm; background: white; padding: 10mm 15mm 15mm 15mm;
+            width: 210mm; 
+            min-height: 297mm; /* Changed to min-height to prevent overlapping text */
+            height: max-content; 
+            background: white; 
+            padding: 10mm 15mm 15mm 15mm;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; overflow: hidden;
+            position: relative; 
+            overflow: visible; /* Changed to visible to ensure all content is fully rendered */
             box-sizing: border-box;
         }
         
@@ -122,19 +129,19 @@
             .print-section, .print-section * { visibility: visible !important; }
             .print-section { 
                 position: fixed !important; left: 0 !important; top: 0 !important; 
-                width: 210mm !important; height: 297mm !important; 
+                width: 210mm !important; min-height: 297mm !important; height: auto !important; 
                 margin: 0 !important; padding: 10mm 15mm 15mm 15mm !important; 
                 background: white !important; 
                 transform: none !important; /* CRITICAL: Removes scale to prevent overlap/spacing bugs */
                 box-shadow: none !important; 
                 display: flex !important; flex-direction: column !important; justify-content: space-between !important;
-                overflow: hidden !important; page-break-after: avoid !important; page-break-inside: avoid !important;
+                overflow: visible !important; page-break-after: auto !important; page-break-inside: auto !important;
                 box-sizing: border-box !important; z-index: 999999 !important;
             }
             .no-print, .no-print * { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             @page { size: A4 portrait; margin: 0 !important; }
-            html, body { width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; background: white !important; }
+            html, body { width: 210mm !important; min-height: 297mm !important; height: auto !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; background: white !important; }
         }
 
         /* --- TECH SUPPORT SPECIFIC STYLES --- */
@@ -445,7 +452,7 @@
                         </div>
 
                         <!-- MIDDLE SECTION (Expands to fill vertical gap) -->
-                        <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-hidden">
+                        <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-visible">
                             <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2 shrink-0">Device Audit & Fault Report</h3>
                             <div class="grid grid-cols-2 gap-6 mb-5 shrink-0">
                                 <div>
@@ -463,7 +470,7 @@
                             </div>
                             <div class="flex-1 flex flex-col min-h-0">
                                 <span class="text-xs font-bold text-slate-500 block mb-2 shrink-0">REPORTED ISSUE:</span>
-                                <p class="font-medium text-slate-800 bg-white p-4 border-2 border-slate-200 rounded-lg text-base flex-1 overflow-hidden" id="a4-issue">No issue described.</p>
+                                <p class="font-medium text-slate-800 bg-white p-4 border-2 border-slate-200 rounded-lg text-base flex-1 overflow-visible" id="a4-issue">No issue described.</p>
                             </div>
                             <div class="mt-5 pt-4 border-t-2 border-slate-200 grid grid-cols-2 gap-y-4 text-base font-medium text-slate-700 shrink-0">
                                 <div class="flex items-center gap-3"><i class="fa-regular fa-square text-xl text-slate-400" id="sq-power"></i> Powers On</div>
@@ -1022,7 +1029,7 @@
                             </div>
 
                             <!-- MIDDLE SECTION (Expands to fill vertical gap) -->
-                            <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-hidden">
+                            <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-visible">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2 shrink-0">Service Level Agreement</h3>
                                 <div class="grid grid-cols-2 gap-6 mb-5 shrink-0">
                                     <div>
@@ -1040,7 +1047,7 @@
                                 </div>
                                 <div class="flex-1 flex flex-col min-h-0">
                                     <span class="text-xs font-bold text-slate-500 block mb-2 shrink-0">CONTRACT NOTES:</span>
-                                    <p class="font-medium text-slate-800 bg-white p-4 border-2 border-slate-200 rounded-lg text-base flex-1 overflow-hidden" id="print-sup-notes">No additional notes.</p>
+                                    <p class="font-medium text-slate-800 bg-white p-4 border-2 border-slate-200 rounded-lg text-base flex-1 overflow-visible" id="print-sup-notes">No additional notes.</p>
                                 </div>
                                 <div class="mt-5 pt-4 border-t-2 border-slate-200 grid grid-cols-2 gap-y-4 text-base font-medium text-slate-700 shrink-0">
                                     <div class="flex items-center gap-3"><i class="fa-solid fa-square-check text-xl text-blue-500"></i> Active SLA Monitored</div>
@@ -1829,12 +1836,51 @@ ${newNote}
             }
 
             // ==========================================
-            // PRINT / EXPORT LOGIC
+            // DIRECT PDF DOWNLOAD LOGIC
             // ==========================================
-            printDocument(elementId) {
-                document.querySelectorAll('.a4-paper').forEach(el => el.classList.remove('print-section'));
-                document.getElementById(elementId).classList.add('print-section');
-                window.print();
+            async printDocument(elementId) {
+                this.showLoading("Generating PDF...", 0);
+                const element = document.getElementById(elementId);
+                
+                // Temporarily remove preview scaling so html2pdf renders full quality A4 without whitespace
+                const isPreview = element.classList.contains('contract-preview');
+                if (isPreview) {
+                    element.classList.remove('contract-preview');
+                }
+
+                let filename = 'Contract.pdf';
+                if(elementId === 'support-a4-document') {
+                    const bizName = document.getElementById('print-sup-biz').innerText || 'Business';
+                    filename = `Support_SLA_${bizName.replace(/\s+/g, '_')}.pdf`;
+                } else if(elementId === 'a4-document') {
+                    const clientName = document.getElementById('a4-name').innerText || 'Client';
+                    filename = `Intake_${clientName.replace(/\s+/g, '_')}.pdf`;
+                }
+
+                const opt = {
+                    margin:       0,
+                    filename:     filename,
+                    image:        { type: 'jpeg', quality: 1.0 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        logging: false 
+                    },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                try {
+                    await html2pdf().set(opt).from(element).save();
+                } catch (err) {
+                    console.error("PDF generation error:", err);
+                    this.showErrorMsg("Failed to generate PDF");
+                } finally {
+                    // Restore scaling so the UI preview goes back to normal
+                    if (isPreview) {
+                        element.classList.add('contract-preview');
+                    }
+                    this.hideLoading();
+                }
             }
 
             // ==========================================
