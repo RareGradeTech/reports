@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <!-- HTML2PDF LIBRARY FOR DIRECT SINGLE-PAGE PDF DOWNLOADS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -18,133 +17,73 @@
             --brand-accent: #2563eb;
             --bg-body: #f8fafc;
             --border-subtle: #e2e8f0;
+            --wa-green: #25D366;
+            --wa-dark: #128C7E;
+            --wa-light: #DCF8C6;
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--brand-primary); overflow: hidden; }
 
         /* --- GLOBAL SPINNER OVERLAY --- */
         #global-spinner {
-            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px);
+            position: fixed; inset: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px);
             z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         #global-spinner.active { opacity: 1; pointer-events: all; }
-        .spinner-ring {
-            width: 60px; height: 60px; border: 4px solid rgba(37, 99, 235, 0.1); border-top-color: #3b82f6;
-            border-radius: 50%; animation: spin 1s linear infinite;
-        }
+        .spinner-ring { width: 60px; height: 60px; border: 4px solid rgba(37,99,235,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* --- PIN LOCK SCREEN --- */
         #lock-screen {
             position: fixed; inset: 0; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             z-index: 50000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: transform 0.6s cubic-bezier(0.8, 0, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.8,0,0.2,1);
         }
         #lock-screen.unlocked { transform: translateY(-100%); }
         .pin-display { display: flex; gap: 16px; margin: 30px 0; }
-        .pin-dot {
-            width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1;
-            transition: all 0.2s; background: transparent;
-        }
-        .pin-dot.filled { background: #2563eb; border-color: #2563eb; box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); }
-        .pin-dot.error { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
+        .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1; transition: all 0.2s; background: transparent; }
+        .pin-dot.filled { background: #2563eb; border-color: #2563eb; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+        .pin-dot.error { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.3); }
         .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 320px; width: 100%; }
-        .num-key {
-            width: 75px; height: 75px; margin: 0 auto; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 600; color: #0f172a;
-            background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            cursor: pointer; transition: all 0.1s; user-select: none;
-        }
+        .num-key { width: 75px; height: 75px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 600; color: #0f172a; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.1s; user-select: none; }
         .num-key:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .num-key:active { transform: scale(0.92); background: #e2e8f0; }
         .shake { animation: shake 0.5s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-        }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 50%{transform:translateX(10px)} 75%{transform:translateX(-10px)} }
 
         /* --- UI COMPONENTS --- */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            border: 1px solid var(--border-subtle); border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        }
-        .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px;
-            color: #64748b; font-weight: 500; transition: all 0.2s; cursor: pointer;
-        }
+        .glass-panel { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid var(--border-subtle); border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05),0 2px 4px -1px rgba(0,0,0,0.03); }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: #64748b; font-weight: 500; transition: all 0.2s; cursor: pointer; }
         .nav-item:hover { background: #f1f5f9; color: var(--brand-primary); }
         .nav-item.active { background: var(--brand-primary); color: white; }
-        .custom-input {
-            width: 100%; padding: 12px 16px; background: #f8fafc; border: 1px solid #cbd5e1;
-            border-radius: 10px; font-size: 14px; transition: all 0.2s; outline: none;
-        }
-        .custom-input:focus { border-color: var(--brand-accent); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .custom-input { width: 100%; padding: 12px 16px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; transition: all 0.2s; outline: none; }
+        .custom-input:focus { border-color: var(--brand-accent); background: white; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 
         /* --- MODAL --- */
-        .system-modal {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
-            z-index: 40000; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 20px;
-        }
+        .system-modal { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 40000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 20px; }
         .system-modal.active { opacity: 1; pointer-events: all; }
-        .modal-content {
-            background: white; width: 100%; max-width: 1000px; max-height: 90vh;
-            border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-            transform: translateY(20px); transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden;
-        }
+        .modal-content { background: white; width: 100%; max-width: 1000px; max-height: 90vh; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden; }
         .system-modal.active .modal-content { transform: translateY(0); }
 
-        /* --- A4 PREVIEW CANVAS & PRINT --- */
+        /* --- A4 PREVIEW --- */
         .a4-wrapper { background: #e2e8f0; padding: 40px; display: flex; justify-content: center; overflow-y: auto; height: 100%; }
-        
-        /* Exact A4 Dimensions & Flex Fill Layout */
-        .a4-paper {
-            width: 210mm; 
-            min-height: 297mm; /* Changed to min-height to prevent overlapping text */
-            height: max-content; 
-            background: white; 
-            padding: 10mm 15mm 15mm 15mm;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; 
-            overflow: visible; /* Changed to visible to ensure all content is fully rendered */
-            box-sizing: border-box;
-        }
-        
-        .contract-preview {
-            transform: scale(0.72);
-            transform-origin: top center;
-            margin-bottom: -83mm; /* Fixes empty space on screen caused by scaling */
-        }
+        .a4-paper { width: 210mm; min-height: 297mm; height: max-content; background: white; padding: 10mm 15mm 15mm 15mm; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: visible; box-sizing: border-box; }
+        .contract-preview { transform: scale(0.72); transform-origin: top center; margin-bottom: -83mm; }
 
         .sig-pad { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: crosshair; width: 100%; height: 120px; touch-action: none; }
         .support-sig-pad { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: crosshair; width: 100%; touch-action: none; }
 
-        /* --- STRICT NO-OVERLAP PRINT CSS --- */
         @media print {
             body * { visibility: hidden; }
             .print-section, .print-section * { visibility: visible !important; }
-            .print-section { 
-                position: fixed !important; left: 0 !important; top: 0 !important; 
-                width: 210mm !important; min-height: 297mm !important; height: auto !important; 
-                margin: 0 !important; padding: 10mm 15mm 15mm 15mm !important; 
-                background: white !important; 
-                transform: none !important; /* CRITICAL: Removes scale to prevent overlap/spacing bugs */
-                box-shadow: none !important; 
-                display: flex !important; flex-direction: column !important; justify-content: space-between !important;
-                overflow: visible !important; page-break-after: auto !important; page-break-inside: auto !important;
-                box-sizing: border-box !important; z-index: 999999 !important;
-            }
+            .print-section { position: fixed !important; left: 0 !important; top: 0 !important; width: 210mm !important; min-height: 297mm !important; height: auto !important; margin: 0 !important; padding: 10mm 15mm 15mm 15mm !important; background: white !important; transform: none !important; box-shadow: none !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; overflow: visible !important; page-break-after: auto !important; page-break-inside: auto !important; box-sizing: border-box !important; z-index: 999999 !important; }
             .no-print, .no-print * { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             @page { size: A4 portrait; margin: 0 !important; }
             html, body { width: 210mm !important; min-height: 297mm !important; height: auto !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; background: white !important; }
         }
 
-        /* --- TECH SUPPORT SPECIFIC STYLES --- */
+        /* --- TECH SUPPORT STYLES --- */
         .business-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; cursor: pointer; }
         .business-card:hover { border-color: #93c5fd; box-shadow: 0 4px 12px rgba(37,99,235,0.08); }
         .device-row { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
@@ -152,16 +91,12 @@
         .tab-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
 
         /* Image lightbox */
-        #lightbox {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(10px);
-            z-index: 999999; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(10px); z-index: 999999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         #lightbox.active { opacity: 1; pointer-events: all; }
         #lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
 
         /* Visit Log Styling */
-        .visit-log-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-size: 12px; transition: all 0.2s; }
+        .visit-log-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-size: 12px; transition: all 0.2s; }
         .visit-log-card:hover { border-color: #10b981; box-shadow: 0 4px 10px rgba(16,185,129,0.05); }
         .log-badge { background: #ecfdf5; color: #065f46; font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; border: 1px solid #d1fae5; }
         .log-field { display: flex; flex-direction: column; margin-bottom: 6px; }
@@ -170,8 +105,101 @@
         .checklist-item { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: #475569; }
         .sig-link { color: #2563eb; text-decoration: underline; font-size: 10px; font-weight: 600; cursor: pointer; }
 
-        .sup-gallery-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 2px solid #d1fae5; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .sup-gallery-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 2px solid #d1fae5; cursor: pointer; transition: all 0.3s cubic-bezier(0.16,1,0.3,1); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .sup-gallery-img:hover { transform: scale(1.04); box-shadow: 0 8px 20px rgba(16,185,129,0.2); border-color: #10b981; }
+
+        /* =============================
+           WHATSAPP MODAL STYLES
+           ============================= */
+        #whatsapp-modal { z-index: 60000; }
+        #whatsapp-modal .modal-content { max-width: 680px; }
+
+        .wa-header {
+            background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            shrink: 0;
+        }
+
+        .wa-template-btn {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+            line-height: 1.3;
+        }
+        .wa-template-btn:hover { border-color: #25D366; background: #f0fdf4; color: #065f46; }
+        .wa-template-btn.selected { border-color: #25D366; background: #f0fdf4; color: #065f46; box-shadow: 0 0 0 3px rgba(37,211,102,0.12); }
+        .wa-template-btn .template-icon { font-size: 16px; margin-bottom: 4px; display: block; }
+        .wa-template-btn .template-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; display: block; }
+        .wa-template-btn .template-desc { font-size: 10px; color: #64748b; font-weight: 500; display: block; margin-top: 2px; }
+        .wa-template-btn.selected .template-desc { color: #10b981; }
+
+        .wa-chat-bubble {
+            background: #DCF8C6;
+            border-radius: 16px 16px 4px 16px;
+            padding: 14px 16px;
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: #1a1a2e;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            white-space: pre-wrap;
+            font-family: 'Inter', sans-serif;
+        }
+        .wa-chat-preview {
+            background: #ece5dd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath fill='%23c9bba4' fill-opacity='0.15' d='M0 0h10v10H0zm20 0h10v10H20zM0 20h10v10H0zm20 20h10v10H20z'/%3E%3C/svg%3E");
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .wa-send-btn {
+            background: linear-gradient(135deg, #128C7E, #25D366);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            letter-spacing: 0.02em;
+        }
+        .wa-send-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(37,211,102,0.3); }
+        .wa-send-btn:active { transform: translateY(0); }
+        .wa-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* WA Button variants for use inline */
+        .btn-wa-inline {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #25D366; color: white;
+            border: none; border-radius: 7px;
+            padding: 5px 10px; font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .btn-wa-inline:hover { background: #128C7E; transform: scale(1.03); }
+
+        .btn-wa-modal {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0;
+            border-radius: 9px; padding: 8px 14px; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .btn-wa-modal:hover { background: #25D366; color: white; border-color: #25D366; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -190,6 +218,79 @@
     <div id="lightbox" onclick="app.closeLightbox()">
         <button onclick="app.closeLightbox()" class="absolute top-6 right-6 text-white/70 hover:text-white text-3xl transition-colors z-10"><i class="fa-solid fa-xmark"></i></button>
         <img id="lightbox-img" src="" alt="Evidence">
+    </div>
+
+    <!-- ======================================================
+         WHATSAPP MESSAGE MODAL
+         ====================================================== -->
+    <div id="whatsapp-modal" class="system-modal">
+        <div class="modal-content" style="max-width:680px; max-height:88vh;">
+            <!-- WA Header -->
+            <div class="wa-header shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center">
+                        <i class="fa-brands fa-whatsapp text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-black text-lg leading-tight">WhatsApp Client</h2>
+                        <p class="text-white/70 text-xs font-medium" id="wa-modal-subtitle">Select a message template</p>
+                    </div>
+                </div>
+                <button onclick="app.closeModal('whatsapp-modal')" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-5">
+
+                <!-- Client Info Strip -->
+                <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4 shadow-sm">
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-black text-xl" id="wa-client-avatar">?</div>
+                    <div class="flex-1">
+                        <p class="font-bold text-slate-800 text-base" id="wa-client-name">Client Name</p>
+                        <p class="text-sm text-slate-500 font-mono font-medium" id="wa-client-phone">---</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold uppercase">Ref ID</p>
+                        <p class="font-mono font-bold text-blue-600 text-sm" id="wa-client-ref">RGT-0000</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold uppercase">Status</p>
+                        <div id="wa-client-status-badge"></div>
+                    </div>
+                </div>
+
+                <!-- Template Selector -->
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Choose Message Template</p>
+                    <div class="grid grid-cols-3 gap-2" id="wa-templates-grid">
+                        <!-- Templates injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Message Preview -->
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Message Preview</p>
+                    <div class="wa-chat-preview">
+                        <div class="wa-chat-bubble" id="wa-message-preview">Select a template above to preview your message.</div>
+                        <p class="text-right text-[10px] text-slate-400 mt-1">● Sent via Rare Grade Tech Portal</p>
+                    </div>
+
+                    <!-- Editable message area -->
+                    <textarea id="wa-message-editable" class="custom-input h-28 resize-none text-sm font-mono" placeholder="Message will appear here. You can edit before sending." oninput="app.onWaMessageEdit()"></textarea>
+                    <p class="text-[10px] text-slate-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-circle-info text-blue-400"></i> You can freely edit the message before sending.</p>
+                </div>
+            </div>
+
+            <!-- Send Footer -->
+            <div class="p-5 border-t border-slate-200 bg-white shrink-0 space-y-3">
+                <button class="wa-send-btn" id="wa-send-btn" onclick="app.sendWhatsApp()" disabled>
+                    <i class="fa-brands fa-whatsapp text-xl"></i>
+                    Open WhatsApp & Send
+                </button>
+                <p class="text-center text-xs text-slate-400">This will open WhatsApp on your device with the message pre-filled. The client's number must be saved or entered correctly.</p>
+            </div>
+        </div>
     </div>
 
     <div id="lock-screen">
@@ -228,31 +329,17 @@
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-2">Hardware Division</div>
-            <div class="nav-item active" onclick="app.navigate('dashboard')" id="nav-dashboard">
-                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
-            </div>
-            <div class="nav-item" onclick="app.navigate('registry')" id="nav-registry">
-                <i class="fa-solid fa-users w-5 text-center"></i> Client Registry
-            </div>
-            <div class="nav-item" onclick="app.navigate('intake')" id="nav-intake">
-                <i class="fa-solid fa-clipboard-list w-5 text-center"></i> Device Intake
-            </div>
+            <div class="nav-item active" onclick="app.navigate('dashboard')" id="nav-dashboard"><i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard</div>
+            <div class="nav-item" onclick="app.navigate('registry')" id="nav-registry"><i class="fa-solid fa-users w-5 text-center"></i> Client Registry</div>
+            <div class="nav-item" onclick="app.navigate('intake')" id="nav-intake"><i class="fa-solid fa-clipboard-list w-5 text-center"></i> Device Intake</div>
 
             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-6 border-t border-slate-100 pt-5">Software Division</div>
-            <div class="nav-item" onclick="app.navigate('soft-registry')" id="nav-soft-registry">
-                <i class="fa-solid fa-code-branch w-5 text-center"></i> Project Registry
-            </div>
-            <div class="nav-item" onclick="app.navigate('soft-intake')" id="nav-soft-intake">
-                <i class="fa-solid fa-laptop-code w-5 text-center"></i> Software Intake
-            </div>
+            <div class="nav-item" onclick="app.navigate('soft-registry')" id="nav-soft-registry"><i class="fa-solid fa-code-branch w-5 text-center"></i> Project Registry</div>
+            <div class="nav-item" onclick="app.navigate('soft-intake')" id="nav-soft-intake"><i class="fa-solid fa-laptop-code w-5 text-center"></i> Software Intake</div>
 
             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4 mt-6 border-t border-slate-100 pt-5">Technical Support</div>
-            <div class="nav-item" onclick="app.navigate('support-registry')" id="nav-support-registry">
-                <i class="fa-solid fa-building w-5 text-center"></i> Business Registry
-            </div>
-            <div class="nav-item" onclick="app.navigate('support-intake')" id="nav-support-intake">
-                <i class="fa-solid fa-screwdriver-wrench w-5 text-center"></i> Add Business
-            </div>
+            <div class="nav-item" onclick="app.navigate('support-registry')" id="nav-support-registry"><i class="fa-solid fa-building w-5 text-center"></i> Business Registry</div>
+            <div class="nav-item" onclick="app.navigate('support-intake')" id="nav-support-intake"><i class="fa-solid fa-screwdriver-wrench w-5 text-center"></i> Add Business</div>
         </nav>
 
         <div class="p-4 border-t border-slate-100">
@@ -310,22 +397,17 @@
                 <div class="p-5 border-b border-slate-200 bg-white">
                     <h3 class="font-bold text-slate-800">Recent Hardware Intake Stream</h3>
                 </div>
-                <div class="p-0">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Client</th>
-                                <th class="p-4 font-medium">Device</th>
-                                <th class="p-4 font-medium">Time Logged</th>
-                                <th class="p-4 font-medium">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dash-recent-table" class="text-sm">
-                            <tr><td colspan="5" class="p-8 text-center text-slate-400">Loading data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead><tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                        <th class="p-4 font-medium">Ref ID</th>
+                        <th class="p-4 font-medium">Client</th>
+                        <th class="p-4 font-medium">Device</th>
+                        <th class="p-4 font-medium">Time Logged</th>
+                        <th class="p-4 font-medium">Status</th>
+                        <th class="p-4 font-medium">Notify</th>
+                    </tr></thead>
+                    <tbody id="dash-recent-table" class="text-sm"><tr><td colspan="6" class="p-8 text-center text-slate-400">Loading data...</td></tr></tbody>
+                </table>
             </div>
         </section>
 
@@ -341,16 +423,14 @@
                 </div>
                 <div class="max-h-[70vh] overflow-y-auto">
                     <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Client Details</th>
-                                <th class="p-4 font-medium">Device / Issue</th>
-                                <th class="p-4 font-medium">Dates & Duration</th>
-                                <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium text-right">Action</th>
-                            </tr>
-                        </thead>
+                        <thead><tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                            <th class="p-4 font-medium">Ref ID</th>
+                            <th class="p-4 font-medium">Client Details</th>
+                            <th class="p-4 font-medium">Device / Issue</th>
+                            <th class="p-4 font-medium">Dates & Duration</th>
+                            <th class="p-4 font-medium">Status</th>
+                            <th class="p-4 font-medium text-right">Action</th>
+                        </tr></thead>
                         <tbody id="registry-table" class="text-sm"></tbody>
                     </table>
                 </div>
@@ -369,7 +449,7 @@
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Client Details</label>
                             <input type="text" id="in-name" class="custom-input" placeholder="Full Name" oninput="app.syncA4()">
-                            <input type="tel" id="in-phone" class="custom-input" placeholder="Phone Number" oninput="app.syncA4()">
+                            <input type="tel" id="in-phone" class="custom-input" placeholder="Phone Number (e.g. 082 123 4567)" oninput="app.syncA4()">
                             <input type="email" id="in-email" class="custom-input" placeholder="Email Address (Optional)" oninput="app.syncA4()">
                         </div>
                         <div class="space-y-3">
@@ -390,18 +470,9 @@
                             <textarea id="in-issue" class="custom-input h-20 resize-none" placeholder="Reported Fault / Symptoms..." oninput="app.syncA4()"></textarea>
                         </div>
                         <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Device Powers On</span>
-                            </label>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-cracks" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Screen/Body Cracks Noted</span>
-                            </label>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="chk-data" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()">
-                                <span class="text-sm font-medium text-slate-700">Client Waives Data Loss</span>
-                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="chk-power" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()"><span class="text-sm font-medium text-slate-700">Device Powers On</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="chk-cracks" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()"><span class="text-sm font-medium text-slate-700">Screen/Body Cracks Noted</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="chk-data" class="w-4 h-4 text-blue-600 rounded" onchange="app.syncA4()"><span class="text-sm font-medium text-slate-700">Client Waives Data Loss</span></label>
                         </div>
                         <div class="space-y-3 relative">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex justify-between">Client Signature <button onclick="app.clearSignature()" class="text-red-500 hover:underline">Clear</button></label>
@@ -415,10 +486,7 @@
 
                 <div class="flex-1 a4-wrapper relative">
                     <button onclick="app.printDocument('a4-document')" class="no-print absolute top-6 right-8 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold transition-colors z-10"><i class="fa-solid fa-file-pdf"></i> Print / Save PDF</button>
-                    
-                    <!-- Hardware Intake A4 Document -->
                     <div id="a4-document" class="a4-paper contract-preview relative">
-                        <!-- TOP SECTION (Header + Client) -->
                         <div class="shrink-0">
                             <div class="flex justify-between items-start border-b-4 border-slate-800 pb-6">
                                 <div class="flex items-center gap-5">
@@ -435,7 +503,6 @@
                                     <p class="text-sm text-slate-500 mt-1" id="a4-date">Date Received: </p>
                                 </div>
                             </div>
-                            
                             <div class="mt-6 grid grid-cols-2 gap-8">
                                 <div>
                                     <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Client Details</h3>
@@ -450,19 +517,11 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- MIDDLE SECTION (Expands to fill vertical gap) -->
                         <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-visible">
                             <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2 shrink-0">Device Audit & Fault Report</h3>
                             <div class="grid grid-cols-2 gap-6 mb-5 shrink-0">
-                                <div>
-                                    <span class="text-xs font-bold text-slate-500 block mb-1">DEVICE / MODEL:</span>
-                                    <p class="text-lg font-black text-slate-800" id="a4-device">Not specified</p>
-                                </div>
-                                <div>
-                                    <span class="text-xs font-bold text-slate-500 block mb-1">DEVICE COLOR:</span>
-                                    <p class="text-lg font-black text-slate-800" id="a4-color">Not specified</p>
-                                </div>
+                                <div><span class="text-xs font-bold text-slate-500 block mb-1">DEVICE / MODEL:</span><p class="text-lg font-black text-slate-800" id="a4-device">Not specified</p></div>
+                                <div><span class="text-xs font-bold text-slate-500 block mb-1">DEVICE COLOR:</span><p class="text-lg font-black text-slate-800" id="a4-color">Not specified</p></div>
                             </div>
                             <div class="bg-blue-50 border-2 border-blue-100 p-4 rounded-lg mb-5 shrink-0">
                                 <span class="text-xs font-bold text-blue-800 block mb-1">CHARGER LOGGED:</span>
@@ -478,11 +537,9 @@
                                 <div class="flex items-center gap-3 col-span-2 text-blue-700 font-bold"><i class="fa-regular fa-square text-xl text-blue-400" id="sq-data"></i> Client accepts data loss liability</div>
                             </div>
                         </div>
-
-                        <!-- BOTTOM SECTION -->
                         <div class="mt-6 pt-5 border-t-2 border-slate-800 shrink-0">
                             <div class="bg-slate-100 p-4 rounded-lg text-xs text-slate-600 mb-6 leading-relaxed text-justify">
-                                <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss. Devices abandoned for >90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition and accessories noted above.
+                                <strong>TERMS OF SERVICE:</strong> Rare Grade Tech is not liable for data loss. Devices abandoned for &gt;90 days will be sold to defray costs. By signing below, the client agrees to the diagnostic fees and confirms the physical condition and accessories noted above.
                             </div>
                             <div class="flex justify-between items-end pb-2">
                                 <div class="w-1/2 pr-10">
@@ -514,17 +571,15 @@
                 </div>
                 <div class="max-h-[70vh] overflow-y-auto">
                     <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                <th class="p-4 font-medium">Ref ID</th>
-                                <th class="p-4 font-medium">Project Name</th>
-                                <th class="p-4 font-medium">Client / Company</th>
-                                <th class="p-4 font-medium">Platform</th>
-                                <th class="p-4 font-medium">Deadline</th>
-                                <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
+                        <thead><tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                            <th class="p-4 font-medium">Ref ID</th>
+                            <th class="p-4 font-medium">Project Name</th>
+                            <th class="p-4 font-medium">Client / Company</th>
+                            <th class="p-4 font-medium">Platform</th>
+                            <th class="p-4 font-medium">Deadline</th>
+                            <th class="p-4 font-medium">Status</th>
+                            <th class="p-4 font-medium text-right">Actions</th>
+                        </tr></thead>
                         <tbody id="soft-registry-table" class="text-sm"></tbody>
                     </table>
                 </div>
@@ -574,9 +629,7 @@
             </div>
         </section>
 
-        <!-- ======================================== -->
         <!-- TECHNICAL SUPPORT REGISTRY -->
-        <!-- ======================================== -->
         <section id="view-support-registry" class="flex-1 overflow-y-auto p-8 hidden">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -593,37 +646,22 @@
                     </button>
                 </div>
             </div>
-
             <div id="support-businesses-grid" class="grid grid-cols-3 gap-5">
-                <div class="col-span-3 text-center text-slate-400 py-16">
-                    <i class="fa-solid fa-building text-4xl mb-3 opacity-30"></i>
-                    <p>No businesses registered yet.</p>
-                </div>
+                <div class="col-span-3 text-center text-slate-400 py-16"><i class="fa-solid fa-building text-4xl mb-3 opacity-30"></i><p>No businesses registered yet.</p></div>
             </div>
         </section>
 
-        <!-- ======================================== -->
-        <!-- TECHNICAL SUPPORT INTAKE (ADD BUSINESS) -->
-        <!-- ======================================== -->
+        <!-- TECHNICAL SUPPORT INTAKE -->
         <section id="view-support-intake" class="flex-1 overflow-y-auto p-8 hidden">
             <div class="max-w-5xl mx-auto">
                 <div class="glass-panel overflow-hidden">
                     <div class="p-6 border-b border-slate-200 bg-white flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600">
-                            <i class="fa-solid fa-building"></i>
-                        </div>
-                        <div>
-                            <h2 class="font-bold text-xl text-slate-800">Register Technical Support Client</h2>
-                            <p class="text-sm text-slate-500">Log a business for regular IT maintenance & support.</p>
-                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600"><i class="fa-solid fa-building"></i></div>
+                        <div><h2 class="font-bold text-xl text-slate-800">Register Technical Support Client</h2><p class="text-sm text-slate-500">Log a business for regular IT maintenance & support.</p></div>
                     </div>
-
                     <div class="p-8 space-y-8 bg-slate-50">
-                        <!-- Business Info -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
-                                <i class="fa-solid fa-briefcase text-violet-500"></i> Business Information
-                            </h3>
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2"><i class="fa-solid fa-briefcase text-violet-500"></i> Business Information</h3>
                             <div class="grid grid-cols-2 gap-4">
                                 <div><label class="text-xs text-slate-500 font-medium">Business / Company Name *</label><input type="text" id="sup-biz-name" class="custom-input mt-1" placeholder="e.g. Limpopo Legal Services"></div>
                                 <div><label class="text-xs text-slate-500 font-medium">Industry / Sector</label><input type="text" id="sup-biz-sector" class="custom-input mt-1" placeholder="e.g. Legal, Retail, Education"></div>
@@ -632,8 +670,7 @@
                                 <div><label class="text-xs text-slate-500 font-medium">Physical Address</label><input type="text" id="sup-biz-address" class="custom-input mt-1" placeholder="Street, City, Province"></div>
                                 <div><label class="text-xs text-slate-500 font-medium">Contract Start Date</label><input type="date" id="sup-biz-start-date" class="custom-input mt-1"></div>
                             </div>
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium">Support Contract Type</label>
+                            <div><label class="text-xs text-slate-500 font-medium">Support Contract Type</label>
                                 <select id="sup-biz-contract" class="custom-input mt-1">
                                     <option value="Monthly Maintenance">Monthly Maintenance</option>
                                     <option value="Quarterly Maintenance">Quarterly Maintenance</option>
@@ -643,12 +680,8 @@
                                 </select>
                             </div>
                         </div>
-
-                        <!-- Primary Contact -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
-                                <i class="fa-solid fa-user-tie text-violet-500"></i> Primary Contact Person
-                            </h3>
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2"><i class="fa-solid fa-user-tie text-violet-500"></i> Primary Contact Person</h3>
                             <div class="grid grid-cols-3 gap-4">
                                 <div><label class="text-xs text-slate-500 font-medium">Contact Name *</label><input type="text" id="sup-contact-name" class="custom-input mt-1" placeholder="Full Name"></div>
                                 <div><label class="text-xs text-slate-500 font-medium">Position / Title</label><input type="text" id="sup-contact-title" class="custom-input mt-1" placeholder="e.g. IT Manager, CEO"></div>
@@ -659,70 +692,32 @@
                                 <div><label class="text-xs text-slate-500 font-medium">WhatsApp Number (if different)</label><input type="tel" id="sup-contact-wa" class="custom-input mt-1" placeholder="WhatsApp"></div>
                             </div>
                         </div>
-
-                        <!-- Devices Under Maintenance -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                                    <i class="fa-solid fa-desktop text-violet-500"></i> Devices Under Maintenance
-                                </h3>
-                                <button onclick="app.addDeviceRow()" class="text-xs bg-violet-50 text-violet-700 hover:bg-violet-100 px-3 py-1.5 rounded-lg font-bold transition border border-violet-200 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-plus"></i> Add Device
-                                </button>
+                                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-desktop text-violet-500"></i> Devices Under Maintenance</h3>
+                                <button onclick="app.addDeviceRow()" class="text-xs bg-violet-50 text-violet-700 hover:bg-violet-100 px-3 py-1.5 rounded-lg font-bold transition border border-violet-200 flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Add Device</button>
                             </div>
                             <div id="devices-container" class="space-y-3"></div>
                             <p class="text-xs text-slate-400 italic" id="no-devices-msg">Click "Add Device" to log devices under this maintenance contract.</p>
                         </div>
-
-                        <!-- Scope of Work -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
-                                <i class="fa-solid fa-list-check text-violet-500"></i> Scope of Maintenance Services
-                            </h3>
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2"><i class="fa-solid fa-list-check text-violet-500"></i> Scope of Maintenance Services</h3>
                             <div class="grid grid-cols-3 gap-3">
-                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
-                                    <input type="checkbox" id="sup-scope-hardware" class="text-violet-600 w-4 h-4">
-                                    <span class="text-sm font-medium text-slate-700">Hardware Repairs</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
-                                    <input type="checkbox" id="sup-scope-software" class="text-violet-600 w-4 h-4">
-                                    <span class="text-sm font-medium text-slate-700">Software Support</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
-                                    <input type="checkbox" id="sup-scope-network" class="text-violet-600 w-4 h-4">
-                                    <span class="text-sm font-medium text-slate-700">Network / LAN</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
-                                    <input type="checkbox" id="sup-scope-backup" class="text-violet-600 w-4 h-4">
-                                    <span class="text-sm font-medium text-slate-700">Backup & Recovery</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
-                                    <input type="checkbox" id="sup-scope-security" class="text-violet-600 w-4 h-4">
-                                    <span class="text-sm font-medium text-slate-700">Security & Antivirus</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition">
-                                    <input type="checkbox" id="sup-scope-remote" class="text-violet-600 w-4 h-4">
-                                    <span class="text-sm font-medium text-slate-700">Remote Support</span>
-                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition"><input type="checkbox" id="sup-scope-hardware" class="text-violet-600 w-4 h-4"><span class="text-sm font-medium text-slate-700">Hardware Repairs</span></label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition"><input type="checkbox" id="sup-scope-software" class="text-violet-600 w-4 h-4"><span class="text-sm font-medium text-slate-700">Software Support</span></label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition"><input type="checkbox" id="sup-scope-network" class="text-violet-600 w-4 h-4"><span class="text-sm font-medium text-slate-700">Network / LAN</span></label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition"><input type="checkbox" id="sup-scope-backup" class="text-violet-600 w-4 h-4"><span class="text-sm font-medium text-slate-700">Backup & Recovery</span></label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition"><input type="checkbox" id="sup-scope-security" class="text-violet-600 w-4 h-4"><span class="text-sm font-medium text-slate-700">Security & Antivirus</span></label>
+                                <label class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:border-violet-300 transition"><input type="checkbox" id="sup-scope-remote" class="text-violet-600 w-4 h-4"><span class="text-sm font-medium text-slate-700">Remote Support</span></label>
                             </div>
-                            <div><label class="text-xs text-slate-500 font-medium">Additional Notes / Special Requirements</label>
-                                <textarea id="sup-notes" class="custom-input mt-1 h-24 resize-none" placeholder="Describe any special requirements, SLA terms, or important notes..."></textarea>
-                            </div>
+                            <div><label class="text-xs text-slate-500 font-medium">Additional Notes / Special Requirements</label><textarea id="sup-notes" class="custom-input mt-1 h-24 resize-none" placeholder="Describe any special requirements, SLA terms, or important notes..."></textarea></div>
                         </div>
-
-                        <!-- Client Authorisation & Signature -->
                         <div class="bg-white p-6 rounded-xl border border-violet-200 shadow-sm space-y-4">
-                            <h3 class="text-xs font-bold text-violet-700 uppercase tracking-wider border-b border-violet-100 pb-3 flex items-center gap-2">
-                                <i class="fa-solid fa-pen-to-square text-violet-500"></i> Client Authorisation & Signature
-                            </h3>
-                            <div class="bg-violet-50 border border-violet-100 rounded-lg p-4 text-sm text-violet-800 leading-relaxed">
-                                <strong>Authorisation Statement:</strong> By signing below, the authorised representative of the above-named business confirms that Rare Grade Tech (Pty) Ltd is hereby appointed to provide IT maintenance and technical support services as described. The client acknowledges the service scope, agrees to Rare Grade Tech's standard terms and conditions, and authorises access to the listed devices for maintenance purposes.
-                            </div>
+                            <h3 class="text-xs font-bold text-violet-700 uppercase tracking-wider border-b border-violet-100 pb-3 flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-violet-500"></i> Client Authorisation & Signature</h3>
+                            <div class="bg-violet-50 border border-violet-100 rounded-lg p-4 text-sm text-violet-800 leading-relaxed"><strong>Authorisation Statement:</strong> By signing below, the authorised representative of the above-named business confirms that Rare Grade Tech (Pty) Ltd is hereby appointed to provide IT maintenance and technical support services as described.</div>
                             <div class="grid grid-cols-2 gap-6">
-                                <div><label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Authorised Signatory Name</label>
-                                    <input type="text" id="sup-sig-name" class="custom-input" placeholder="Full name of person signing"></div>
-                                <div><label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Capacity / Designation</label>
-                                    <input type="text" id="sup-sig-title" class="custom-input" placeholder="e.g. Managing Director, Owner"></div>
+                                <div><label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Authorised Signatory Name</label><input type="text" id="sup-sig-name" class="custom-input" placeholder="Full name of person signing"></div>
+                                <div><label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Capacity / Designation</label><input type="text" id="sup-sig-title" class="custom-input" placeholder="e.g. Managing Director, Owner"></div>
                             </div>
                             <div>
                                 <div class="flex justify-between items-center mb-2">
@@ -732,7 +727,6 @@
                                 <canvas id="sup-sig-canvas" class="support-sig-pad h-32 block" style="height:128px;"></canvas>
                             </div>
                         </div>
-
                         <button onclick="app.submitSupportIntake()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base">
                             <i class="fa-solid fa-building-circle-check"></i> Register Business & Save Contract
                         </button>
@@ -741,45 +735,34 @@
             </div>
         </section>
 
-        <!-- ======================================== -->
         <!-- HARDWARE ADMIN MODAL -->
-        <!-- ======================================== -->
         <div id="update-modal" class="system-modal">
             <div class="modal-content flex flex-col h-full">
                 <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
                     <h2 class="text-xl font-bold text-slate-800">Repair Record Control</h2>
-                    <div class="flex items-center">
-                        <button onclick="app.deleteRecord()" class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-colors mr-3" title="Delete Record"><i class="fa-solid fa-trash"></i></button>
+                    <div class="flex items-center gap-2">
+                        <!-- WhatsApp button in modal -->
+                        <button onclick="app.openWhatsAppFromModal()" class="btn-wa-modal" title="Send WhatsApp to client">
+                            <i class="fa-brands fa-whatsapp text-base"></i> WhatsApp Client
+                        </button>
+                        <button onclick="app.deleteRecord()" class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-colors" title="Delete Record"><i class="fa-solid fa-trash"></i></button>
                         <button onclick="app.closeModal('update-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
                 <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
                     <div class="w-full md:w-3/5 p-6 overflow-y-auto border-r border-slate-100 bg-slate-50">
                         <div class="flex justify-between items-start mb-6">
-                            <div>
-                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Reference ID</p>
-                                <p class="font-mono text-lg font-bold text-blue-600" id="mod-ref">---</p>
-                            </div>
+                            <div><p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Reference ID</p><p class="font-mono text-lg font-bold text-blue-600" id="mod-ref">---</p></div>
                             <div class="text-right">
-                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Date Received</p>
-                                <p class="font-medium text-sm text-slate-800" id="mod-date-in">---</p>
-                                <div class="mt-2">
-                                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Time in Repair</p>
-                                    <p class="font-medium text-sm text-slate-800" id="mod-days-in">---</p>
-                                </div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Date Received</p><p class="font-medium text-sm text-slate-800" id="mod-date-in">---</p>
+                                <div class="mt-2"><p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Time in Repair</p><p class="font-medium text-sm text-slate-800" id="mod-days-in">---</p></div>
                             </div>
                         </div>
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Client Details</h3>
                             <div class="mb-2"><input type="text" id="mod-client" class="custom-input py-1.5 px-3 font-bold text-slate-800" placeholder="Client Name"></div>
-                            <div class="flex gap-2">
-                                <input type="tel" id="mod-phone" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Phone">
-                                <input type="email" id="mod-email" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Email">
-                            </div>
-                            <div class="mt-4">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase">Client Signature Captured</span>
-                                <img id="mod-signature" src="" class="h-16 mt-1 border border-slate-200 rounded hidden bg-white">
-                            </div>
+                            <div class="flex gap-2"><input type="tel" id="mod-phone" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Phone"><input type="email" id="mod-email" class="custom-input py-1.5 px-3 text-sm flex-1" placeholder="Email"></div>
+                            <div class="mt-4"><span class="text-[10px] font-bold text-slate-500 uppercase">Client Signature Captured</span><img id="mod-signature" src="" class="h-16 mt-1 border border-slate-200 rounded hidden bg-white"></div>
                         </div>
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Device & Fault Details</h3>
@@ -789,11 +772,8 @@
                             </div>
                             <div class="mb-3"><span class="text-[10px] font-bold text-slate-500 uppercase">Reported Issue</span><textarea id="mod-issue" class="custom-input py-1.5 px-3 text-sm mt-1 h-16 resize-none" placeholder="Issue"></textarea></div>
                             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="mod-chk-charger" class="w-4 h-4 text-blue-600 rounded" onchange="app.toggleAdminCharger()">
-                                    <span class="text-xs font-bold text-slate-700 uppercase">Charger Left?</span>
-                                </label>
-                                <input type="text" id="mod-charger-specs" class="custom-input py-1.5 px-3 text-sm flex-1 hidden border-blue-200" placeholder="Charger Specs (e.g. 65W Type-C)">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="mod-chk-charger" class="w-4 h-4 text-blue-600 rounded" onchange="app.toggleAdminCharger()"><span class="text-xs font-bold text-slate-700 uppercase">Charger Left?</span></label>
+                                <input type="text" id="mod-charger-specs" class="custom-input py-1.5 px-3 text-sm flex-1 hidden border-blue-200" placeholder="Charger Specs">
                             </div>
                         </div>
                         <div id="mod-procurement-section" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 shadow-sm hidden">
@@ -843,18 +823,8 @@
                 <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
                     <div class="w-full md:w-3/5 p-6 overflow-y-auto border-r border-slate-100 bg-slate-50">
                         <div class="flex justify-between items-start mb-6">
-                            <div>
-                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Project ID</p>
-                                <p class="font-mono text-lg font-bold text-purple-600" id="mod-soft-ref">---</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Date Logged</p>
-                                <p class="font-medium text-sm text-slate-800" id="mod-soft-date-in">---</p>
-                                <div class="mt-2">
-                                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Time in Pipeline</p>
-                                    <p class="font-medium text-sm text-slate-800" id="mod-soft-days-in">---</p>
-                                </div>
-                            </div>
+                            <div><p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Project ID</p><p class="font-mono text-lg font-bold text-purple-600" id="mod-soft-ref">---</p></div>
+                            <div class="text-right"><p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Date Logged</p><p class="font-medium text-sm text-slate-800" id="mod-soft-date-in">---</p><div class="mt-2"><p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Time in Pipeline</p><p class="font-medium text-sm text-slate-800" id="mod-soft-days-in">---</p></div></div>
                         </div>
                         <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b pb-2">Client Details</h3>
@@ -889,8 +859,7 @@
                         <div class="space-y-5 flex-1">
                             <div><label class="text-xs font-bold text-slate-700 uppercase">Assigned Developer</label><input type="text" id="mod-soft-dev" class="custom-input mt-1 bg-purple-50 font-bold text-purple-700" placeholder="Developer Name"></div>
                             <div><label class="text-xs font-bold text-slate-700 uppercase">Development Notes / Commits</label><textarea id="mod-soft-notes" class="custom-input mt-1 h-32 resize-none" placeholder="Progress notes..."></textarea></div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-700 uppercase">Project Phase</label>
+                            <div><label class="text-xs font-bold text-slate-700 uppercase">Project Phase</label>
                                 <select id="mod-soft-status" class="custom-input mt-1 font-bold">
                                     <option value="Requirements Gathering">Requirements Gathering</option>
                                     <option value="UI/UX Design">UI/UX Design</option>
@@ -910,28 +879,20 @@
         <div id="support-detail-modal" class="system-modal">
             <div class="modal-content" style="max-width:900px;">
                 <div class="flex justify-between items-center p-6 border-b border-slate-100 shrink-0">
-                    <div>
-                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Support Contract</p>
-                        <h2 class="text-xl font-bold text-slate-800" id="mod-sup-biz-name">Business Name</h2>
-                    </div>
+                    <div><p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Support Contract</p><h2 class="text-xl font-bold text-slate-800" id="mod-sup-biz-name">Business Name</h2></div>
                     <div class="flex items-center gap-2">
                         <button onclick="app.deleteSupportRecord()" class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-colors" title="Delete Record"><i class="fa-solid fa-trash"></i></button>
                         <button onclick="app.closeModal('support-detail-modal')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
-
-                <!-- Tabs -->
                 <div class="flex gap-2 p-4 border-b border-slate-100 bg-slate-50 shrink-0 overflow-x-auto">
                     <button class="tab-btn active" onclick="app.switchSupportTab('overview', this)">Overview</button>
                     <button class="tab-btn" onclick="app.switchSupportTab('devices', this)">Devices</button>
                     <button class="tab-btn" onclick="app.switchSupportTab('contract', this)">Contract & Signature</button>
                     <button class="tab-btn" onclick="app.switchSupportTab('history', this)">History & Evidence</button>
                 </div>
-
                 <input type="hidden" id="mod-sup-db-key">
                 <div class="flex-1 overflow-y-auto" style="max-height:calc(90vh - 180px);">
-
-                    <!-- Overview Tab -->
                     <div id="sup-tab-overview" class="p-6 space-y-4">
                         <div class="grid grid-cols-2 gap-6">
                             <div class="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
@@ -963,8 +924,7 @@
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider border-b pb-2 mb-3">Scope of Services</p>
                             <div id="mod-sup-scope" class="flex flex-wrap gap-2"></div>
                         </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-700 uppercase">Status</label>
+                        <div><label class="text-xs font-bold text-slate-700 uppercase">Status</label>
                             <select id="mod-sup-status" class="custom-input mt-1 font-bold">
                                 <option value="Active">Active</option>
                                 <option value="On Hold">On Hold</option>
@@ -976,29 +936,20 @@
                             <i class="fa-solid fa-floppy-disk"></i> Save Details & Status
                         </button>
                     </div>
-
-                    <!-- Devices Tab -->
                     <div id="sup-tab-devices" class="p-6 hidden">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-slate-800">Registered Devices</h3>
                             <span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full" id="mod-sup-device-count">0 devices</span>
                         </div>
-                        <div id="mod-sup-devices-list" class="space-y-3">
-                            <p class="text-slate-400 text-sm text-center py-8">No devices registered.</p>
-                        </div>
+                        <div id="mod-sup-devices-list" class="space-y-3"><p class="text-slate-400 text-sm text-center py-8">No devices registered.</p></div>
                     </div>
-
-                    <!-- Contract & Signature Tab (A4 Printable) -->
                     <div id="sup-tab-contract" class="p-6 hidden bg-slate-100 flex flex-col items-center">
                         <button onclick="app.printDocument('support-a4-document')" class="mb-4 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold transition-colors no-print"><i class="fa-solid fa-file-pdf"></i> Print / Save PDF Contract</button>
-                        
-                        <!-- A4 Printable Area for Support Contract -->
                         <div id="support-a4-document" class="a4-paper contract-preview relative">
-                            <!-- TOP SECTION (Header + Client) -->
                             <div class="shrink-0">
                                 <div class="flex justify-between items-start border-b-4 border-slate-800 pb-6">
                                     <div class="flex items-center gap-5">
-                                        <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Rare Grade Tech Logo" class="w-20 h-20 object-cover rounded-xl shadow-sm border border-slate-200">
+                                        <img src="https://i.postimg.cc/0N2N1P77/Whats-App-Image-2026-04-23-at-10-39-54.jpg" alt="Logo" class="w-20 h-20 object-cover rounded-xl shadow-sm border border-slate-200">
                                         <div>
                                             <h1 class="text-3xl font-black text-slate-900 tracking-tight leading-none">RARE GRADE TECH</h1>
                                             <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1.5">IT & Software Engineering</p>
@@ -1011,7 +962,6 @@
                                         <p class="text-sm text-slate-500 mt-1" id="print-sup-date">Effective: </p>
                                     </div>
                                 </div>
-                                
                                 <div class="mt-6 grid grid-cols-2 gap-8">
                                     <div>
                                         <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2 border-b-2 border-slate-100 pb-1">Business Details</h3>
@@ -1027,19 +977,11 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- MIDDLE SECTION (Expands to fill vertical gap) -->
                             <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 flex-1 flex flex-col overflow-visible">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-200 pb-2 shrink-0">Service Level Agreement</h3>
                                 <div class="grid grid-cols-2 gap-6 mb-5 shrink-0">
-                                    <div>
-                                        <span class="text-xs font-bold text-slate-500 block mb-1">CONTRACT TYPE:</span>
-                                        <p class="text-lg font-black text-slate-800" id="print-sup-contract">---</p>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs font-bold text-slate-500 block mb-1">COVERED DEVICES:</span>
-                                        <p class="text-lg font-black text-slate-800" id="print-sup-devices">0 Devices</p>
-                                    </div>
+                                    <div><span class="text-xs font-bold text-slate-500 block mb-1">CONTRACT TYPE:</span><p class="text-lg font-black text-slate-800" id="print-sup-contract">---</p></div>
+                                    <div><span class="text-xs font-bold text-slate-500 block mb-1">COVERED DEVICES:</span><p class="text-lg font-black text-slate-800" id="print-sup-devices">0 Devices</p></div>
                                 </div>
                                 <div class="bg-blue-50 border-2 border-blue-100 p-4 rounded-lg mb-5 shrink-0">
                                     <span class="text-xs font-bold text-blue-800 block mb-1">SCOPE OF SERVICES:</span>
@@ -1055,12 +997,8 @@
                                     <div class="flex items-center gap-3 col-span-2 text-blue-700 font-bold"><i class="fa-solid fa-square-check text-xl text-blue-500"></i> Client agrees to Standard Terms & Conditions</div>
                                 </div>
                             </div>
-
-                            <!-- BOTTOM SECTION -->
                             <div class="mt-6 pt-5 border-t-2 border-slate-800 shrink-0">
-                                <div class="bg-slate-100 p-4 rounded-lg text-xs text-slate-600 mb-6 leading-relaxed text-justify">
-                                    <strong>TERMS & CONDITIONS:</strong> Rare Grade Tech (Pty) Ltd agrees to provide maintenance and support services for the hardware and software defined in this agreement. Response times are subject to the active SLA tier. The client authorizes Rare Grade Tech personnel to access listed devices and systems. Data backup remains the primary responsibility of the client unless explicitly selected in the scope of services. This contract represents the entire agreement between both parties.
-                                </div>
+                                <div class="bg-slate-100 p-4 rounded-lg text-xs text-slate-600 mb-6 leading-relaxed text-justify"><strong>TERMS & CONDITIONS:</strong> Rare Grade Tech (Pty) Ltd agrees to provide maintenance and support services for the hardware and software defined in this agreement. Response times are subject to the active SLA tier. The client authorizes Rare Grade Tech personnel to access listed devices and systems. Data backup remains the primary responsibility of the client unless explicitly selected in the scope of services. This contract represents the entire agreement between both parties.</div>
                                 <div class="flex justify-between items-end pb-2">
                                     <div class="w-1/2 pr-10">
                                         <p class="text-sm font-bold text-slate-500 mb-2">Authorised Client Signature</p>
@@ -1071,34 +1009,27 @@
                                         <p class="text-xs font-black text-slate-800" id="print-sup-sig-name">---</p>
                                         <p class="text-xs text-slate-500 mt-1" id="print-sup-sig-title">---</p>
                                     </div>
-                                    <div class="w-1/3 border-t-2 border-slate-800 pt-3 text-center">
-                                        <p class="text-sm font-black text-slate-800">Rare Grade Tech Authorized</p>
-                                    </div>
+                                    <div class="w-1/3 border-t-2 border-slate-800 pt-3 text-center"><p class="text-sm font-black text-slate-800">Rare Grade Tech Authorized</p></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- History & Evidence Tab -->
                     <div id="sup-tab-history" class="p-6 hidden bg-slate-50/50">
                         <div class="mb-6">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3"><i class="fa-solid fa-camera"></i> Attached Evidence</h3>
                             <div id="mod-sup-photos" class="grid grid-cols-4 gap-3"></div>
                             <p id="mod-sup-photos-empty" class="text-xs text-slate-400 italic">No photos attached.</p>
                         </div>
-                        
                         <div class="mb-6">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b border-slate-200 pb-2"><i class="fa-solid fa-clock-rotate-left"></i> Visit History</h3>
                             <div id="mod-sup-logs" class="space-y-3"></div>
                         </div>
-                        
                         <div class="border-t border-slate-200 pt-5 bg-white p-5 rounded-xl shadow-sm border">
                             <label class="text-xs font-bold text-slate-700 uppercase">Append Admin Note</label>
                             <textarea id="mod-sup-manual-note" class="custom-input mt-2 h-24 resize-none" placeholder="Add a manual log entry or admin note..."></textarea>
                             <button onclick="app.saveSupportNotes()" class="mt-3 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all shadow-sm">Append Note to Log</button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -1115,6 +1046,146 @@
             messagingSenderId: "1057428047643",
             appId: "1:1057428047643:web:f3801c0d933225a5cd35be"
         };
+
+        // ============================================================
+        //  WHATSAPP MESSAGE TEMPLATES
+        //  Each template is a function that receives { name, refId,
+        //  device, status, techName, issue } and returns a string.
+        // ============================================================
+        const WA_TEMPLATES = [
+            {
+                id: 'intake',
+                icon: '📋',
+                label: 'Intake Received',
+                desc: 'Confirm device was logged',
+                color: 'blue',
+                build: ({ name, refId, device }) =>
+`Hello ${name} 👋
+
+Your device has been successfully logged at *Rare Grade Tech*.
+
+📱 *Device:* ${device || 'Your Device'}
+🔖 *Reference ID:* ${refId}
+📅 *Date Received:* ${new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}
+
+Our technicians will begin assessing your device shortly. We'll keep you updated every step of the way.
+
+Thank you for trusting *Rare Grade Tech* 🙌
+📞 015 065 0979 | 061 527 0749`
+            },
+            {
+                id: 'in-repair',
+                icon: '🔧',
+                label: 'In Repair',
+                desc: 'Device is being worked on',
+                color: 'amber',
+                build: ({ name, refId, device, techName }) =>
+`Hello ${name} 👋
+
+Great news — our technician is now actively working on your device!
+
+📱 *Device:* ${device || 'Your Device'}
+🔖 *Reference ID:* ${refId}
+👨‍🔧 *Technician:* ${techName || 'Rare Grade Tech Team'}
+
+We'll notify you as soon as there's an update or once your device is ready.
+
+Thank you for your patience 🙏
+*Rare Grade Tech* | 015 065 0979`
+            },
+            {
+                id: 'waiting-parts',
+                icon: '📦',
+                label: 'Waiting for Parts',
+                desc: 'Parts have been ordered',
+                color: 'orange',
+                build: ({ name, refId, device }) =>
+`Hello ${name} 👋
+
+We have completed our diagnosis on your device and we've identified the required parts.
+
+📱 *Device:* ${device || 'Your Device'}
+🔖 *Reference ID:* ${refId}
+📦 *Status:* Parts have been ordered & are on their way
+
+We'll contact you immediately once the parts arrive and the repair is complete. Thank you for your patience!
+
+*Rare Grade Tech* | 061 527 0749`
+            },
+            {
+                id: 'ready',
+                icon: '✅',
+                label: 'Ready for Collection',
+                desc: 'Device is fixed & ready',
+                color: 'green',
+                build: ({ name, refId, device }) =>
+`Hello ${name} 👋
+
+🎉 *Great news!* Your device is repaired and ready for collection!
+
+📱 *Device:* ${device || 'Your Device'}
+🔖 *Reference ID:* ${refId}
+✅ *Status:* Ready for Collection
+
+📍 Please visit our office during business hours to collect your device. Kindly bring this message or your reference ID.
+
+🕗 *Mon–Fri: 8:00–17:00 | Sat: 8:00–13:00*
+
+Thank you for choosing *Rare Grade Tech* 🙌`
+            },
+            {
+                id: 'payment-reminder',
+                icon: '💳',
+                label: 'Payment Request',
+                desc: 'Request payment before collection',
+                color: 'purple',
+                build: ({ name, refId, device }) =>
+`Hello ${name} 👋
+
+Your device is ready for collection! Please arrange payment before or upon arrival.
+
+📱 *Device:* ${device || 'Your Device'}
+🔖 *Reference ID:* ${refId}
+
+💳 *Payment Methods Accepted:*
+• EFT / Bank Transfer
+• Cash
+• Card (in-store)
+
+Please reply to this message to confirm your collection time.
+
+*Rare Grade Tech* | info@raregradetech.co.za`
+            },
+            {
+                id: 'failed',
+                icon: '⚠️',
+                label: 'Irreparable',
+                desc: 'Device could not be fixed',
+                color: 'red',
+                build: ({ name, refId, device }) =>
+`Hello ${name},
+
+We regret to inform you that after thorough assessment, your device could not be repaired.
+
+📱 *Device:* ${device || 'Your Device'}
+🔖 *Reference ID:* ${refId}
+
+Our technicians have done everything possible but unfortunately the damage is irreparable.
+
+You are welcome to collect the device at any time. We will gladly discuss data recovery or replacement options.
+
+Sincerely,
+*Rare Grade Tech* | 015 065 0979`
+            },
+            {
+                id: 'custom',
+                icon: '✏️',
+                label: 'Custom Message',
+                desc: 'Write your own message',
+                color: 'slate',
+                build: ({ name }) => `Hello ${name} 👋\n\n`
+            }
+        ];
 
         class EnterpriseSystem {
             constructor() {
@@ -1137,6 +1208,10 @@
 
                 this.deviceRowCount = 0;
 
+                // WhatsApp state
+                this._waCurrentRecord = null;
+                this._waSelectedTemplate = null;
+
                 this.initFirebase();
                 this.initTime();
                 this.initSignaturePad();
@@ -1148,23 +1223,165 @@
                 if (this.documentA4Date) this.documentA4Date.innerText = "Date Received: " + this.formatDate(Date.now());
             }
 
-            formatDate(timestamp) {
-                if (!timestamp) return "---";
-                const date = new Date(timestamp);
-                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            // ==========================================
+            //  WHATSAPP CORE METHODS
+            // ==========================================
+
+            /** Convert SA phone number to international format for wa.me */
+            formatPhoneForWA(raw) {
+                if (!raw) return null;
+                // Strip all non-digit characters
+                let num = raw.replace(/\D/g, '');
+                // SA: 0821234567 → 27821234567
+                if (num.startsWith('0') && num.length >= 9) {
+                    num = '27' + num.slice(1);
+                }
+                // Already has country code
+                if (num.startsWith('27') && num.length === 11) return num;
+                // Fallback: return as-is if it looks international
+                if (num.length >= 10) return num;
+                return null;
             }
 
-            getDaysInRepairText(timestamp, dateCollected) {
-                if (!timestamp) return "";
-                const end = dateCollected ? dateCollected : Date.now();
-                const diffTime = Math.abs(end - timestamp);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if (dateCollected) return `<span class="text-slate-400 font-medium">${diffDays} days total</span>`;
-                return `<span class="text-red-500 font-bold">${diffDays} days in pipeline</span>`;
+            /** Open the WhatsApp modal for a hardware record */
+            openWhatsAppModal(record) {
+                if (!record) return;
+                this._waCurrentRecord = record;
+                this._waSelectedTemplate = null;
+
+                // Populate client strip
+                const name = record.clientName || 'Client';
+                document.getElementById('wa-client-avatar').innerText = name.charAt(0).toUpperCase();
+                document.getElementById('wa-client-name').innerText = name;
+                document.getElementById('wa-client-phone').innerText = record.clientPhone || 'No phone on file';
+                document.getElementById('wa-client-ref').innerText = `RGT-${record.refId}`;
+                document.getElementById('wa-modal-subtitle').innerText = record.clientPhone
+                    ? record.clientPhone
+                    : '⚠️ No phone number on file';
+                document.getElementById('wa-client-status-badge').innerHTML = this.getStatusBadge(record.status || 'Pending');
+
+                // Build template buttons
+                const grid = document.getElementById('wa-templates-grid');
+                grid.innerHTML = '';
+                WA_TEMPLATES.forEach(tpl => {
+                    const btn = document.createElement('button');
+                    btn.className = 'wa-template-btn';
+                    btn.dataset.id = tpl.id;
+                    btn.innerHTML = `<span class="template-icon">${tpl.icon}</span><span class="template-label">${tpl.label}</span><span class="template-desc">${tpl.desc}</span>`;
+                    btn.onclick = () => this.selectWaTemplate(tpl.id);
+                    grid.appendChild(btn);
+                });
+
+                // Reset message area
+                document.getElementById('wa-message-preview').innerText = 'Select a template above to preview your message.';
+                document.getElementById('wa-message-editable').value = '';
+                document.getElementById('wa-send-btn').disabled = true;
+
+                // Auto-select based on current status
+                const statusTemplateMap = {
+                    'Pending': 'intake',
+                    'In Repair': 'in-repair',
+                    'Waiting for Parts': 'waiting-parts',
+                    'Ready for Collection': 'ready',
+                    'Failed to Repair': 'failed',
+                    'Completed & Collected': 'ready'
+                };
+                const autoSelect = statusTemplateMap[record.status] || 'intake';
+                setTimeout(() => this.selectWaTemplate(autoSelect), 50);
+
+                document.getElementById('whatsapp-modal').classList.add('active');
+            }
+
+            /** Called from the hardware admin modal's WA button */
+            openWhatsAppFromModal() {
+                const dbKey = document.getElementById('mod-db-key').value;
+                if (!dbKey) return;
+                const record = this.reportsData.find(r => r.key === dbKey);
+                if (!record) return;
+                // Grab latest edits from modal fields
+                const liveRecord = {
+                    ...record,
+                    clientName: document.getElementById('mod-client').value || record.clientName,
+                    clientPhone: document.getElementById('mod-phone').value || record.clientPhone,
+                    device: document.getElementById('mod-device').value || record.device,
+                    status: document.getElementById('mod-status').value || record.status,
+                };
+                this.openWhatsAppModal(liveRecord);
+            }
+
+            selectWaTemplate(tplId) {
+                const tpl = WA_TEMPLATES.find(t => t.id === tplId);
+                if (!tpl || !this._waCurrentRecord) return;
+
+                this._waSelectedTemplate = tplId;
+
+                // Highlight selected button
+                document.querySelectorAll('.wa-template-btn').forEach(b => {
+                    b.classList.toggle('selected', b.dataset.id === tplId);
+                });
+
+                const r = this._waCurrentRecord;
+                const message = tpl.build({
+                    name: r.clientName || 'Valued Client',
+                    refId: `RGT-${r.refId}`,
+                    device: r.device || 'Your Device',
+                    status: r.status,
+                    techName: this.currentAdmin ? this.currentAdmin.name : 'Rare Grade Tech Team',
+                    issue: r.issue || ''
+                });
+
+                document.getElementById('wa-message-preview').innerText = message;
+                document.getElementById('wa-message-editable').value = message;
+                document.getElementById('wa-send-btn').disabled = false;
+            }
+
+            onWaMessageEdit() {
+                // Sync preview with editable area
+                const msg = document.getElementById('wa-message-editable').value;
+                document.getElementById('wa-message-preview').innerText = msg;
+                document.getElementById('wa-send-btn').disabled = msg.trim().length === 0;
+            }
+
+            sendWhatsApp() {
+                const r = this._waCurrentRecord;
+                if (!r) return;
+
+                const rawPhone = r.clientPhone;
+                const phone = this.formatPhoneForWA(rawPhone);
+
+                if (!phone) {
+                    alert('⚠️ No valid phone number found for this client.\n\nPlease update the client\'s phone number in the record first.');
+                    return;
+                }
+
+                const message = document.getElementById('wa-message-editable').value.trim();
+                if (!message) return;
+
+                const encoded = encodeURIComponent(message);
+                const url = `https://wa.me/${phone}?text=${encoded}`;
+                window.open(url, '_blank');
+                this.showToast(`WhatsApp opened for ${r.clientName || 'client'} ✓`);
+            }
+
+            showToast(msg, type = 'success') {
+                let toast = document.getElementById('rgt-toast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'rgt-toast';
+                    toast.style.cssText = 'position:fixed;bottom:28px;right:28px;z-index:999999;padding:12px 20px;border-radius:12px;font-weight:700;font-size:13px;transition:all 0.3s;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(0,0,0,0.15);transform:translateY(10px);opacity:0;';
+                    document.body.appendChild(toast);
+                }
+                toast.style.background = type === 'error' ? '#ef4444' : '#0f172a';
+                toast.style.color = 'white';
+                toast.innerHTML = `<i class="fa-solid fa-${type === 'error' ? 'circle-xmark' : 'circle-check'} text-${type === 'error' ? 'red' : 'green'}-300"></i> ${msg}`;
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+                clearTimeout(this._toastTimer);
+                this._toastTimer = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; }, 3000);
             }
 
             // ==========================================
-            // FIREBASE & LIVE DATA
+            //  FIREBASE & LIVE DATA
             // ==========================================
             initFirebase() {
                 firebase.initializeApp(FIREBASE_CONFIG);
@@ -1203,6 +1420,20 @@
                 });
             }
 
+            formatDate(timestamp) {
+                if (!timestamp) return "---";
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            }
+
+            getDaysInRepairText(timestamp, dateCollected) {
+                if (!timestamp) return "";
+                const end = dateCollected ? dateCollected : Date.now();
+                const diffDays = Math.ceil(Math.abs(end - timestamp) / (1000 * 60 * 60 * 24));
+                if (dateCollected) return `<span class="text-slate-400 font-medium">${diffDays} days total</span>`;
+                return `<span class="text-red-500 font-bold">${diffDays} days in pipeline</span>`;
+            }
+
             updateDashboard() {
                 let pendingCount = 0, readyCount = 0;
                 const tbody = document.getElementById('dash-recent-table');
@@ -1215,17 +1446,26 @@
                         const tr = document.createElement('tr');
                         tr.className = "border-b border-slate-100 hover:bg-slate-50 cursor-pointer";
                         tr.onclick = () => this.openModal(report.key);
+
+                        const hasPhone = !!report.clientPhone;
                         tr.innerHTML = `
                             <td class="p-4 font-mono text-xs text-slate-500">RGT-${report.refId}</td>
                             <td class="p-4 font-medium text-slate-800">${report.clientName}</td>
                             <td class="p-4 text-slate-600">${report.device}</td>
                             <td class="p-4 text-xs text-slate-500"><div>${this.formatDate(report.timestamp)}</div><div>${this.getDaysInRepairText(report.timestamp, report.dateCollected)}</div></td>
-                            <td class="p-4">${this.getStatusBadge(report.status)}</td>`;
+                            <td class="p-4">${this.getStatusBadge(report.status)}</td>
+                            <td class="p-4">
+                                <button onclick="event.stopPropagation(); app.openWhatsAppModal(app.reportsData.find(r=>r.key==='${report.key}'))"
+                                    class="btn-wa-inline ${!hasPhone ? 'opacity-40 cursor-not-allowed' : ''}"
+                                    ${!hasPhone ? 'disabled title="No phone on file"' : 'title="Send WhatsApp"'}>
+                                    <i class="fa-brands fa-whatsapp"></i> WA
+                                </button>
+                            </td>`;
                         tbody.appendChild(tr);
                     }
                 });
 
-                if (this.reportsData.length === 0) tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No hardware records found.</td></tr>';
+                if (this.reportsData.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No hardware records found.</td></tr>';
 
                 document.getElementById('stat-pending').innerText = pendingCount;
                 document.getElementById('stat-ready').innerText = readyCount;
@@ -1234,29 +1474,28 @@
             }
 
             // ==========================================
-            // LOG & PARSER HELPERS
+            //  LOG & PARSER HELPERS
             // ==========================================
             parseVisitLogs(rawNotes) {
                 if (!rawNotes || !rawNotes.trim()) return [];
                 const entries = [];
                 const blocks = rawNotes.split(/={4,}\n?/g).map(b => b.trim()).filter(b => b.length > 0);
-
-                blocks.forEach((block) => {
-                    const isStructured = block.includes('VISIT LOG:') || block.includes('TECHNICIAN:') || block.includes('TASKS COMPLETED:');
+                blocks.forEach(block => {
+                    const isStructured = block.includes('VISIT LOG:') || block.includes('TECHNICIAN:');
                     if (isStructured) {
                         const entry = { type: 'structured', raw: block };
-                        const dateMatch = block.match(/VISIT LOG:\s*(.+)/); if (dateMatch) entry.date = dateMatch[1].trim();
-                        const typeMatch = block.match(/TYPE:\s*(.+)/); if (typeMatch) entry.visitType = typeMatch[1].trim();
-                        const techMatch = block.match(/TECHNICIAN:\s*(.+)/); if (techMatch) entry.technician = techMatch[1].trim();
-                        const tasksSection = block.match(/TASKS COMPLETED:\n([\s\S]*?)(?:\n[A-Z]|\n====|$)/);
-                        if (tasksSection) {
-                            entry.tasks = tasksSection[1].split('\n').map(t => t.replace(/^\s*-\s*/, '').trim()).filter(t => t && t !== 'No standard checklist items selected.');
-                        }
-                        const partsMatch = block.match(/PARTS USED:\s*(.+)/); if (partsMatch) entry.parts = partsMatch[1].trim();
-                        const nextMatch = block.match(/NEXT STEPS:\s*(.+)/); if (nextMatch) entry.nextSteps = nextMatch[1].trim();
-                        const notesSection = block.match(/NOTES:\s*\n([\s\S]*?)(?:\nCLIENT SIG|\n====|$)/); if (notesSection) entry.notes = notesSection[1].trim();
-                        const sigSection = block.match(/CLIENT SIG \(([^)]+)\):\s*\n(.+)/);
-                        if (sigSection) { entry.sigName = sigSection[1].trim(); entry.sigUrl = sigSection[2].trim(); }
+                        const m = (rx) => { const r = block.match(rx); return r ? r[1].trim() : null; };
+                        entry.date = m(/VISIT LOG:\s*(.+)/);
+                        entry.visitType = m(/TYPE:\s*(.+)/);
+                        entry.technician = m(/TECHNICIAN:\s*(.+)/);
+                        const ts = block.match(/TASKS COMPLETED:\n([\s\S]*?)(?:\n[A-Z]|\n====|$)/);
+                        if (ts) entry.tasks = ts[1].split('\n').map(t => t.replace(/^\s*-\s*/, '').trim()).filter(t => t && t !== 'No standard checklist items selected.');
+                        entry.parts = m(/PARTS USED:\s*(.+)/);
+                        entry.nextSteps = m(/NEXT STEPS:\s*(.+)/);
+                        const ns = block.match(/NOTES:\s*\n([\s\S]*?)(?:\nCLIENT SIG|\n====|$)/);
+                        if (ns) entry.notes = ns[1].trim();
+                        const ss = block.match(/CLIENT SIG \(([^)]+)\):\s*\n(.+)/);
+                        if (ss) { entry.sigName = ss[1].trim(); entry.sigUrl = ss[2].trim(); }
                         entries.push(entry);
                     } else {
                         entries.push({ type: 'raw', raw: block });
@@ -1273,39 +1512,24 @@
                     container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 italic flex flex-col items-center gap-2"><i class="fa-regular fa-clock-rotate-left text-2xl text-slate-300"></i> No visit logs yet.</div>`;
                     return;
                 }
-
-                entries.forEach((entry, i) => {
+                entries.forEach(entry => {
                     const div = document.createElement('div');
                     div.className = 'visit-log-card shadow-sm mb-3';
-
                     if (entry.type === 'structured') {
                         const hasTasks = entry.tasks && entry.tasks.length > 0;
                         const hasSig = entry.sigUrl && !entry.sigUrl.includes('[Image Upload Failed');
-                        const isCloudUrl = hasSig && (entry.sigUrl.startsWith('https://res.cloudinary') || entry.sigUrl.startsWith('http'));
-
+                        const isCloudUrl = hasSig && entry.sigUrl.startsWith('http');
                         div.innerHTML = `
-                            <div class="log-header">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-clipboard-check text-emerald-500 text-sm"></i>
-                                    <span class="font-black text-slate-700 text-xs">${entry.date || 'Unknown Date'}</span>
-                                </div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-emerald-500 text-sm"></i><span class="font-black text-slate-700 text-xs">${entry.date || 'Unknown Date'}</span></div>
                                 <span class="log-badge">${entry.visitType || 'Site Visit'}</span>
                             </div>
-                            ${entry.technician ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-user-helmet-safety mr-1"></i>Technician</span><span class="log-value font-bold text-emerald-700">${entry.technician}</span></div>` : ''}
-                            ${hasTasks ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-list-check mr-1"></i>Tasks Completed</span><div class="mt-1 space-y-1">${entry.tasks.map(t => `<div class="checklist-item"><i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0"></i><span>${t}</span></div>`).join('')}</div></div>` : ''}
-                            ${entry.parts && entry.parts !== 'None' ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-box-open mr-1"></i>Parts / Consumables</span><span class="log-value">${entry.parts}</span></div>` : ''}
-                            ${entry.nextSteps && entry.nextSteps !== 'None' ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-forward mr-1"></i>Recommendations</span><span class="log-value">${entry.nextSteps}</span></div>` : ''}
-                            ${entry.notes ? `<div class="log-field"><span class="log-label"><i class="fa-solid fa-note-sticky mr-1"></i>Notes</span><span class="log-value whitespace-pre-line">${entry.notes}</span></div>` : ''}
-                            ${entry.sigName ? `<div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between"><div class="flex items-center gap-2"><i class="fa-solid fa-signature text-emerald-400 text-xs"></i><span class="text-[10px] font-bold text-slate-500">Signed: ${entry.sigName}</span></div>${isCloudUrl ? `<a href="${entry.sigUrl}" target="_blank" class="sig-link">View Sig →</a>` : (entry.sigUrl ? `<span class="text-[9px] text-red-400 font-semibold">Upload failed</span>` : '')}</div>` : ''}
-                        `;
+                            ${entry.technician ? `<div class="log-field"><span class="log-label">Technician</span><span class="log-value font-bold text-emerald-700">${entry.technician}</span></div>` : ''}
+                            ${hasTasks ? `<div class="log-field"><span class="log-label">Tasks</span><div class="mt-1 space-y-1">${entry.tasks.map(t => `<div class="checklist-item"><i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i><span>${t}</span></div>`).join('')}</div></div>` : ''}
+                            ${entry.notes ? `<div class="log-field"><span class="log-label">Notes</span><span class="log-value whitespace-pre-line">${entry.notes}</span></div>` : ''}
+                            ${entry.sigName ? `<div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-500">Signed: ${entry.sigName}</span>${isCloudUrl ? `<a href="${entry.sigUrl}" target="_blank" class="sig-link">View Sig →</a>` : ''}</div>` : ''}`;
                     } else {
-                        div.innerHTML = `
-                            <div class="log-header">
-                                <div class="flex items-center gap-2"><i class="fa-solid fa-file-lines text-slate-400 text-sm"></i><span class="font-black text-slate-600 text-xs">Note / Legacy Entry</span></div>
-                                <span class="log-badge" style="background:#f1f5f9;color:#475569;border-color:#e2e8f0">raw</span>
-                            </div>
-                            <p class="log-value whitespace-pre-line text-slate-600 leading-relaxed">${entry.raw}</p>
-                        `;
+                        div.innerHTML = `<div class="flex items-center gap-2 mb-2"><i class="fa-solid fa-file-lines text-slate-400 text-sm"></i><span class="font-black text-slate-600 text-xs">Note / Legacy Entry</span></div><p class="log-value whitespace-pre-line text-slate-600 leading-relaxed">${entry.raw}</p>`;
                     }
                     container.appendChild(div);
                 });
@@ -1313,18 +1537,13 @@
 
             openLightbox(src) {
                 const lb = document.getElementById('lightbox');
-                const img = document.getElementById('lightbox-img');
-                if (src) {
-                    img.src = src;
-                    lb.classList.add('active');
-                } else {
-                    lb.classList.remove('active');
-                }
+                document.getElementById('lightbox-img').src = src || '';
+                lb.classList.toggle('active', !!src);
             }
             closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
 
             // ==========================================
-            // HARDWARE FILTER & REGISTRY
+            //  HARDWARE FILTER & REGISTRY
             // ==========================================
             filterRegistry() {
                 const search = document.getElementById('search-input').value.toLowerCase();
@@ -1339,10 +1558,14 @@
                 filtered.forEach(report => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
-                    let notifyBtn = report.clientEmail ? `<button onclick="event.stopPropagation(); app.notifyClient('${report.clientEmail}', 'RGT-${report.refId}', '${report.clientName}')" class="ml-2 text-slate-400 hover:text-blue-500" title="Send Email Receipt"><i class="fa-regular fa-envelope"></i></button>` : "";
+                    const hasPhone = !!report.clientPhone;
+                    let notifyBtn = report.clientEmail ? `<button onclick="event.stopPropagation(); app.notifyClient('${report.clientEmail}', 'RGT-${report.refId}', '${report.clientName}')" class="ml-1 text-slate-400 hover:text-blue-500" title="Send Email"><i class="fa-regular fa-envelope"></i></button>` : "";
                     tr.innerHTML = `
                         <td class="p-4 font-mono text-xs text-slate-500">RGT-${report.refId}</td>
-                        <td class="p-4"><div class="font-medium text-slate-800">${report.clientName}</div><div class="text-xs text-slate-500">${report.clientPhone || '-'} ${notifyBtn}</div></td>
+                        <td class="p-4">
+                            <div class="font-medium text-slate-800">${report.clientName}</div>
+                            <div class="text-xs text-slate-500 flex items-center gap-1">${report.clientPhone || '-'}${notifyBtn}</div>
+                        </td>
                         <td class="p-4"><div class="text-sm font-medium text-slate-800">${report.device}</div><div class="text-xs text-slate-500 mt-1 truncate max-w-[200px]">${report.issue || ''}</div></td>
                         <td class="p-4 text-xs text-slate-500">
                             <div>In: <span class="font-medium text-slate-700">${this.formatDate(report.timestamp)}</span></div>
@@ -1350,7 +1573,16 @@
                             <div class="mt-1">${this.getDaysInRepairText(report.timestamp, report.dateCollected)}</div>
                         </td>
                         <td class="p-4">${this.getStatusBadge(report.status)}</td>
-                        <td class="p-4 text-right"><button onclick="app.openModal('${report.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">View / Update</button></td>`;
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="event.stopPropagation(); app.openWhatsAppModal(app.reportsData.find(r=>r.key==='${report.key}'))"
+                                    class="btn-wa-inline ${!hasPhone ? 'opacity-40 cursor-not-allowed' : ''}"
+                                    ${!hasPhone ? 'disabled title="No phone on file"' : 'title="Send WhatsApp message"'}>
+                                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                                </button>
+                                <button onclick="app.openModal('${report.key}')" class="bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-800 shadow-sm">View</button>
+                            </div>
+                        </td>`;
                     tbody.appendChild(tr);
                 });
                 if (filtered.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records match your search.</td></tr>';
@@ -1382,12 +1614,9 @@
             }
 
             // ==========================================
-            // TECHNICAL SUPPORT REGISTRY
+            //  TECHNICAL SUPPORT REGISTRY
             // ==========================================
-            filterSupportRegistry() {
-                const search = document.getElementById('search-support-input').value.toLowerCase();
-                this.renderSupportRegistry(search);
-            }
+            filterSupportRegistry() { this.renderSupportRegistry(document.getElementById('search-support-input').value.toLowerCase()); }
 
             renderSupportRegistry(search = '') {
                 const grid = document.getElementById('support-businesses-grid');
@@ -1397,29 +1626,21 @@
                     (b.sector && b.sector.toLowerCase().includes(search)) ||
                     (b.contactPhone && b.contactPhone.includes(search))
                 );
-
                 if (filtered.length === 0) {
                     grid.innerHTML = `<div class="col-span-3 text-center text-slate-400 py-16"><i class="fa-solid fa-building text-4xl mb-3 opacity-30 block"></i><p>${search ? 'No results found.' : 'No businesses registered yet.'}</p></div>`;
                     return;
                 }
-
                 grid.innerHTML = '';
                 filtered.forEach(biz => {
                     const statusColor = biz.status === 'Active' ? 'emerald' : biz.status === 'On Hold' ? 'amber' : 'red';
                     const deviceCount = biz.devices ? Object.keys(biz.devices).length : 0;
-                    const scopes = biz.scope ? Object.entries(biz.scope).filter(([k,v]) => v).map(([k]) => {
-                        const labels = { hardware: 'Hardware', software: 'Software', network: 'Network', backup: 'Backup', security: 'Security', remote: 'Remote' };
-                        return labels[k] || k;
-                    }) : [];
-
+                    const scopes = biz.scope ? Object.entries(biz.scope).filter(([k,v]) => v).map(([k]) => ({ hardware: 'Hardware', software: 'Software', network: 'Network', backup: 'Backup', security: 'Security', remote: 'Remote' }[k] || k)) : [];
                     const card = document.createElement('div');
                     card.className = "business-card p-5 cursor-pointer";
                     card.onclick = () => this.openSupportModal(biz.key);
                     card.innerHTML = `
                         <div class="flex items-start justify-between mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 text-xl font-black shrink-0">
-                                ${biz.bizName ? biz.bizName.charAt(0).toUpperCase() : '?'}
-                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 text-xl font-black shrink-0">${biz.bizName ? biz.bizName.charAt(0).toUpperCase() : '?'}</div>
                             <span class="bg-${statusColor}-100 text-${statusColor}-700 text-[10px] font-bold uppercase px-2 py-1 rounded-full">${biz.status || 'Active'}</span>
                         </div>
                         <h3 class="font-bold text-slate-800 text-base leading-tight mb-1">${biz.bizName || '---'}</h3>
@@ -1427,10 +1648,7 @@
                         <div class="flex items-center gap-2 text-sm text-slate-600 mb-1"><i class="fa-solid fa-user text-xs text-slate-400 w-4"></i> ${biz.contactName || '---'}</div>
                         <div class="flex items-center gap-2 text-sm text-slate-600 mb-3"><i class="fa-solid fa-phone text-xs text-slate-400 w-4"></i> ${biz.contactPhone || '---'}</div>
                         <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                            <div class="flex gap-1 flex-wrap">
-                                ${scopes.slice(0, 3).map(s => `<span class="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded font-medium border border-violet-100">${s}</span>`).join('')}
-                                ${scopes.length > 3 ? `<span class="text-[10px] text-slate-400">+${scopes.length - 3}</span>` : ''}
-                            </div>
+                            <div class="flex gap-1 flex-wrap">${scopes.slice(0,3).map(s => `<span class="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded font-medium border border-violet-100">${s}</span>`).join('')}${scopes.length > 3 ? `<span class="text-[10px] text-slate-400">+${scopes.length - 3}</span>` : ''}</div>
                             <span class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-solid fa-desktop text-slate-300"></i> ${deviceCount} device${deviceCount !== 1 ? 's' : ''}</span>
                         </div>`;
                     grid.appendChild(card);
@@ -1438,58 +1656,31 @@
             }
 
             // ==========================================
-            // DEVICE ROWS IN SUPPORT INTAKE
+            //  DEVICE ROWS IN SUPPORT INTAKE
             // ==========================================
             addDeviceRow() {
                 const container = document.getElementById('devices-container');
                 const noMsg = document.getElementById('no-devices-msg');
                 if (noMsg) noMsg.style.display = 'none';
-
                 this.deviceRowCount++;
                 const idx = this.deviceRowCount;
                 const row = document.createElement('div');
-                row.className = "device-row";
-                row.id = `device-row-${idx}`;
+                row.className = "device-row"; row.id = `device-row-${idx}`;
                 row.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-xs font-bold text-violet-700 uppercase tracking-wider">Device #${idx}</span>
-                        <button onclick="app.removeDeviceRow(${idx})" class="text-red-400 hover:text-red-600 text-xs font-medium transition"><i class="fa-solid fa-times mr-1"></i>Remove</button>
-                    </div>
+                    <div class="flex justify-between items-center mb-3"><span class="text-xs font-bold text-violet-700 uppercase tracking-wider">Device #${idx}</span><button onclick="app.removeDeviceRow(${idx})" class="text-red-400 hover:text-red-600 text-xs font-medium transition"><i class="fa-solid fa-times mr-1"></i>Remove</button></div>
                     <div class="grid grid-cols-3 gap-3 mb-3">
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Device Type</label>
-                            <select name="dev-type-${idx}" class="custom-input mt-1 text-sm py-2">
-                                <option value="Desktop PC">Desktop PC</option>
-                                <option value="Laptop">Laptop</option>
-                                <option value="Server">Server</option>
-                                <option value="Printer">Printer</option>
-                                <option value="Network Switch">Network Switch</option>
-                                <option value="Router / Firewall">Router / Firewall</option>
-                                <option value="UPS / Battery">UPS / Battery</option>
-                                <option value="Monitor">Monitor</option>
-                                <option value="Tablet">Tablet</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Make / Brand</label><input type="text" name="dev-make-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Dell, HP, Lenovo"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Device Type</label><select name="dev-type-${idx}" class="custom-input mt-1 text-sm py-2"><option>Desktop PC</option><option>Laptop</option><option>Server</option><option>Printer</option><option>Network Switch</option><option>Router / Firewall</option><option>UPS / Battery</option><option>Monitor</option><option>Tablet</option><option>Other</option></select></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Make / Brand</label><input type="text" name="dev-make-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Dell, HP"></div>
                         <div><label class="text-[10px] font-bold text-slate-500 uppercase">Model</label><input type="text" name="dev-model-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. OptiPlex 7090"></div>
                     </div>
                     <div class="grid grid-cols-3 gap-3 mb-3">
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Serial Number</label><input type="text" name="dev-serial-${idx}" class="custom-input mt-1 text-sm py-2 font-mono" placeholder="e.g. CN07XY1234"></div>
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Asset Tag / Internal ID</label><input type="text" name="dev-asset-${idx}" class="custom-input mt-1 text-sm py-2 font-mono" placeholder="e.g. PC-001"></div>
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Operating System</label>
-                            <select name="dev-os-${idx}" class="custom-input mt-1 text-sm py-2">
-                                <option value="Windows 11">Windows 11</option>
-                                <option value="Windows 10">Windows 10</option>
-                                <option value="Windows Server">Windows Server</option>
-                                <option value="macOS">macOS</option>
-                                <option value="Ubuntu / Linux">Ubuntu / Linux</option>
-                                <option value="N/A">N/A (Printer/Network)</option>
-                            </select>
-                        </div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Serial Number</label><input type="text" name="dev-serial-${idx}" class="custom-input mt-1 text-sm py-2 font-mono" placeholder="Serial No."></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Asset Tag</label><input type="text" name="dev-asset-${idx}" class="custom-input mt-1 text-sm py-2 font-mono" placeholder="e.g. PC-001"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Operating System</label><select name="dev-os-${idx}" class="custom-input mt-1 text-sm py-2"><option>Windows 11</option><option>Windows 10</option><option>Windows Server</option><option>macOS</option><option>Ubuntu / Linux</option><option>N/A</option></select></div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Location / Department</label><input type="text" name="dev-location-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Reception, Server Room"></div>
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Condition / Notes</label><input type="text" name="dev-condition-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Good, Faulty display"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Location / Dept</label><input type="text" name="dev-location-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Reception"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Condition / Notes</label><input type="text" name="dev-condition-${idx}" class="custom-input mt-1 text-sm py-2" placeholder="e.g. Good"></div>
                     </div>`;
                 container.appendChild(row);
             }
@@ -1497,10 +1688,8 @@
             removeDeviceRow(idx) {
                 const row = document.getElementById(`device-row-${idx}`);
                 if (row) row.remove();
-                const container = document.getElementById('devices-container');
-                if (container.children.length === 0) {
+                if (document.getElementById('devices-container').children.length === 0)
                     document.getElementById('no-devices-msg').style.display = 'block';
-                }
             }
 
             collectDevices() {
@@ -1508,80 +1697,39 @@
                 const devices = [];
                 container.querySelectorAll('[id^="device-row-"]').forEach(row => {
                     const idx = row.id.replace('device-row-', '');
-                    const get = (name) => {
-                        const el = row.querySelector(`[name="${name}"]`);
-                        return el ? el.value : '';
-                    };
-                    devices.push({
-                        type: get(`dev-type-${idx}`),
-                        make: get(`dev-make-${idx}`),
-                        model: get(`dev-model-${idx}`),
-                        serial: get(`dev-serial-${idx}`),
-                        assetTag: get(`dev-asset-${idx}`),
-                        os: get(`dev-os-${idx}`),
-                        location: get(`dev-location-${idx}`),
-                        condition: get(`dev-condition-${idx}`)
-                    });
+                    const get = name => { const el = row.querySelector(`[name="${name}"]`); return el ? el.value : ''; };
+                    devices.push({ type: get(`dev-type-${idx}`), make: get(`dev-make-${idx}`), model: get(`dev-model-${idx}`), serial: get(`dev-serial-${idx}`), assetTag: get(`dev-asset-${idx}`), os: get(`dev-os-${idx}`), location: get(`dev-location-${idx}`), condition: get(`dev-condition-${idx}`) });
                 });
                 return devices;
             }
 
             // ==========================================
-            // SUPPORT INTAKE SUBMIT
+            //  SUPPORT INTAKE SUBMIT
             // ==========================================
             async submitSupportIntake() {
                 const bizName = document.getElementById('sup-biz-name').value;
                 const contactName = document.getElementById('sup-contact-name').value;
                 const contactPhone = document.getElementById('sup-contact-phone').value;
-                if (!bizName || !contactName || !contactPhone) {
-                    alert("Please fill in Business Name, Contact Name, and Phone Number.");
-                    return;
-                }
-
+                if (!bizName || !contactName || !contactPhone) { alert("Please fill in Business Name, Contact Name, and Phone Number."); return; }
                 this.showLoading("Registering business...");
                 try {
                     const refId = Math.floor(1000 + Math.random() * 9000).toString();
-                    const devices = this.collectDevices();
-
                     const data = {
-                        refId,
-                        bizName,
-                        sector: document.getElementById('sup-biz-sector').value,
-                        address: document.getElementById('sup-biz-address').value,
-                        contractType: document.getElementById('sup-biz-contract').value,
-                        startDate: document.getElementById('sup-biz-start-date').value,
-                        contactName,
-                        contactTitle: document.getElementById('sup-contact-title').value,
-                        contactPhone,
-                        contactEmail: document.getElementById('sup-contact-email').value,
-                        contactWA: document.getElementById('sup-contact-wa').value,
-                        scope: {
-                            hardware: document.getElementById('sup-scope-hardware').checked,
-                            software: document.getElementById('sup-scope-software').checked,
-                            network: document.getElementById('sup-scope-network').checked,
-                            backup: document.getElementById('sup-scope-backup').checked,
-                            security: document.getElementById('sup-scope-security').checked,
-                            remote: document.getElementById('sup-scope-remote').checked,
-                        },
-                        notes: document.getElementById('sup-notes').value,
-                        sigName: document.getElementById('sup-sig-name').value,
-                        sigTitle: document.getElementById('sup-sig-title').value,
+                        refId, bizName, sector: document.getElementById('sup-biz-sector').value, address: document.getElementById('sup-biz-address').value,
+                        contractType: document.getElementById('sup-biz-contract').value, startDate: document.getElementById('sup-biz-start-date').value,
+                        contactName, contactTitle: document.getElementById('sup-contact-title').value, contactPhone,
+                        contactEmail: document.getElementById('sup-contact-email').value, contactWA: document.getElementById('sup-contact-wa').value,
+                        scope: { hardware: document.getElementById('sup-scope-hardware').checked, software: document.getElementById('sup-scope-software').checked, network: document.getElementById('sup-scope-network').checked, backup: document.getElementById('sup-scope-backup').checked, security: document.getElementById('sup-scope-security').checked, remote: document.getElementById('sup-scope-remote').checked },
+                        notes: document.getElementById('sup-notes').value, sigName: document.getElementById('sup-sig-name').value, sigTitle: document.getElementById('sup-sig-title').value,
                         signatureBase64: this.supSigHasSignature ? this.supSigCanvas.toDataURL() : null,
-                        devices,
-                        status: 'Active',
-                        timestamp: Date.now(),
-                        maintenanceNotes: ''
+                        devices: this.collectDevices(), status: 'Active', timestamp: Date.now(), maintenanceNotes: ''
                     };
-
                     await this.db.ref('support_businesses').push(data);
                     this.hideLoading();
                     alert(`Business registered!\nID: SUP-${refId}`);
                     this.resetSupportForm();
                     this.navigate('support-registry');
-                } catch (err) {
-                    console.error(err);
-                    this.showErrorMsg(`Save failed: ${err.message}`);
-                }
+                } catch (err) { this.showErrorMsg(`Save failed: ${err.message}`); }
             }
 
             resetSupportForm() {
@@ -1603,16 +1751,13 @@
             }
 
             // ==========================================
-            // SUPPORT MODAL
+            //  SUPPORT MODAL
             // ==========================================
             openSupportModal(dbKey, silent = false) {
                 const biz = this.supportData.find(b => b.key === dbKey);
                 if (!biz) return;
-
                 document.getElementById('mod-sup-db-key').value = dbKey;
                 document.getElementById('mod-sup-biz-name').innerText = biz.bizName || '---';
-                
-                // Editable Fields
                 document.getElementById('mod-sup-company').value = biz.bizName || '';
                 document.getElementById('mod-sup-sector').value = biz.sector || '';
                 document.getElementById('mod-sup-address').value = biz.address || '';
@@ -1625,7 +1770,6 @@
                 document.getElementById('mod-sup-contact-wa').value = biz.contactWA || '';
                 document.getElementById('mod-sup-status').value = biz.status || 'Active';
 
-                // Scope display in Overview & Contract
                 const scopeEl = document.getElementById('mod-sup-scope');
                 const printScopeEl = document.getElementById('print-sup-scope');
                 scopeEl.innerHTML = ''; printScopeEl.innerHTML = '';
@@ -1638,12 +1782,8 @@
                         }
                     });
                 }
-                if (!scopeEl.innerHTML) {
-                    scopeEl.innerHTML = '<span class="text-slate-400 text-sm">No scope defined.</span>';
-                    printScopeEl.innerHTML = '<span class="text-slate-400 text-xs">No scope defined.</span>';
-                }
+                if (!scopeEl.innerHTML) scopeEl.innerHTML = '<span class="text-slate-400 text-sm">No scope defined.</span>';
 
-                // Devices
                 const devicesList = document.getElementById('mod-sup-devices-list');
                 const deviceCount = document.getElementById('mod-sup-device-count');
                 const printDevCount = document.getElementById('print-sup-devices');
@@ -1652,97 +1792,47 @@
                 const devsArr = Array.isArray(devs) ? devs : Object.values(devs);
                 deviceCount.innerText = `${devsArr.length} device${devsArr.length !== 1 ? 's' : ''}`;
                 printDevCount.innerText = `${devsArr.length} Device${devsArr.length !== 1 ? 's' : ''} Covered`;
-                
                 if (devsArr.length === 0) {
-                    devicesList.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No devices registered under this contract.</p>';
+                    devicesList.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No devices registered.</p>';
                 } else {
                     devsArr.forEach((dev, i) => {
-                        devicesList.innerHTML += `
-                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                <div class="flex items-start justify-between mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-xs font-bold">${i + 1}</span>
-                                        <span class="font-bold text-slate-800">${dev.make || ''} ${dev.model || dev.type || 'Unknown Device'}</span>
-                                    </div>
-                                    <span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded font-bold uppercase">${dev.type || '---'}</span>
-                                </div>
-                                <div class="grid grid-cols-3 gap-3 text-xs text-slate-600">
-                                    <div><span class="font-bold text-slate-400 block">Serial No.</span>${dev.serial || '---'}</div>
-                                    <div><span class="font-bold text-slate-400 block">Asset Tag</span>${dev.assetTag || '---'}</div>
-                                    <div><span class="font-bold text-slate-400 block">OS</span>${dev.os || '---'}</div>
-                                    <div><span class="font-bold text-slate-400 block">Location</span>${dev.location || '---'}</div>
-                                    <div class="col-span-2"><span class="font-bold text-slate-400 block">Condition</span>${dev.condition || '---'}</div>
-                                </div>
-                            </div>`;
+                        devicesList.innerHTML += `<div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-start justify-between mb-2"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-xs font-bold">${i+1}</span><span class="font-bold text-slate-800">${dev.make || ''} ${dev.model || dev.type || 'Unknown'}</span></div><span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded font-bold uppercase">${dev.type || '---'}</span></div><div class="grid grid-cols-3 gap-3 text-xs text-slate-600"><div><span class="font-bold text-slate-400 block">Serial</span>${dev.serial || '---'}</div><div><span class="font-bold text-slate-400 block">Asset</span>${dev.assetTag || '---'}</div><div><span class="font-bold text-slate-400 block">OS</span>${dev.os || '---'}</div><div><span class="font-bold text-slate-400 block">Location</span>${dev.location || '---'}</div><div class="col-span-2"><span class="font-bold text-slate-400 block">Condition</span>${dev.condition || '---'}</div></div></div>`;
                     });
                 }
 
-                // Contract Print Variables
                 document.getElementById('print-sup-ref').innerText = `REF: SUP-${biz.refId}`;
                 document.getElementById('print-sup-date').innerText = `Effective: ${biz.startDate || this.formatDate(biz.timestamp)}`;
-                
-                const printNotesEl = document.getElementById('print-sup-notes');
-                if (printNotesEl) {
-                    printNotesEl.innerText = biz.notes || "No additional notes specified.";
-                }
-
+                const pn = document.getElementById('print-sup-notes');
+                if (pn) pn.innerText = biz.notes || "No additional notes specified.";
                 this.syncSupportA4();
 
-                // Signature handling
-                const sigName = biz.sigName || '---';
-                const sigTitle = biz.sigTitle || '---';
-                
-                document.getElementById('print-sup-sig-name').innerText = sigName;
-                document.getElementById('print-sup-sig-title').innerText = sigTitle;
+                document.getElementById('print-sup-sig-name').innerText = biz.sigName || '---';
+                document.getElementById('print-sup-sig-title').innerText = biz.sigTitle || '---';
+                const psi = document.getElementById('print-sup-sig-img');
+                const psp = document.getElementById('print-sup-sig-placeholder');
+                if (biz.signatureBase64 && biz.signatureBase64.length > 50) { psi.src = biz.signatureBase64; psi.classList.remove('hidden'); psp.classList.add('hidden'); }
+                else { psi.classList.add('hidden'); psp.classList.remove('hidden'); }
 
-                const printSigImg = document.getElementById('print-sup-sig-img');
-                const printSigPlaceholder = document.getElementById('print-sup-sig-placeholder');
-
-                if (biz.signatureBase64 && biz.signatureBase64.length > 50) {
-                    printSigImg.src = biz.signatureBase64;
-                    printSigImg.classList.remove('hidden');
-                    printSigPlaceholder.classList.add('hidden');
-                } else {
-                    printSigImg.classList.add('hidden');
-                    printSigPlaceholder.classList.remove('hidden');
-                }
-
-                // History & Evidence Tab (Photos & Logs)
                 const photosGrid = document.getElementById('mod-sup-photos');
                 const photosEmpty = document.getElementById('mod-sup-photos-empty');
                 photosGrid.innerHTML = '';
                 const photosArr = Array.isArray(biz.photos) ? biz.photos : [];
-                if(photosArr.length > 0) {
-                    photosEmpty.classList.add('hidden');
-                    photosArr.forEach((url) => {
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.className = "sup-gallery-img";
-                        img.onclick = () => this.openLightbox(url);
-                        photosGrid.appendChild(img);
-                    });
-                } else {
-                    photosEmpty.classList.remove('hidden');
-                }
+                if (photosArr.length > 0) { photosEmpty.classList.add('hidden'); photosArr.forEach(url => { const img = document.createElement('img'); img.src = url; img.className = "sup-gallery-img"; img.onclick = () => this.openLightbox(url); photosGrid.appendChild(img); }); }
+                else { photosEmpty.classList.remove('hidden'); }
 
-                const parsedLogs = this.parseVisitLogs(biz.maintenanceNotes);
-                this.renderVisitLogs(parsedLogs, 'mod-sup-logs');
+                this.renderVisitLogs(this.parseVisitLogs(biz.maintenanceNotes), 'mod-sup-logs');
                 document.getElementById('mod-sup-manual-note').value = '';
 
-                if(!silent) {
+                if (!silent) {
                     this.switchSupportTab('overview', document.querySelector('#support-detail-modal .tab-btn'));
                     document.getElementById('support-detail-modal').classList.add('active');
                 }
             }
 
             switchSupportTab(tab, btn) {
-                ['overview', 'devices', 'contract', 'history'].forEach(t => {
-                    const el = document.getElementById(`sup-tab-${t}`);
-                    if (el) el.classList.add('hidden');
-                });
+                ['overview', 'devices', 'contract', 'history'].forEach(t => { const el = document.getElementById(`sup-tab-${t}`); if (el) el.classList.add('hidden'); });
                 const active = document.getElementById(`sup-tab-${tab}`);
                 if (active) active.classList.remove('hidden');
-
                 document.querySelectorAll('#support-detail-modal .tab-btn').forEach(b => b.classList.remove('active'));
                 if (btn) btn.classList.add('active');
             }
@@ -1753,213 +1843,85 @@
                 this.showLoading("Saving...");
                 try {
                     await this.db.ref('support_businesses/' + dbKey).update({
-                        bizName: document.getElementById('mod-sup-company').value,
-                        sector: document.getElementById('mod-sup-sector').value,
-                        address: document.getElementById('mod-sup-address').value,
-                        contractType: document.getElementById('mod-sup-contract-type').value,
-                        startDate: document.getElementById('mod-sup-start-date').value,
-                        contactName: document.getElementById('mod-sup-contact-name').value,
-                        contactTitle: document.getElementById('mod-sup-contact-title').value,
-                        contactPhone: document.getElementById('mod-sup-contact-phone').value,
-                        contactEmail: document.getElementById('mod-sup-contact-email').value,
-                        contactWA: document.getElementById('mod-sup-contact-wa').value,
-                        status: document.getElementById('mod-sup-status').value,
-                        lastUpdated: Date.now()
+                        bizName: document.getElementById('mod-sup-company').value, sector: document.getElementById('mod-sup-sector').value,
+                        address: document.getElementById('mod-sup-address').value, contractType: document.getElementById('mod-sup-contract-type').value,
+                        startDate: document.getElementById('mod-sup-start-date').value, contactName: document.getElementById('mod-sup-contact-name').value,
+                        contactTitle: document.getElementById('mod-sup-contact-title').value, contactPhone: document.getElementById('mod-sup-contact-phone').value,
+                        contactEmail: document.getElementById('mod-sup-contact-email').value, contactWA: document.getElementById('mod-sup-contact-wa').value,
+                        status: document.getElementById('mod-sup-status').value, lastUpdated: Date.now()
                     });
-                    this.hideLoading();
-                    this.showToast("Details updated successfully");
-                } catch (err) {
-                    this.showErrorMsg(`Update failed: ${err.message}`);
-                }
+                    this.hideLoading(); this.showToast("Details updated successfully");
+                } catch (err) { this.showErrorMsg(`Update failed: ${err.message}`); }
             }
 
             async saveSupportNotes() {
                 const dbKey = document.getElementById('mod-sup-db-key').value;
                 if (!dbKey) return;
-                
                 const newNote = document.getElementById('mod-sup-manual-note').value.trim();
                 if (!newNote) return this.showToast("Please enter a note", "error");
-
                 this.showLoading("Saving note...");
                 try {
                     const biz = this.supportData.find(b => b.key === dbKey);
-                    let existingNotes = biz.maintenanceNotes || '';
-                    
                     const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
                     const techName = this.currentAdmin ? this.currentAdmin.name : "Admin";
-
-                    const newEntry = `
-====================================
-VISIT LOG: ${dateStr}
-TYPE: Manual Admin Note
-TECHNICIAN: ${techName}
-------------------------------------
-TASKS COMPLETED:
-  - No standard checklist items selected.
-
-PARTS USED: None
-NEXT STEPS: None
-
-NOTES: 
-${newNote}
-
-====================================
-`;
-                    const updatedNotes = newEntry + existingNotes;
-
-                    await this.db.ref('support_businesses/' + dbKey).update({
-                        maintenanceNotes: updatedNotes,
-                        lastUpdated: Date.now()
-                    });
-                    
+                    const newEntry = `\n====================================\nVISIT LOG: ${dateStr}\nTYPE: Manual Admin Note\nTECHNICIAN: ${techName}\n------------------------------------\nTASKS COMPLETED:\n  - No standard checklist items selected.\n\nPARTS USED: None\nNEXT STEPS: None\n\nNOTES: \n${newNote}\n\n====================================\n`;
+                    await this.db.ref('support_businesses/' + dbKey).update({ maintenanceNotes: newEntry + (biz.maintenanceNotes || ''), lastUpdated: Date.now() });
                     document.getElementById('mod-sup-manual-note').value = '';
-                    this.hideLoading();
-                    this.showToast("Note appended to log.");
-                } catch (err) {
-                    this.showErrorMsg(`Save failed: ${err.message}`);
-                }
+                    this.hideLoading(); this.showToast("Note appended to log.");
+                } catch (err) { this.showErrorMsg(`Save failed: ${err.message}`); }
             }
 
             async deleteSupportRecord() {
                 const dbKey = document.getElementById('mod-sup-db-key').value;
-                if (!dbKey) return;
-                if (confirm('Are you sure you want to permanently delete this business record? This cannot be undone.')) {
-                    this.showLoading("Deleting...");
-                    try {
-                        await this.db.ref('support_businesses/' + dbKey).remove();
-                        this.hideLoading();
-                        this.closeModal('support-detail-modal');
-                    } catch (err) {
-                        this.showErrorMsg(`Delete failed: ${err.message}`);
-                    }
-                }
+                if (!dbKey || !confirm('Are you sure you want to permanently delete this business record?')) return;
+                this.showLoading("Deleting...");
+                try { await this.db.ref('support_businesses/' + dbKey).remove(); this.hideLoading(); this.closeModal('support-detail-modal'); }
+                catch (err) { this.showErrorMsg(`Delete failed: ${err.message}`); }
             }
 
             // ==========================================
-            // DIRECT PDF DOWNLOAD LOGIC (FORCED ONE PAGE)
+            //  PDF DOWNLOAD
             // ==========================================
             async printDocument(elementId) {
                 this.showLoading("Generating PDF...", 0);
                 const element = document.getElementById(elementId);
-
-                // Temporarily remove preview scaling so html2pdf renders full quality A4 without whitespace
                 const isPreview = element.classList.contains('contract-preview');
-                if (isPreview) {
-                    element.classList.remove('contract-preview');
-                }
-
-                // Force layout recalculation to get accurate full height
+                if (isPreview) element.classList.remove('contract-preview');
                 element.style.height = 'max-content';
-                
-                // Yield to browser to let styles apply
                 await new Promise(r => setTimeout(r, 50));
-                
                 const currentHeight = element.scrollHeight;
-
                 let filename = 'Contract.pdf';
-                if(elementId === 'support-a4-document') {
-                    const bizName = document.getElementById('print-sup-biz').innerText || 'Business';
-                    filename = `Support_SLA_${bizName.replace(/\s+/g, '_')}.pdf`;
-                } else if(elementId === 'a4-document') {
-                    const clientName = document.getElementById('a4-name').innerText || 'Client';
-                    filename = `Intake_${clientName.replace(/\s+/g, '_')}.pdf`;
-                }
-
-                // Setting unit to 'px' seamlessly locks the PDF size to the actual HTML element size
-                // 210mm in pixels at 96 DPI is roughly 794. 297mm is roughly 1123.
-                const pdfWidth = 794; 
-                const pdfHeight = Math.max(1123, currentHeight + 20); // Ensures it spans exactly ONE continuous page
-
-                const opt = {
-                    margin:       0,
-                    filename:     filename,
-                    image:        { type: 'jpeg', quality: 1.0 },
-                    html2canvas:  {
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                        scrollY: 0
-                    },
-                    jsPDF: {
-                        unit: 'px',
-                        format: [pdfWidth, pdfHeight],
-                        orientation: 'portrait'
-                    }
-                };
-
-                try {
-                    await html2pdf().set(opt).from(element).save();
-                } catch (err) {
-                    console.error("PDF generation error:", err);
-                    this.showErrorMsg("Failed to generate PDF");
-                } finally {
-                    // Restore scaling so the UI preview goes back to normal
-                    element.style.height = '';
-                    if (isPreview) {
-                        element.classList.add('contract-preview');
-                    }
-                    this.hideLoading();
-                }
+                if (elementId === 'support-a4-document') filename = `Support_SLA_${(document.getElementById('print-sup-biz').innerText || 'Business').replace(/\s+/g, '_')}.pdf`;
+                else if (elementId === 'a4-document') filename = `Intake_${(document.getElementById('a4-name').innerText || 'Client').replace(/\s+/g, '_')}.pdf`;
+                const opt = { margin: 0, filename, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 }, jsPDF: { unit: 'px', format: [794, Math.max(1123, currentHeight + 20)], orientation: 'portrait' } };
+                try { await html2pdf().set(opt).from(element).save(); }
+                catch (err) { this.showErrorMsg("Failed to generate PDF"); }
+                finally { element.style.height = ''; if (isPreview) element.classList.add('contract-preview'); this.hideLoading(); }
             }
 
             // ==========================================
-            // SUPPORT SIGNATURE PAD
+            //  SUPPORT SIGNATURE PAD
             // ==========================================
             initSupportSignaturePad() {
                 this.supSigCanvas = document.getElementById('sup-sig-canvas');
                 if (!this.supSigCanvas) return;
                 this.supSigCtx = this.supSigCanvas.getContext('2d');
-
-                const resizeCanvas = () => {
-                    const rect = this.supSigCanvas.parentElement.getBoundingClientRect();
-                    if (rect.width > 0) {
-                        const tempUrl = this.supSigHasSignature ? this.supSigCanvas.toDataURL() : null;
-                        this.supSigCanvas.width = rect.width - 48;
-                        this.supSigCanvas.height = 128;
-                        if (tempUrl) {
-                            const img = new Image();
-                            img.src = tempUrl;
-                            img.onload = () => this.supSigCtx.drawImage(img, 0, 0);
-                        }
-                    }
-                };
-
-                setTimeout(resizeCanvas, 100);
-
-                const getPos = (e) => {
-                    const rect = this.supSigCanvas.getBoundingClientRect();
-                    const src = e.touches ? e.touches[0] : e;
-                    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
-                };
-
-                this.supSigCanvas.addEventListener('mousedown', (e) => {
-                    this.supSigDrawing = true;
-                    this.supSigHasSignature = true;
-                    this.supSigCtx.beginPath();
-                    const p = getPos(e); this.supSigCtx.moveTo(p.x, p.y);
-                });
-                this.supSigCanvas.addEventListener('mousemove', (e) => {
-                    if (!this.supSigDrawing) return;
-                    const p = getPos(e);
-                    this.supSigCtx.lineWidth = 2.5; this.supSigCtx.lineCap = 'round'; this.supSigCtx.lineJoin = 'round'; this.supSigCtx.strokeStyle = '#0f172a';
-                    this.supSigCtx.lineTo(p.x, p.y); this.supSigCtx.stroke();
-                });
-                this.supSigCanvas.addEventListener('mouseup', () => { this.supSigDrawing = false; this.supSigCtx.closePath(); });
+                const resize = () => { const rect = this.supSigCanvas.parentElement.getBoundingClientRect(); if (rect.width > 0) { const url = this.supSigHasSignature ? this.supSigCanvas.toDataURL() : null; this.supSigCanvas.width = rect.width - 48; this.supSigCanvas.height = 128; if (url) { const img = new Image(); img.src = url; img.onload = () => this.supSigCtx.drawImage(img, 0, 0); } } };
+                setTimeout(resize, 100);
+                const gp = e => { const rect = this.supSigCanvas.getBoundingClientRect(); const s = e.touches ? e.touches[0] : e; return { x: s.clientX - rect.left, y: s.clientY - rect.top }; };
+                this.supSigCanvas.addEventListener('mousedown', e => { this.supSigDrawing = true; this.supSigHasSignature = true; this.supSigCtx.beginPath(); const p = gp(e); this.supSigCtx.moveTo(p.x, p.y); });
+                this.supSigCanvas.addEventListener('mousemove', e => { if (!this.supSigDrawing) return; const p = gp(e); this.supSigCtx.lineWidth = 2.5; this.supSigCtx.lineCap = 'round'; this.supSigCtx.lineJoin = 'round'; this.supSigCtx.strokeStyle = '#0f172a'; this.supSigCtx.lineTo(p.x, p.y); this.supSigCtx.stroke(); });
+                this.supSigCanvas.addEventListener('mouseup', () => { this.supSigDrawing = false; });
                 this.supSigCanvas.addEventListener('mouseout', () => { this.supSigDrawing = false; });
-                this.supSigCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.supSigDrawing = true; this.supSigHasSignature = true; this.supSigCtx.beginPath(); const p = getPos(e); this.supSigCtx.moveTo(p.x, p.y); }, { passive: false });
-                this.supSigCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (!this.supSigDrawing) return; const p = getPos(e); this.supSigCtx.lineWidth = 2.5; this.supSigCtx.lineCap = 'round'; this.supSigCtx.lineJoin = 'round'; this.supSigCtx.strokeStyle = '#0f172a'; this.supSigCtx.lineTo(p.x, p.y); this.supSigCtx.stroke(); }, { passive: false });
-                this.supSigCanvas.addEventListener('touchend', (e) => { e.preventDefault(); this.supSigDrawing = false; this.supSigCtx.closePath(); }, { passive: false });
+                this.supSigCanvas.addEventListener('touchstart', e => { e.preventDefault(); this.supSigDrawing = true; this.supSigHasSignature = true; this.supSigCtx.beginPath(); const p = gp(e); this.supSigCtx.moveTo(p.x, p.y); }, { passive: false });
+                this.supSigCanvas.addEventListener('touchmove', e => { e.preventDefault(); if (!this.supSigDrawing) return; const p = gp(e); this.supSigCtx.lineWidth = 2.5; this.supSigCtx.lineCap = 'round'; this.supSigCtx.strokeStyle = '#0f172a'; this.supSigCtx.lineTo(p.x, p.y); this.supSigCtx.stroke(); }, { passive: false });
+                this.supSigCanvas.addEventListener('touchend', e => { e.preventDefault(); this.supSigDrawing = false; }, { passive: false });
             }
 
-            clearSupportSignature() {
-                if (this.supSigCtx && this.supSigCanvas) {
-                    this.supSigCtx.clearRect(0, 0, this.supSigCanvas.width, this.supSigCanvas.height);
-                    this.supSigHasSignature = false;
-                }
-            }
+            clearSupportSignature() { if (this.supSigCtx && this.supSigCanvas) { this.supSigCtx.clearRect(0, 0, this.supSigCanvas.width, this.supSigCanvas.height); this.supSigHasSignature = false; } }
 
             // ==========================================
-            // STATUS BADGE HELPER
+            //  STATUS BADGE
             // ==========================================
             getStatusBadge(status) {
                 if (status === 'Pending') return '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Pending</span>';
@@ -1970,13 +1932,12 @@ ${newNote}
             }
 
             // ==========================================
-            // CHARGER & INTAKE
+            //  CHARGER & INTAKE
             // ==========================================
             toggleChargerSpecs() {
                 const chk = document.getElementById('chk-charger').checked;
                 const spec = document.getElementById('in-charger-specs');
-                if (chk) spec.classList.remove('hidden');
-                else { spec.classList.add('hidden'); spec.value = ''; }
+                if (chk) spec.classList.remove('hidden'); else { spec.classList.add('hidden'); spec.value = ''; }
             }
 
             syncA4() {
@@ -1987,9 +1948,7 @@ ${newNote}
                 document.getElementById('a4-color').innerText = document.getElementById('in-color').value || "Not specified";
                 document.getElementById('a4-issue').innerText = document.getElementById('in-issue').value || "No issue described.";
                 const hasCharger = document.getElementById('chk-charger').checked;
-                const specs = document.getElementById('in-charger-specs').value;
-                if (hasCharger) { document.getElementById('a4-charger').innerText = `Included: ${specs || "Charger Left by Client"}`; }
-                else { document.getElementById('a4-charger').innerText = "No charger left by client."; }
+                document.getElementById('a4-charger').innerText = hasCharger ? `Included: ${document.getElementById('in-charger-specs').value || "Charger Left by Client"}` : "No charger left by client.";
                 document.getElementById('sq-power').className = document.getElementById('chk-power').checked ? "fa-solid fa-square-check text-blue-500" : "fa-regular fa-square text-slate-400";
                 document.getElementById('sq-cracks').className = document.getElementById('chk-cracks').checked ? "fa-solid fa-square-check text-blue-500" : "fa-regular fa-square text-slate-400";
                 document.getElementById('sq-data').className = document.getElementById('chk-data').checked ? "fa-solid fa-square-check text-blue-500" : "fa-regular fa-square text-slate-400";
@@ -2007,10 +1966,8 @@ ${newNote}
                     this.showLoading("Saving data to Firebase...", 0);
                     const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
                     const reportData = {
-                        refId: generatedRef, clientName: name,
-                        clientPhone: document.getElementById('in-phone').value,
-                        clientEmail: document.getElementById('in-email').value,
-                        device, color: document.getElementById('in-color').value || "Not specified",
+                        refId: generatedRef, clientName: name, clientPhone: document.getElementById('in-phone').value,
+                        clientEmail: document.getElementById('in-email').value, device, color: document.getElementById('in-color').value || "Not specified",
                         charger: { included: document.getElementById('chk-charger').checked, specs: document.getElementById('in-charger-specs').value || "" },
                         issue: document.getElementById('in-issue').value,
                         checks: { power: document.getElementById('chk-power').checked, cracks: document.getElementById('chk-cracks').checked, dataWaiver: document.getElementById('chk-data').checked },
@@ -2019,14 +1976,28 @@ ${newNote}
                     };
                     await this.db.ref('reports').push(reportData);
                     this.hideLoading();
-                    if (reportData.clientEmail) {
-                        if (confirm(`Intake Saved! REF: RGT-${generatedRef}\n\nWould you like to open your email app to send the client their Reference ID now?`)) {
+
+                    const phone = this.formatPhoneForWA(reportData.clientPhone);
+                    if (phone) {
+                        if (confirm(`✅ Intake Saved! REF: RGT-${generatedRef}\n\nSend intake confirmation via WhatsApp to ${reportData.clientPhone}?`)) {
+                            this._waCurrentRecord = { ...reportData, key: generatedRef };
+                            this.selectWaTemplate('intake');
+                            setTimeout(() => {
+                                const msg = document.getElementById('wa-message-editable').value;
+                                const encoded = encodeURIComponent(msg);
+                                window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+                            }, 100);
+                        }
+                    } else if (reportData.clientEmail) {
+                        if (confirm(`Intake Saved! REF: RGT-${generatedRef}\n\nSend email receipt to client?`)) {
                             this.notifyClient(reportData.clientEmail, `RGT-${generatedRef}`, reportData.clientName);
                         }
-                    } else { alert(`Intake successfully saved!\nReference ID: RGT-${generatedRef}`); }
+                    } else {
+                        alert(`Intake successfully saved!\nReference ID: RGT-${generatedRef}`);
+                    }
                     this.resetIntakeForm();
                     this.navigate('registry');
-                } catch (error) { console.error(error); this.showErrorMsg(`Save failed: ${error.message}`); }
+                } catch (error) { this.showErrorMsg(`Save failed: ${error.message}`); }
             }
 
             async submitSoftwareIntake() {
@@ -2036,21 +2007,18 @@ ${newNote}
                 try {
                     this.showLoading("Saving project to pipeline...", 0);
                     const generatedRef = Math.floor(1000 + Math.random() * 9000).toString();
-                    const projectData = {
-                        refId: generatedRef, clientName, clientPhone: document.getElementById('soft-client-phone').value,
-                        clientEmail: document.getElementById('soft-client-email').value, projectName,
-                        platform: document.getElementById('soft-platform').value, deadline: document.getElementById('soft-deadline').value,
+                    await this.db.ref('software_projects').push({
+                        refId: generatedRef, clientName, clientPhone: document.getElementById('soft-client-phone').value, clientEmail: document.getElementById('soft-client-email').value,
+                        projectName, platform: document.getElementById('soft-platform').value, deadline: document.getElementById('soft-deadline').value,
                         repoLink: document.getElementById('soft-repo').value, techStack: document.getElementById('soft-stack').value,
-                        requirements: document.getElementById('soft-requirements').value, timestamp: Date.now(),
-                        status: 'Requirements Gathering', devAssigned: 'Pending', devNotes: ''
-                    };
-                    await this.db.ref('software_projects').push(projectData);
+                        requirements: document.getElementById('soft-requirements').value, timestamp: Date.now(), status: 'Requirements Gathering', devAssigned: 'Pending', devNotes: ''
+                    });
                     this.hideLoading();
                     alert(`Software Project successfully added!\nProject ID: SFT-${generatedRef}`);
                     document.querySelectorAll('#view-soft-intake input, #view-soft-intake textarea').forEach(i => i.value = '');
                     document.getElementById('soft-platform').value = 'Web Application';
                     this.navigate('soft-registry');
-                } catch (error) { console.error(error); this.showErrorMsg(`Save failed: ${error.message}`); }
+                } catch (error) { this.showErrorMsg(`Save failed: ${error.message}`); }
             }
 
             resetIntakeForm() {
@@ -2065,13 +2033,12 @@ ${newNote}
             resetRef() { document.getElementById('a4-ref').innerText = "REF: RGT-" + Math.floor(1000 + Math.random() * 9000); }
 
             // ==========================================
-            // HARDWARE MODAL
+            //  HARDWARE MODAL
             // ==========================================
             toggleAdminCharger() {
                 const chk = document.getElementById('mod-chk-charger').checked;
                 const spec = document.getElementById('mod-charger-specs');
-                if (chk) spec.classList.remove('hidden');
-                else { spec.classList.add('hidden'); spec.value = ''; }
+                if (chk) spec.classList.remove('hidden'); else { spec.classList.add('hidden'); spec.value = ''; }
             }
 
             populateModalSilently(dbKey) {
@@ -2079,32 +2046,29 @@ ${newNote}
                 if (!report) return;
                 document.getElementById('mod-date-in').innerText = this.formatDate(report.timestamp);
                 document.getElementById('mod-days-in').innerHTML = this.getDaysInRepairText(report.timestamp, report.dateCollected);
-                const safeSetInput = (id, val) => { const el = document.getElementById(id); if (!el.dataset.userModified && document.activeElement !== el) el.value = val || ''; };
-                safeSetInput('mod-client', report.clientName); safeSetInput('mod-phone', report.clientPhone); safeSetInput('mod-email', report.clientEmail);
-                safeSetInput('mod-device', report.device); safeSetInput('mod-color', report.color); safeSetInput('mod-issue', report.issue);
+                const safeSet = (id, val) => { const el = document.getElementById(id); if (!el.dataset.userModified && document.activeElement !== el) el.value = val || ''; };
+                safeSet('mod-client', report.clientName); safeSet('mod-phone', report.clientPhone); safeSet('mod-email', report.clientEmail);
+                safeSet('mod-device', report.device); safeSet('mod-color', report.color); safeSet('mod-issue', report.issue);
                 const chargerChk = document.getElementById('mod-chk-charger');
-                const chargerSpecs = document.getElementById('mod-charger-specs');
-                if (report.charger) { chargerChk.checked = report.charger.included || false; safeSetInput('mod-charger-specs', report.charger.specs); if (chargerChk.checked) chargerSpecs.classList.remove('hidden'); else chargerSpecs.classList.add('hidden'); }
+                if (report.charger) { chargerChk.checked = report.charger.included || false; safeSet('mod-charger-specs', report.charger.specs); document.getElementById('mod-charger-specs').classList.toggle('hidden', !chargerChk.checked); }
                 const sigImg = document.getElementById('mod-signature');
                 if (report.signatureBase64 && report.signatureBase64.length > 50) { sigImg.src = report.signatureBase64; sigImg.classList.remove('hidden'); } else { sigImg.classList.add('hidden'); }
                 const procSec = document.getElementById('mod-procurement-section');
                 const procList = document.getElementById('mod-procurement-list');
-                procList.innerHTML = '';
-                let hasParts = false;
+                procList.innerHTML = ''; let hasParts = false;
                 if (report.partsRequired) {
                     const p = report.partsRequired;
-                    const addPart = (name, details) => { hasParts = true; procList.innerHTML += `<li><i class="fa-solid fa-circle text-[8px] text-blue-500 mr-2"></i><strong>${name}</strong>: ${details}</li>`; };
-                    if (p.screen && p.screen.needed) addPart('Screen', `${p.screen.specs || 'N/A'} (PN: ${p.screen.pn || 'N/A'})`);
-                    if (p.mobo && p.mobo.needed) addPart('Motherboard', `PN: ${p.mobo.pn || 'N/A'}`);
-                    if (p.battery && p.battery.needed) addPart('Battery', `Model: ${p.battery.model || 'N/A'}`);
-                    if (p.ram && p.ram.needed) addPart('RAM', `${p.ram.capacity || 'N/A'} ${p.ram.type || ''}`);
-                    if (p.ssd && p.ssd.needed) addPart('SSD', `${p.ssd.capacity || 'N/A'} ${p.ssd.type || ''}`);
+                    const addPart = (n, d) => { hasParts = true; procList.innerHTML += `<li><i class="fa-solid fa-circle text-[8px] text-blue-500 mr-2"></i><strong>${n}</strong>: ${d}</li>`; };
+                    if (p.screen && p.screen.needed) addPart('Screen', `${p.screen.specs || 'N/A'}`);
+                    if (p.battery && p.battery.needed) addPart('Battery', `${p.battery.model || 'N/A'}`);
+                    if (p.ram && p.ram.needed) addPart('RAM', `${p.ram.capacity || 'N/A'}`);
+                    if (p.ssd && p.ssd.needed) addPart('SSD', `${p.ssd.capacity || 'N/A'}`);
                     if (p.other) addPart('Other', p.other);
                 }
                 if (hasParts) procSec.classList.remove('hidden'); else procSec.classList.add('hidden');
-                const statusSelect = document.getElementById('mod-status');
-                if (!statusSelect.dataset.userModified) statusSelect.value = report.status || "Pending";
-                safeSetInput('mod-notes', report.techNotes);
+                const statusSel = document.getElementById('mod-status');
+                if (!statusSel.dataset.userModified) statusSel.value = report.status || "Pending";
+                safeSet('mod-notes', report.techNotes);
             }
 
             openModal(dbKey) {
@@ -2112,25 +2076,11 @@ ${newNote}
                 if (!report) return;
                 document.getElementById('mod-db-key').value = dbKey;
                 document.getElementById('mod-ref').innerText = `RGT-${report.refId}`;
-                const trackModified = (id) => { const el = document.getElementById(id); if (!el) return; el.dataset.userModified = ""; el.addEventListener('input', () => el.dataset.userModified = "true"); el.addEventListener('change', () => el.dataset.userModified = "true"); };
-                ['mod-client','mod-phone','mod-email','mod-device','mod-color','mod-issue','mod-notes','mod-status','mod-charger-specs'].forEach(trackModified);
+                const track = id => { const el = document.getElementById(id); if (!el) return; el.dataset.userModified = ""; el.addEventListener('input', () => el.dataset.userModified = "true"); el.addEventListener('change', () => el.dataset.userModified = "true"); };
+                ['mod-client','mod-phone','mod-email','mod-device','mod-color','mod-issue','mod-notes','mod-status','mod-charger-specs'].forEach(track);
                 document.getElementById('mod-tech-name').value = this.currentAdmin ? this.currentAdmin.name : "Admin";
                 this.populateModalSilently(dbKey);
                 document.getElementById('update-modal').classList.add('active');
-            }
-
-            populateSoftModalSilently(dbKey) {
-                const project = this.softwareData.find(r => r.key === dbKey);
-                if (!project) return;
-                document.getElementById('mod-soft-date-in').innerText = this.formatDate(project.timestamp);
-                document.getElementById('mod-soft-days-in').innerHTML = this.getDaysInRepairText(project.timestamp, project.dateCollected);
-                const safeSetInput = (id, val) => { const el = document.getElementById(id); if (el && !el.dataset.userModified && document.activeElement !== el) el.value = val || ''; };
-                safeSetInput('mod-soft-client', project.clientName); safeSetInput('mod-soft-phone', project.clientPhone); safeSetInput('mod-soft-email', project.clientEmail);
-                safeSetInput('mod-soft-project', project.projectName); safeSetInput('mod-soft-platform', project.platform); safeSetInput('mod-soft-deadline', project.deadline);
-                safeSetInput('mod-soft-repo', project.repoLink); safeSetInput('mod-soft-stack', project.techStack); safeSetInput('mod-soft-requirements', project.requirements);
-                safeSetInput('mod-soft-dev', project.devAssigned); safeSetInput('mod-soft-notes', project.devNotes);
-                const statusSelect = document.getElementById('mod-soft-status');
-                if (!statusSelect.dataset.userModified) statusSelect.value = project.status || "Requirements Gathering";
             }
 
             openSoftModal(dbKey) {
@@ -2138,9 +2088,17 @@ ${newNote}
                 if (!project) return;
                 document.getElementById('mod-soft-db-key').value = dbKey;
                 document.getElementById('mod-soft-ref').innerText = `SFT-${project.refId}`;
-                const trackModified = (id) => { const el = document.getElementById(id); if (el) { el.dataset.userModified = ""; el.addEventListener('input', () => el.dataset.userModified = "true"); el.addEventListener('change', () => el.dataset.userModified = "true"); } };
-                ['mod-soft-client','mod-soft-phone','mod-soft-email','mod-soft-project','mod-soft-platform','mod-soft-deadline','mod-soft-repo','mod-soft-stack','mod-soft-requirements','mod-soft-dev','mod-soft-notes','mod-soft-status'].forEach(trackModified);
-                this.populateSoftModalSilently(dbKey);
+                const track = id => { const el = document.getElementById(id); if (el) { el.dataset.userModified = ""; el.addEventListener('input', () => el.dataset.userModified = "true"); el.addEventListener('change', () => el.dataset.userModified = "true"); } };
+                ['mod-soft-client','mod-soft-phone','mod-soft-email','mod-soft-project','mod-soft-platform','mod-soft-deadline','mod-soft-repo','mod-soft-stack','mod-soft-requirements','mod-soft-dev','mod-soft-notes','mod-soft-status'].forEach(track);
+                document.getElementById('mod-soft-date-in').innerText = this.formatDate(project.timestamp);
+                document.getElementById('mod-soft-days-in').innerHTML = this.getDaysInRepairText(project.timestamp, project.dateCollected);
+                const ss = (id, val) => { const el = document.getElementById(id); if (el && !el.dataset.userModified && document.activeElement !== el) el.value = val || ''; };
+                ss('mod-soft-client', project.clientName); ss('mod-soft-phone', project.clientPhone); ss('mod-soft-email', project.clientEmail);
+                ss('mod-soft-project', project.projectName); ss('mod-soft-platform', project.platform); ss('mod-soft-deadline', project.deadline);
+                ss('mod-soft-repo', project.repoLink); ss('mod-soft-stack', project.techStack); ss('mod-soft-requirements', project.requirements);
+                ss('mod-soft-dev', project.devAssigned); ss('mod-soft-notes', project.devNotes);
+                const statusSel = document.getElementById('mod-soft-status');
+                if (!statusSel.dataset.userModified) statusSel.value = project.status || "Requirements Gathering";
                 document.getElementById('soft-update-modal').classList.add('active');
             }
 
@@ -2166,9 +2124,8 @@ ${newNote}
                     };
                     if (updateData.status === 'Completed & Collected') updateData.dateCollected = Date.now();
                     await this.db.ref('reports/' + dbKey).update(updateData);
-                    this.hideLoading();
-                    this.closeModal('update-modal');
-                } catch (error) { console.error(error); this.showErrorMsg(`Update failed: ${error.message}`); }
+                    this.hideLoading(); this.closeModal('update-modal');
+                } catch (error) { this.showErrorMsg(`Update failed: ${error.message}`); }
             }
 
             async saveSoftAdminUpdate() {
@@ -2176,47 +2133,40 @@ ${newNote}
                 if (!dbKey) return;
                 this.showLoading("Saving software update...");
                 try {
-                    let updateData = {
+                    await this.db.ref('software_projects/' + dbKey).update({
                         clientName: document.getElementById('mod-soft-client').value, clientPhone: document.getElementById('mod-soft-phone').value,
                         clientEmail: document.getElementById('mod-soft-email').value, projectName: document.getElementById('mod-soft-project').value,
                         platform: document.getElementById('mod-soft-platform').value, deadline: document.getElementById('mod-soft-deadline').value,
                         repoLink: document.getElementById('mod-soft-repo').value, techStack: document.getElementById('mod-soft-stack').value,
                         requirements: document.getElementById('mod-soft-requirements').value, devAssigned: document.getElementById('mod-soft-dev').value,
                         devNotes: document.getElementById('mod-soft-notes').value, status: document.getElementById('mod-soft-status').value, lastUpdated: Date.now()
-                    };
-                    await this.db.ref('software_projects/' + dbKey).update(updateData);
-                    this.hideLoading();
-                    this.closeModal('soft-update-modal');
-                } catch (error) { console.error(error); this.showErrorMsg(`Update failed: ${error.message}`); }
+                    });
+                    this.hideLoading(); this.closeModal('soft-update-modal');
+                } catch (error) { this.showErrorMsg(`Update failed: ${error.message}`); }
             }
 
             async deleteRecord() {
                 const dbKey = document.getElementById('mod-db-key').value;
-                if (!dbKey) return;
-                if (confirm('Are you sure you want to completely delete this record? This cannot be undone.')) {
-                    this.showLoading("Deleting Record...");
-                    try { await this.db.ref('reports/' + dbKey).remove(); this.hideLoading(); this.closeModal('update-modal'); }
-                    catch (err) { this.showErrorMsg(`Delete failed: ${err.message}`); }
-                }
+                if (!dbKey || !confirm('Are you sure you want to completely delete this record? This cannot be undone.')) return;
+                this.showLoading("Deleting Record...");
+                try { await this.db.ref('reports/' + dbKey).remove(); this.hideLoading(); this.closeModal('update-modal'); }
+                catch (err) { this.showErrorMsg(`Delete failed: ${err.message}`); }
             }
 
             async deleteSoftRecord() {
                 const dbKey = document.getElementById('mod-soft-db-key').value;
-                if (!dbKey) return;
-                if (confirm('Are you sure you want to completely delete this project? This cannot be undone.')) {
-                    this.showLoading("Deleting Project...");
-                    try { await this.db.ref('software_projects/' + dbKey).remove(); this.hideLoading(); this.closeModal('soft-update-modal'); }
-                    catch (err) { this.showErrorMsg(`Delete failed: ${err.message}`); }
-                }
+                if (!dbKey || !confirm('Are you sure you want to completely delete this project?')) return;
+                this.showLoading("Deleting Project...");
+                try { await this.db.ref('software_projects/' + dbKey).remove(); this.hideLoading(); this.closeModal('soft-update-modal'); }
+                catch (err) { this.showErrorMsg(`Delete failed: ${err.message}`); }
             }
 
             // ==========================================
-            // PIN LOGIC
+            //  PIN LOGIC
             // ==========================================
             initKeyboardListener() {
-                window.addEventListener('keydown', (e) => {
-                    const lockScreen = document.getElementById('lock-screen');
-                    if (!lockScreen.classList.contains('unlocked')) {
+                window.addEventListener('keydown', e => {
+                    if (!document.getElementById('lock-screen').classList.contains('unlocked')) {
                         if (e.key >= '0' && e.key <= '9') this.pressPin(e.key);
                         else if (e.key === 'Backspace') this.backspacePin();
                         else if (e.key === 'Escape' || e.key === 'Delete') this.clearPin();
@@ -2224,54 +2174,44 @@ ${newNote}
                 });
             }
 
-            pressPin(digit) {
-                if (this.pinInput.length < 5) { this.pinInput += digit; this.updatePinDisplay(); }
-                if (this.pinInput.length === 5) this.validatePin();
-            }
+            pressPin(digit) { if (this.pinInput.length < 5) { this.pinInput += digit; this.updatePinDisplay(); } if (this.pinInput.length === 5) this.validatePin(); }
             clearPin() { this.pinInput = ""; this.updatePinDisplay(); }
             backspacePin() { this.pinInput = this.pinInput.slice(0, -1); this.updatePinDisplay(); }
 
             updatePinDisplay() {
                 const dots = document.querySelectorAll('.pin-dot');
-                dots.forEach((dot, index) => { dot.className = 'pin-dot'; if (index < this.pinInput.length) dot.classList.add('filled'); });
-                if (this.pinInput.length === 1) {
-                    const instruction = document.getElementById('pin-instruction');
-                    instruction.innerText = "Enter Secure Employee PIN to Access";
-                    instruction.className = "text-slate-500 text-sm font-medium transition-colors";
-                }
+                dots.forEach((dot, i) => { dot.className = 'pin-dot'; if (i < this.pinInput.length) dot.classList.add('filled'); });
+                if (this.pinInput.length === 1) { const inst = document.getElementById('pin-instruction'); inst.innerText = "Enter Secure Employee PIN to Access"; inst.className = "text-slate-500 text-sm font-medium transition-colors"; }
             }
 
             async validatePin() {
                 if (this.pinInput.length !== 5) return;
                 const feedbackText = document.getElementById('pin-instruction');
                 feedbackText.innerText = "Verifying PIN...";
-                feedbackText.classList.remove('text-red-500', 'text-slate-500');
-                feedbackText.classList.add('text-blue-500');
+                feedbackText.className = "text-blue-500 text-sm font-medium transition-colors";
                 if (this.pinInput === "12345") {
                     this.currentAdmin = { key: "master_admin", name: "System Admin", employeeNumber: "12345" };
                     document.getElementById('lock-screen').classList.add('unlocked');
                     this.updateSidebarProfile(); this.clearPin();
-                    feedbackText.innerText = "Enter Secure Employee PIN to Access"; feedbackText.classList.remove('text-blue-500');
+                    feedbackText.innerText = "Enter Secure Employee PIN to Access"; feedbackText.className = "text-slate-500 text-sm font-medium transition-colors";
                     return;
                 }
                 try {
                     const snap = await this.db.ref('employees').once('value');
                     let foundAdmin = null;
-                    if (snap.exists()) { snap.forEach(child => { const data = child.val(); if (String(data.employeeNumber) === String(this.pinInput)) foundAdmin = { key: child.key, ...data }; }); }
-                    if (foundAdmin) { this.currentAdmin = foundAdmin; document.getElementById('lock-screen').classList.add('unlocked'); this.updateSidebarProfile(); this.clearPin(); feedbackText.innerText = "Enter Secure Employee PIN to Access"; feedbackText.classList.remove('text-blue-500'); }
-                    else { this.showPinError("Invalid PIN. Not found in database."); }
-                } catch (err) { console.error(err); this.showPinError("Database connection blocked. Use 12345 to bypass."); }
+                    if (snap.exists()) snap.forEach(child => { const data = child.val(); if (String(data.employeeNumber) === String(this.pinInput)) foundAdmin = { key: child.key, ...data }; });
+                    if (foundAdmin) { this.currentAdmin = foundAdmin; document.getElementById('lock-screen').classList.add('unlocked'); this.updateSidebarProfile(); this.clearPin(); feedbackText.innerText = "Enter Secure Employee PIN to Access"; feedbackText.className = "text-slate-500 text-sm font-medium transition-colors"; }
+                    else this.showPinError("Invalid PIN. Not found in database.");
+                } catch (err) { this.showPinError("Database blocked. Use 12345 to bypass."); }
             }
 
             showPinError(msg) {
-                const feedbackText = document.getElementById('pin-instruction');
-                feedbackText.innerText = msg || "Invalid PIN entered.";
-                feedbackText.classList.remove('text-blue-500', 'text-slate-500');
-                feedbackText.classList.add('text-red-500');
-                document.querySelectorAll('.pin-dot').forEach(dot => { dot.classList.remove('filled'); dot.classList.add('error'); });
+                const ft = document.getElementById('pin-instruction');
+                ft.innerText = msg; ft.className = "text-red-500 text-sm font-medium transition-colors";
+                document.querySelectorAll('.pin-dot').forEach(d => { d.classList.remove('filled'); d.classList.add('error'); });
                 const display = document.getElementById('pin-display');
                 display.classList.add('shake');
-                setTimeout(() => { display.classList.remove('shake'); this.pinInput = ""; document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('error')); }, 600);
+                setTimeout(() => { display.classList.remove('shake'); this.pinInput = ""; document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('error')); }, 600);
             }
 
             updateSidebarProfile() {
@@ -2285,41 +2225,25 @@ ${newNote}
             lockSystem() { this.currentAdmin = null; document.getElementById('lock-screen').classList.remove('unlocked'); }
 
             // ==========================================
-            // INTAKE SIGNATURE PAD
+            //  INTAKE SIGNATURE PAD
             // ==========================================
             initSignaturePad() {
                 this.canvas = document.getElementById('sig-canvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.hasSignature = false;
-                this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
-                this.canvas.addEventListener('mousemove', (e) => this.draw(e));
-                this.canvas.addEventListener('mouseup', () => this.stopDrawing());
-                this.canvas.addEventListener('mouseout', () => this.stopDrawing());
-                this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.startDrawing(e); }, { passive: false });
-                this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); this.draw(e); }, { passive: false });
-                this.canvas.addEventListener('touchend', (e) => { e.preventDefault(); this.stopDrawing(); }, { passive: false });
+                const gp = e => { const rect = this.canvas.getBoundingClientRect(); let cx = e.clientX, cy = e.clientY; if (e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; } return { x: cx - rect.left, y: cy - rect.top }; };
+                this.canvas.addEventListener('mousedown', e => { this.isDrawing = true; this.hasSignature = true; this.ctx.beginPath(); const p = gp(e); this.ctx.moveTo(p.x, p.y); });
+                this.canvas.addEventListener('mousemove', e => { if (!this.isDrawing) return; const p = gp(e); this.ctx.lineWidth = 2.5; this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round'; this.ctx.strokeStyle = '#0f172a'; this.ctx.lineTo(p.x, p.y); this.ctx.stroke(); });
+                this.canvas.addEventListener('mouseup', () => { if (this.isDrawing) { this.isDrawing = false; this.ctx.closePath(); this.syncA4(); } });
+                this.canvas.addEventListener('mouseout', () => { this.isDrawing = false; });
+                this.canvas.addEventListener('touchstart', e => { e.preventDefault(); this.isDrawing = true; this.hasSignature = true; this.ctx.beginPath(); const p = gp(e); this.ctx.moveTo(p.x, p.y); }, { passive: false });
+                this.canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!this.isDrawing) return; const p = gp(e); this.ctx.lineWidth = 2.5; this.ctx.lineCap = 'round'; this.ctx.strokeStyle = '#0f172a'; this.ctx.lineTo(p.x, p.y); this.ctx.stroke(); }, { passive: false });
+                this.canvas.addEventListener('touchend', e => { e.preventDefault(); this.isDrawing = false; this.ctx.closePath(); this.syncA4(); }, { passive: false });
             }
 
-            getPointerPos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                let clientX = e.clientX, clientY = e.clientY;
-                if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-                return { x: clientX - rect.left, y: clientY - rect.top };
-            }
-
-            startDrawing(e) { this.isDrawing = true; this.hasSignature = true; this.ctx.beginPath(); const pos = this.getPointerPos(e); this.ctx.moveTo(pos.x, pos.y); }
-            draw(e) {
-                if (!this.isDrawing) return;
-                const pos = this.getPointerPos(e);
-                this.ctx.lineWidth = 2.5; this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round'; this.ctx.strokeStyle = '#0f172a';
-                this.ctx.lineTo(pos.x, pos.y); this.ctx.stroke();
-            }
-            stopDrawing() { if (this.isDrawing) { this.isDrawing = false; this.ctx.closePath(); this.syncA4(); } }
             clearSignature() { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.hasSignature = false; this.syncA4(); }
 
-            initTime() {
-                setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }, 1000);
-            }
+            initTime() { setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }, 1000); }
 
             notifyClient(email, refId, name) {
                 const subject = encodeURIComponent(`Intake Confirmation: ${refId}`);
@@ -2332,7 +2256,7 @@ ${newNote}
                 document.getElementById('spinner-text').innerText = "An error occurred";
                 document.getElementById('spinner-text').classList.add('text-red-600');
                 document.getElementById('spinner-subtext').innerText = msg;
-                setTimeout(() => { this.hideLoading(); document.getElementById('spinner-ring').style.display = 'block'; document.getElementById('spinner-text').classList.remove('text-red-600'); document.getElementById('spinner-subtext').innerText = ""; }, 5000);
+                setTimeout(() => { this.hideLoading(); document.getElementById('spinner-ring').style.display = 'block'; document.getElementById('spinner-text').classList.remove('text-red-600'); }, 5000);
             }
 
             showLoading(text = "Processing...", duration = 0) {
@@ -2345,22 +2269,14 @@ ${newNote}
 
             navigate(viewId) {
                 ['dashboard', 'registry', 'intake', 'soft-registry', 'soft-intake', 'support-registry', 'support-intake'].forEach(v => {
-                    const el = document.getElementById('view-' + v);
-                    if (el) el.classList.add('hidden');
+                    const el = document.getElementById('view-' + v); if (el) el.classList.add('hidden');
                 });
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
                 const target = document.getElementById('view-' + viewId);
                 if (target) target.classList.remove('hidden');
                 const nav = document.getElementById('nav-' + viewId);
                 if (nav) nav.classList.add('active');
-
-                const titles = {
-                    'dashboard': 'Overview Dashboard', 'registry': 'Hardware Client Registry',
-                    'intake': 'Device Intake Form', 'soft-registry': 'Software Project Pipeline',
-                    'soft-intake': 'Software Specifications Log', 'support-registry': 'Technical Support — Business Registry',
-                    'support-intake': 'Register Support Client'
-                };
+                const titles = { 'dashboard': 'Overview Dashboard', 'registry': 'Hardware Client Registry', 'intake': 'Device Intake Form', 'soft-registry': 'Software Project Pipeline', 'soft-intake': 'Software Specifications Log', 'support-registry': 'Technical Support — Business Registry', 'support-intake': 'Register Support Client' };
                 document.getElementById('page-title').innerText = titles[viewId] || 'Portal';
 
                 if (viewId === 'intake') {
@@ -2369,22 +2285,15 @@ ${newNote}
                         if (canvas && canvas.parentElement) {
                             const rect = canvas.parentElement.getBoundingClientRect();
                             if (rect.width > 0 && canvas.width !== rect.width) {
-                                const tempUrl = this.hasSignature ? canvas.toDataURL() : null;
+                                const url = this.hasSignature ? canvas.toDataURL() : null;
                                 canvas.width = rect.width; canvas.height = 120;
-                                if (tempUrl) { const img = new Image(); img.src = tempUrl; img.onload = () => this.ctx.drawImage(img, 0, 0); }
+                                if (url) { const img = new Image(); img.src = url; img.onload = () => this.ctx.drawImage(img, 0, 0); }
                             }
                         }
                     }, 50);
                 }
-
                 if (viewId === 'support-intake') {
-                    setTimeout(() => {
-                        const c = document.getElementById('sup-sig-canvas');
-                        if (c && c.parentElement) {
-                            const rect = c.parentElement.getBoundingClientRect();
-                            if (rect.width > 0) { c.width = rect.width - 48; c.height = 128; }
-                        }
-                    }, 50);
+                    setTimeout(() => { const c = document.getElementById('sup-sig-canvas'); if (c && c.parentElement) { const rect = c.parentElement.getBoundingClientRect(); if (rect.width > 0) { c.width = rect.width - 48; c.height = 128; } } }, 50);
                 }
             }
         }
@@ -2396,9 +2305,9 @@ ${newNote}
             if (canvas && canvas.offsetParent !== null) {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 if (Math.abs(canvas.width - rect.width) > 20) {
-                    const tempUrl = app.hasSignature ? canvas.toDataURL() : null;
+                    const url = app.hasSignature ? canvas.toDataURL() : null;
                     canvas.width = rect.width; canvas.height = 120;
-                    if (tempUrl) { const img = new Image(); img.src = tempUrl; img.onload = () => app.ctx.drawImage(img, 0, 0); }
+                    if (url) { const img = new Image(); img.src = url; img.onload = () => app.ctx.drawImage(img, 0, 0); }
                 }
             }
         });
